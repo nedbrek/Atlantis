@@ -1,0 +1,9 @@
+*.o
+*.d
+*.so
+*.exe
+*.ncb
+*.suo
+*.vcproj.user
+Debug/
+
