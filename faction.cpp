@@ -365,6 +365,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		return;
 	}
 
+	writeComputerReport(pGame);
+
 	f->PutStr("Atlantis Report For:");
 	if((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
 			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
@@ -574,6 +576,139 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	f->EndLine();
 
 	present_regions.DeleteAll();
+}
+
+void Faction::writeComputerReport(Game *pGame)
+{
+	Aoutfile of;
+	of.OpenByName(AString("creport.") + num);
+	ofstream &f = *of.file;
+
+	f << "Name {"; of.PutStr(*name); f << '}' << std::endl;
+	f << "FactionType {"; of.PutStr(AString(" (") + FactionTypeStr() + ")"); f << '}' << std::endl;
+	f << "Month " << MonthNames[ pGame->month ] << std::endl;
+	f << "Year " << pGame->year << std::endl;
+	f << "VerString {"; of.PutStr(ATL_VER_STRING( CURRENT_ATL_VER )); f << '}' << std::endl;
+	f << "Rulesetname {" << Globals->RULESET_NAME << '}' << std::endl;
+	f << "Rulesetversion {"; of.PutStr(ATL_VER_STRING( Globals->RULESET_VERSION )); f << '}' << std::endl;
+	f << "Newssheet " << times << std::endl;
+	f << "Password {"; of.PutStr(*password); f << '}' << std::endl;
+
+	f << "TurnCountdown ";
+	if (Globals->MAX_INACTIVE_TURNS != -1 && pGame->TurnNumber() != lastorders)
+		f << Globals->MAX_INACTIVE_TURNS - pGame->TurnNumber() + lastorders;
+	else
+		f << -1;
+	f << std::endl;
+
+	f << "Quit ";
+	if (!exists)
+	{
+		if (quit != 0)
+			f << quit;
+		else
+			f << QUIT_BY_ORDER;
+	}
+	else
+		f << 0;
+	f << std::endl;
+
+	f << "TaxRegion " << war_regions.Num() << std::endl;
+	f << "MaxTax " << pGame->AllowedTaxes(this) << std::endl;
+
+	f << "TradeRegion " << trade_regions.Num() << std::endl;
+	f << "MaxTrade " << pGame->AllowedTrades(this) << std::endl;
+
+	f << "NumMage " << nummages << std::endl;
+	f << "MaxMage " << pGame->AllowedMages(this) << std::endl;
+
+	if (Globals->APPRENTICES_EXIST)
+	{
+		f << "NumAppr " << numapprentices << std::endl;
+		f << "MaxAppr " << pGame->AllowedApprentices(this) << std::endl;
+	}
+
+	{
+		f << "Errors {" << std::endl;
+		forlist((&errors))
+		{
+			f << '{';
+			of.PutStr(*((AString*)elem));
+			f << '}' << std::endl;
+		}
+		f << '}' << std::endl;
+	}
+
+	{
+		f << "Battles {";
+		forlist(&battles)
+		{
+			//((BattlePtr *) elem)->ptr->Report(f,this);
+		}
+		f << '}' << std::endl;
+	}
+
+	{
+		f << "Events {" << std::endl;
+		forlist((&events))
+		{
+			f << '{';
+			of.PutStr(*((AString*)elem));
+			f << '}' << std::endl;
+		}
+		f << '}' << std::endl;
+	}
+
+	{
+		f << "NewSkills {" << std::endl;
+		forlist(&shows)
+		{
+			AString *string = ((ShowSkill*)elem)->Report(this);
+			if (string)
+			{
+				f << '{';
+				of.PutStr(*string);
+				f << '}' << std::endl;
+			}
+			delete string;
+		}
+		f << '}' << std::endl;
+	}
+
+	{
+		f << "NewItems {" << std::endl;
+		forlist(&itemshows) {
+			f << '{';
+			of.PutStr(*((AString*)elem));
+			f << '}' << std::endl;
+		}
+		f << '}' << std::endl;
+	}
+
+	{
+		f << "NewObjects {" << std::endl;
+		forlist(&objectshows)
+		{
+			f << '{';
+			of.PutStr(*((AString*)elem));
+			f << '}' << std::endl;
+		}
+		f << '}' << std::endl;
+	}
+
+	f << "DefaultAttitude {" << AttitudeStrs[defaultattitude] << '}' << std::endl;
+	f << "Silver " << unclaimed << std::endl;
+
+	{
+		f << "Regions {" << std::endl;
+		forlist(&present_regions)
+		{
+			f << '{' << std::endl;
+			((ARegionPtr*)elem)->ptr->WriteCReport(&of, this, pGame->month, &pGame->regions);
+			f << '}' << std::endl;
+		}
+		f << '}' << std::endl;
+	}
 }
 
 void Faction::WriteFacInfo( Aoutfile *file )

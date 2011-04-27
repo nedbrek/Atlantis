@@ -2011,6 +2011,62 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 	}
 }
 
+void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
+				ARegionList *pRegions)
+{
+	Farsight *farsight = GetFarsight(&farsees, fac);
+	Farsight *passer   = GetFarsight(&passers, fac);
+	int present = Present(fac) || fac->IsNPC();
+	if (!farsight && !passer && !present)
+	{
+		return;
+	}
+
+	std::ofstream &o = *f->file;
+	o << "Terrain {" << TerrainDefs[type].name << '}' << std::endl;
+	o << "Location {" << xloc << ' ' << yloc << '}' << std::endl;
+	o << "Region {"; f->PutStr(*name); o << '}' << std::endl;
+
+	o << "Town {";
+	if (town)
+	{
+		o << '{'; f->PutStr(*town->name); o << '}';
+		o << ' ';
+		o << '{'; f->PutStr(TownString(town->TownType())); o << '}';
+	}
+	o << '}' << std::endl; // end town
+
+	if (Population() &&
+	    (present || farsight ||
+	     (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_PEASANTS)))
+	{
+		o << "Population " << Population() << std::endl;
+		if(Globals->RACES_EXIST)
+		{
+			o << "Race {" << ItemDefs[race].names << '}' << std::endl;
+		}
+
+		if(present || farsight ||
+		   Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY)
+		{
+			o << "MaxTax " << money << std::endl;
+		}
+	}
+
+	if(Globals->WEATHER_EXISTS)
+	{
+		o << "WeatherOld {" << SeasonNames[weather] << '}' << std::endl;
+		o << "WeatherNew {" << SeasonNames[pRegions->GetWeather(this, (month + 1) % 12)]
+		  << '}' << std::endl;
+	}
+
+	//Ned, economy
+	//Ned, exits
+	//Ned, gates
+	//Ned, objects
+	//Ned, passers
+}
+
 // DK
 void ARegion::WriteTemplate(Areport *f, Faction *fac,
 		ARegionList *pRegs, int month)

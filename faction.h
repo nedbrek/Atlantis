@@ -134,6 +134,7 @@ public:
     AString FactionTypeStr();
     void WriteReport( Areport *f, Game *pGame );
     void WriteFacInfo(Aoutfile *);
+	 void writeComputerReport(Game *pGame);
     
     void SetAttitude(int,int); /* faction num, attitude */
     /* if attitude == -1, clear it */

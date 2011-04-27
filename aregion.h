@@ -174,6 +174,8 @@ class ARegion : public AListElem
 		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
 		void WriteReport(Areport *f, Faction *fac, int month,
 				ARegionList *pRegions);
+		void WriteCReport(Aoutfile *f, Faction *fac, int month,
+				ARegionList *pRegions);
 		// DK
 		void WriteTemplate(Areport *,Faction *, ARegionList *, int);
 		void WriteTemplateHeader(Areport *, Faction *, ARegionList *, int);
