@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual C++ Express 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ceran", "Ceran.vcproj", "{45D81000-49C9-47BC-8040-245967D79152}"
+	ProjectSection(ProjectDependencies) = postProject
+		{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B} = {704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Atlantis", "..\Atlantis.vcproj", "{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +18,10 @@ Global
 		{45D81000-49C9-47BC-8040-245967D79152}.Debug|Win32.Build.0 = Debug|Win32
 		{45D81000-49C9-47BC-8040-245967D79152}.Release|Win32.ActiveCfg = Release|Win32
 		{45D81000-49C9-47BC-8040-245967D79152}.Release|Win32.Build.0 = Release|Win32
+		{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}.Debug|Win32.Build.0 = Debug|Win32
+		{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}.Release|Win32.ActiveCfg = Release|Win32
+		{704373B3-C416-4DA8-BBEB-C0C9AF82CC4B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
