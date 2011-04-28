@@ -7,3 +7,8 @@
 *.vcproj.user
 Debug/
 
+*.vcproj.COMP1.root.user
+test/
+smoketest/
+2test/
+
