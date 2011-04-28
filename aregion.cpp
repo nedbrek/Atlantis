@@ -1407,6 +1407,23 @@ AString ARegion::Print(ARegionList *pRegs)
 	return temp;
 }
 
+void ARegion::CPrint(Aoutfile *f)
+{
+	std::ofstream &o = *f->file;
+	o << "Terrain {" << TerrainDefs[type].name << '}' << std::endl;
+	o << "Location {" << xloc << ' ' << yloc << '}' << std::endl;
+	o << "Region {"; f->PutStr(*name); o << '}' << std::endl;
+
+	o << "Town {";
+	if (town)
+	{
+		o << '{'; f->PutStr(*town->name); o << '}';
+		o << ' ';
+		o << '{'; f->PutStr(TownString(town->TownType())); o << '}';
+	}
+	o << '}' << std::endl; // end town
+}
+
 void ARegion::SetLoc(int x,int y,int z)
 {
 	xloc = x;
@@ -2022,19 +2039,10 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 		return;
 	}
 
-	std::ofstream &o = *f->file;
-	o << "Terrain {" << TerrainDefs[type].name << '}' << std::endl;
-	o << "Location {" << xloc << ' ' << yloc << '}' << std::endl;
-	o << "Region {"; f->PutStr(*name); o << '}' << std::endl;
+	// give our short details
+	CPrint(f);
 
-	o << "Town {";
-	if (town)
-	{
-		o << '{'; f->PutStr(*town->name); o << '}';
-		o << ' ';
-		o << '{'; f->PutStr(TownString(town->TownType())); o << '}';
-	}
-	o << '}' << std::endl; // end town
+	std::ofstream &o = *f->file;
 
 	if (Population() &&
 	    (present || farsight ||
@@ -2046,14 +2054,14 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 			o << "Race {" << ItemDefs[race].names << '}' << std::endl;
 		}
 
-		if(present || farsight ||
-		   Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY)
+		if (present || farsight ||
+		    (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_REGION_MONEY))
 		{
 			o << "MaxTax " << money << std::endl;
 		}
 	}
 
-	if(Globals->WEATHER_EXISTS)
+	if (Globals->WEATHER_EXISTS)
 	{
 		o << "WeatherOld {" << SeasonNames[weather] << '}' << std::endl;
 		o << "WeatherNew {" << SeasonNames[pRegions->GetWeather(this, (month + 1) % 12)]
@@ -2061,7 +2069,54 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 	}
 
 	//Ned, economy
-	//Ned, exits
+
+	// exits
+	int exits_seen[NDIRS];
+	if (present || farsight ||
+	   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_ALL_EXITS))
+	{
+		for(int i = 0; i < NDIRS; ++i)
+			exits_seen[i] = 1;
+	}
+	else
+	{
+		// This is just a transit report and we're not showing all
+		// exits.   See if we are showing used exits.
+
+		// Show none by default.
+		int i;
+		for(i = 0; i < NDIRS; ++i)
+			exits_seen[i] = 0;
+
+		// Now, if we should, show the ones actually used.
+		if(Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_USED_EXITS)
+		{
+			forlist(&passers) {
+				Farsight *p = (Farsight *)elem;
+				if(p->faction == fac)
+				{
+					for(i = 0; i < NDIRS; ++i)
+					{
+						exits_seen[i] |= p->exits_used[i];
+					}
+				}
+			}
+		}
+	}
+
+	o << "Exits {" << std::endl;
+	for (int i = 0; i < NDIRS; ++i)
+	{
+		ARegion *r = neighbors[i];
+		if (r && exits_seen[i])
+		{
+			o << DirectionStrs[i] << ' ' << '{' << std::endl;
+			r->CPrint(f);
+			o << '}' << std::endl;
+		}
+	}
+	o << '}' << std::endl;
+
 	//Ned, gates
 	//Ned, objects
 	//Ned, passers

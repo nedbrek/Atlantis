@@ -183,6 +183,7 @@ class ARegion : public AListElem
 
 		AString ShortPrint(ARegionList *pRegs);
 		AString Print(ARegionList *pRegs);
+		void CPrint(Aoutfile *f);
 
 		void Kill(Unit *);
 		void ClearHell();

@@ -20,6 +20,26 @@ proc printRegion {r} {
 	puts "------------------------------------------------------------"
 	puts -nonewline "The weather was [dict get $r WeatherOld] last month; "
 	puts "it will be [dict get $r WeatherNew] next month."
+
+	set exits [dict get $r Exits]
+	if {[llength $exits]} {
+
+		puts "Exits:"
+
+		foreach {dir des} $exits {
+			puts -nonewline "$dir : [dGet $des Terrain]"
+			set loc [dict get $des Location]
+			puts -nonewline "([lindex $loc 0],[lindex $loc 1]) in "
+			puts -nonewline "[dGet $des Region]"
+
+			set city [dict get $des Town]
+			if {[llength $city]} {
+				puts -nonewline ", contains [string trim [lindex $city 0]]"
+				puts -nonewline "\[[string trim [lindex $city 1]]\]"
+			}
+			puts ""
+		}
+	}
 }
 
 puts "Atlantis Report For:"
@@ -126,7 +146,7 @@ if {[llength $newObjects]} {
 puts "Declared Attitudes (default [dict get $s DefaultAttitude]):"
 puts ""
 
-puts "Unclaimed silver: [dict get $s Silver]"
+puts "Unclaimed silver: [dict get $s Silver].\n"
 
 set regions [dict get $s Regions]
 foreach region $regions {
