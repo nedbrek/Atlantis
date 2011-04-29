@@ -20,14 +20,23 @@ proc printRegion {r} {
 	puts "------------------------------------------------------------"
 	puts -nonewline "The weather was [dict get $r WeatherOld] last month; "
 	puts "it will be [dict get $r WeatherNew] next month."
+	puts "Wages: \$[dGet $r Wage] (Max: \$[dGet $r MaxWage])."
+	puts "Wanted:"
+	foreach {item cost} [dict get $r Wants] {
+		puts "   [string trim $item] at \$$cost,"
+	}
+	puts "For Sale:"
+	foreach {item cost} [dict get $r Sells] {
+		puts "  [string trim $item] at \$$cost,"
+	}
 
 	set exits [dict get $r Exits]
 	if {[llength $exits]} {
 
-		puts "Exits:"
+		puts "\nExits:"
 
 		foreach {dir des} $exits {
-			puts -nonewline "$dir : [dGet $des Terrain]"
+			puts -nonewline "   $dir : [dGet $des Terrain]"
 			set loc [dict get $des Location]
 			puts -nonewline "([lindex $loc 0],[lindex $loc 1]) in "
 			puts -nonewline "[dGet $des Region]"

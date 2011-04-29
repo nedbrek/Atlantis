@@ -2069,6 +2069,49 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 	}
 
 	//Ned, economy
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present)
+	{
+		Production *p = products.GetProd(I_SILVER, -1);
+		o << "Wage " << p->productivity << std::endl;
+		o << "MaxWage " << p->amount << std::endl;
+	}
+
+	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS) || present)
+	{
+		o << "Wants {" << std::endl;
+		forlist(&markets) {
+			Market *m = (Market*)elem;
+			if (!m->amount) continue;
+
+			if (m->type == M_SELL) {
+				if (ItemDefs[m->item].type & IT_ADVANCED) {
+					if(!Globals->MARKETS_SHOW_ADVANCED_ITEMS) {
+						if (!HasItem(fac,m->item)) {
+							continue;
+						}
+					}
+				}
+
+				o << '{'; f->PutStr(ItemString(m->item, m->amount)); o << '}' << std::endl;
+				o << m->price << std::endl;
+			}
+		}
+		o << '}' << std::endl; // end Wants
+
+		{
+			o << "Sells {" << std::endl;
+			forlist(&markets) {
+				Market *m = (Market*)elem;
+				if (!m->amount) continue;
+
+				if (m->type == M_BUY) {
+					o << '{'; f->PutStr(ItemString(m->item, m->amount)); o << '}' << std::endl;
+					o << m->price << std::endl;
+				}
+			}
+			o << '}' << std::endl; // end Sells
+		}
+	}
 
 	// exits
 	int exits_seen[NDIRS];
