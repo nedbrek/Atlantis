@@ -2068,12 +2068,17 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 		  << '}' << std::endl;
 	}
 
-	//Ned, economy
+	// economy
 	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_WAGES) || present)
 	{
 		Production *p = products.GetProd(I_SILVER, -1);
 		o << "Wage " << p->productivity << std::endl;
 		o << "MaxWage " << p->amount << std::endl;
+	}
+	else
+	{
+		o << "Wage {}" << std::endl;
+		o << "MaxWage {}" << std::endl;
 	}
 
 	if ((Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_MARKETS) || present)
@@ -2112,6 +2117,42 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 			o << '}' << std::endl; // end Sells
 		}
 	}
+
+	// products
+	o << "Products {" << std::endl;
+	{
+		forlist((&products)) {
+			Production *p = (Production*)elem;
+			if (ItemDefs[p->itemtype].type & IT_ADVANCED)
+			{
+				if (CanMakeAdv(fac, p->itemtype))
+				{
+					o << '{'; f->PutStr(p->WriteReport()); o << '}' << std::endl;
+				}
+			}
+			else
+			{
+				if (p->itemtype == I_SILVER)
+				{
+					if (p->skill == S_ENTERTAINMENT)
+					{
+						if ((Globals->TRANSIT_REPORT &
+							GameDefs::REPORT_SHOW_ENTERTAINMENT) || present)
+						{
+							o << "{Ent " << p->amount << '}' << std::endl;
+						}
+					}
+					//else, not sure what produces silver...
+				}
+				else if (present ||
+				   (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_RESOURCES))
+				{
+					o << '{'; f->PutStr(p->WriteReport()); o << '}' << std::endl;
+				}
+			}
+		}
+	}
+	o << '}' << std::endl;
 
 	// exits
 	int exits_seen[NDIRS];
