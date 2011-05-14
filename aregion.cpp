@@ -2203,6 +2203,59 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 
 	//Ned, gates
 	//Ned, objects
+	{
+		forlist (&objects) {
+			Object *op = (Object*)elem;
+			if (op->type != O_DUMMY)
+			{
+				o << "Object {}" << std::endl;
+			}
+
+			o << "Units {" << std::endl;
+			forlist ((&op->units)) {
+				Unit *u = (Unit*)elem;
+				o << '{' << std::endl;
+				o << "Report ";
+				bool limit = false;
+				if (u->faction == fac)
+				{
+					o << "own";
+				}
+				else
+				{
+					//Ned, visibility
+					limit = true;
+					o << "foreign";
+				}
+				o << std::endl;
+				o << "Name {"; f->PutStr(*u->name); o << '}' << std::endl;
+
+				o << "Desc {";
+				if (u->describe)
+					f->PutStr(*u->describe);
+				o << '}' << std::endl;
+
+				o << "Items {" << std::endl;
+				{
+					forlist(&u->items) {
+						Item *i = (Item*)elem;
+						// if we see everything, or item is bulky
+						if (!limit || ItemDefs[i->type].weight)
+						{
+							o << '{' << i->num << ' '
+							  << '{' << ItemDefs[i->type].name << '}' << ' ';
+							o << ItemDefs[i->type].abr;
+							o << '}' << std::endl;
+						}
+					}
+				}
+				o << '}' << std::endl; // end items
+
+				o << '}' << std::endl; // end unit
+			}
+			o << '}' << std::endl;
+		}
+	}
 	//Ned, passers
 }
 
