@@ -124,6 +124,14 @@ public:
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
 
+    // Faction limit functions.
+    // game specific and can be found in extra.cpp. They
+    // may return -1 to indicate no limit.
+	int AllowedMages( Faction *pFac );
+	int AllowedApprentices(Faction *pFact);
+	int AllowedTaxes( Faction *pFac );
+	int AllowedTrades( Faction *pFac );
+
 private:
     //
     // Game editing functions.
@@ -384,18 +392,9 @@ private:
 	void DoExchangeOrders();
 	void DoExchangeOrder(ARegion *,Unit *,ExchangeOrder *);
 
-    //
-    // Faction limit functions.
-    //
-    // The first 3 are game specific and can be found in extra.cpp. They
-    // may return -1 to indicate no limit.
-    //
-    int AllowedMages( Faction *pFac );
-	int AllowedApprentices(Faction *pFact);
-    int AllowedTaxes( Faction *pFac );
-    int AllowedTrades( Faction *pFac );
-    int TaxCheck( ARegion *pReg, Faction *pFac );
-    int TradeCheck( ARegion *pReg, Faction *pFac );
+	// Faction limit functions.
+	int TaxCheck( ARegion *pReg, Faction *pFac );
+	int TradeCheck( ARegion *pReg, Faction *pFac );
 
     //
     // The DoGiveOrder returns 0 normally, or 1 if no more GIVE orders
