@@ -2208,7 +2208,7 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 			Object *op = (Object*)elem;
 			if (op->type != O_DUMMY)
 			{
-				o << "Object {}" << std::endl;
+				o << "Object {" << std::endl;
 			}
 
 			o << "Units {" << std::endl;
@@ -2254,6 +2254,11 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 				o << '}' << std::endl; // end unit
 			}
 			o << '}' << std::endl;
+
+			if (op->type != O_DUMMY)
+			{
+				o << '}' << std::endl;
+			}
 		}
 	}
 	//Ned, passers
