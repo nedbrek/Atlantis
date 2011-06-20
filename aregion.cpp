@@ -2028,6 +2028,71 @@ void ARegion::WriteReport(Areport * f,Faction * fac,int month,
 	}
 }
 
+static
+void writeUnits(Aoutfile *f, Faction *fac, Object *op)
+{
+	std::ofstream &o = *f->file;
+	o << "Units {" << std::endl;
+	forlist ((&op->units)) {
+		Unit *u = (Unit*)elem;
+		o << '{' << std::endl;
+		o << "Report ";
+		bool limit = false;
+		if (u->faction == fac)
+		{
+			o << "own";
+		}
+		else
+		{
+			//Ned, visibility
+			limit = true;
+			o << "foreign";
+		}
+		o << std::endl;
+		o << "Name {"; f->PutStr(*u->name); o << '}' << std::endl;
+
+		o << "Desc {";
+		if (u->describe)
+			f->PutStr(*u->describe);
+		o << '}' << std::endl;
+
+		o << "Items {" << std::endl;
+		{
+			forlist(&u->items) {
+				Item *i = (Item*)elem;
+				// if we see everything, or item is bulky
+				if (!limit || ItemDefs[i->type].weight)
+				{
+					o << '{' << i->num << ' '
+					  << '{' << ItemDefs[i->type].name << '}' << ' ';
+					o << ItemDefs[i->type].abr;
+					o << '}' << std::endl;
+				}
+			}
+		}
+		o << '}' << std::endl; // end items
+
+		if (!limit)
+		{
+			o << "Skills {" << std::endl;
+			forlist(&u->skills) {
+				Skill *s = (Skill*)elem;
+				o << '{'
+				  << '{' << SkillDefs[s->type].name << '}' << ' '
+				  << SkillDefs[s->type].abbr << ' '
+				  << GetLevelByDays(s->days/u->GetMen()) << ' '
+				  << s->days/u->GetMen();
+
+				o << '}' << std::endl; // end this skill
+			}
+			o << '}' << std::endl; // end skills
+		}
+
+		o << '}' << std::endl; // end unit
+	}
+	o << '}' << std::endl;
+}
+
 void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 				ARegionList *pRegions)
 {
@@ -2203,79 +2268,45 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 
 	//Ned, gates
 	//Ned, objects
+	bool hasObjects = false;
 	{
 		forlist (&objects) {
 			Object *op = (Object*)elem;
 			if (op->type != O_DUMMY)
 			{
-				o << "Object {" << std::endl;
+				hasObjects = true;
+				continue;
 			}
 
-			o << "Units {" << std::endl;
-			forlist ((&op->units)) {
-				Unit *u = (Unit*)elem;
-				o << '{' << std::endl;
-				o << "Report ";
-				bool limit = false;
-				if (u->faction == fac)
-				{
-					o << "own";
-				}
-				else
-				{
-					//Ned, visibility
-					limit = true;
-					o << "foreign";
-				}
-				o << std::endl;
-				o << "Name {"; f->PutStr(*u->name); o << '}' << std::endl;
+			writeUnits(f, fac, op);
+		}
+	}
 
-				o << "Desc {";
-				if (u->describe)
-					f->PutStr(*u->describe);
-				o << '}' << std::endl;
-
-				o << "Items {" << std::endl;
-				{
-					forlist(&u->items) {
-						Item *i = (Item*)elem;
-						// if we see everything, or item is bulky
-						if (!limit || ItemDefs[i->type].weight)
-						{
-							o << '{' << i->num << ' '
-							  << '{' << ItemDefs[i->type].name << '}' << ' ';
-							o << ItemDefs[i->type].abr;
-							o << '}' << std::endl;
-						}
-					}
-				}
-				o << '}' << std::endl; // end items
-
-				if (!limit)
-				{
-					o << "Skills {" << std::endl;
-					forlist(&u->skills) {
-						Skill *s = (Skill*)elem;
-						o << '{'
-						  << '{' << SkillDefs[s->type].name << '}' << ' '
-						  << SkillDefs[s->type].abbr << ' '
-						  << GetLevelByDays(s->days/u->GetMen()) << ' '
-						  << s->days/u->GetMen();
-
-						o << '}' << std::endl; // end this skill
-					}
-					o << '}' << std::endl; // end skills
-				}
-
-				o << '}' << std::endl; // end unit
+	if (hasObjects)
+	{
+		o << "Objects {" << std::endl;
+		forlist (&objects) {
+			Object *op = (Object*)elem;
+			if (op->type == O_DUMMY)
+			{
+				continue;
 			}
+			const ObjectType &ob = ObjectDefs[op->type];
+
+			o << '{'; o << std::endl;
+
+			o << "Name {";
+			f->PutStr(*op->name);
 			o << '}' << std::endl;
 
-			if (op->type != O_DUMMY)
-			{
-				o << '}' << std::endl;
-			}
+			o << "ObjectName {";
+			o << ob.name << '}' << std::endl;
+
+			writeUnits(f, fac, op);
+
+			o << '}' << std::endl;
 		}
+		o << '}' << std::endl;
 	}
 	//Ned, passers
 }
