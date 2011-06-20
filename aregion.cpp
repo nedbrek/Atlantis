@@ -2251,6 +2251,22 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 				}
 				o << '}' << std::endl; // end items
 
+				if (!limit)
+				{
+					o << "Skills {" << std::endl;
+					forlist(&u->skills) {
+						Skill *s = (Skill*)elem;
+						o << '{'
+						  << '{' << SkillDefs[s->type].name << '}' << ' '
+						  << SkillDefs[s->type].abbr << ' '
+						  << GetLevelByDays(s->days/u->GetMen()) << ' '
+						  << s->days/u->GetMen();
+
+						o << '}' << std::endl; // end this skill
+					}
+					o << '}' << std::endl; // end skills
+				}
+
 				o << '}' << std::endl; // end unit
 			}
 			o << '}' << std::endl;
