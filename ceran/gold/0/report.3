@@ -1,0 +1,117 @@
+Atlantis Report For:
+Tester (3) (War 1, Trade 1, Magic 1)
+January, Year 1
+
+Atlantis Engine Version: 4.1.0
+Ceran, Version: 2.0.4 (beta)
+
+REMINDER: You have not set a password for your faction!
+
+Faction Status:
+Tax Regions: 0 (10)
+Trade Regions: 0 (10)
+Mages: 1 (2)
+
+Events during turn:
+Unit (279): Claims 20 silver for maintenance.
+
+Skill reports:
+
+pattern [PATT] 1: The Pattern skill is not directly useful to a mage,
+  but is rather one of the Foundation skills on which other magical
+  skills are based. A mage's Pattern skill indicates the ability to
+  handle complex magical patterns, and is important for complicated
+  tasks such as healing and controlling nature. This skill costs 100
+  silver per month of study.
+
+spirit [SPIR] 1: The Spirit skill is not directly useful to a mage,
+  but is rather one of the Foundation skills on which other magical
+  skills are based. Spirit skill indicates the mage's ability to
+  control and affect magic and other powers beyond the material world.
+  This skill costs 100 silver per month of study.
+
+gate lore [GATE] 1: Gate Lore is the art of detecting and using
+  magical Gates, which are spread through the world. The Gates are
+  numbered in order, but spread out randomly, so there is no
+  correlation between the Gate number and the Gate's location. A mage
+  with skill 1 in Gate Lore can see a Gate if one exists in the same
+  region as the mage. This detection is automatic; the Gate will
+  appear in the region report. A mage with skill 1 in Gate Lore may
+  also jump through a Gate into another region on the same level
+  containing a gate, selected at random. To use Gate Lore in this
+  manner, use the syntax CAST Gate_Lore RANDOM UNITS <unit> ... UNITS
+  is followed by a list of units to follow the mage through the Gate
+  (the mage always jumps through the Gate). At level 1, the mage may
+  carry 15 weight units through the Gate (including the weight of the
+  mage). This skill requires pattern [PATT] 1, and spirit [SPIR] 1 to
+  begin to study. This skill costs 100 silver per month of study. This
+  skill is studied at one half the normal speed.
+
+Declared Attitudes (default Neutral):
+Hostile : none.
+Unfriendly : none.
+Neutral : none.
+Friendly : none.
+Ally : none.
+
+Unclaimed silver: 5050.
+
+nexus (0,0,nexus) in Unnamed, contains Kedsul [city], 5800 peasants
+  (high elves), $58000.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  
+  Edledhron Nexus is a magical place; the entryway to the world of
+    Edledhron. Enjoy your stay, the city guards should keep you safe
+    as long as you should choose to stay. However, rumor has it that
+    once you have left the Nexus, you can never return.
+  
+  Wages: $20 (Max: $116000).
+  Wanted: 184 grain [GRAI] at $20, 122 livestock [LIVE] at $24, 58
+    crossbows [XBOW] at $75, 52 wagons [WAGO] at $111, 64 spears
+    [SPEA] at $73, 77 axes [AXE] at $86, 73 spinning wheels [SPIN] at
+    $84, 69 rough gems [RGEM] at $89, 96 maces [MACE] at $67, 70
+    morning stars [MSTA] at $122, 81 parrying daggers [PDAG] at $69,
+    81 battle hammers [BHAM] at $128, 77 jewelry [JEWE] at $122, 86
+    roses [ROSE] at $127.
+  For Sale: 56 herbs [HERB] at $57, 63 lassoes [LASS] at $112, 96
+    battle axes [BAXE] at $167, 87 spices [SPIC] at $75, 88 perfume
+    [PERF] at $69, 1160 high elves [HELF] at $80.
+  Entertainment available: $2900.
+  Products: 61 livestock [LIVE], 21 herbs [HERB].
+
+Exits:
+  North : desert (0,20) in Naquelrienne, contains Huilooton [city].
+  Northeast : swamp (23,11) in Narienne, contains Emtkal [city].
+  Southeast : mystforest (9,29) in Buyet, contains O'arbur [city].
+  South : swamp (7,7) in Kargbul, contains Tar-dor [city].
+  Southwest : plain (14,14) in Lyfel, contains Ethilthielar [city].
+  Northwest : forest (25,25) in Ethilforanfel, contains Uissaeburg
+    [city].
+
+There is a Gate here (Gate 18 of 22).
+
+- City Guard (1), on guard, 600 leaders [LEAD], 600 swords [SWOR], 600
+  plate armor [PARM].
+- City Mage (2), leader [LEAD].
+* Unit (279), Tester (3), revealing faction, leader [LEAD]. Weight:
+  10. Capacity: 0/0/15/0. Skills: pattern [PATT] 1 (30), spirit [SPIR]
+  1 (30), gate lore [GATE] 1 (30). Can Study: magical healing [MHEA],
+  farsight [FARS], mind reading [MIND], earth lore [EART].
+
+
+
+Orders Template (Long Format):
+
+#atlantis 3
+
+;*** nexus (0,0,nexus) in Unnamed, contains Kedsul [city] ***
+
+unit 279
+;Unit (279), revealing faction, leader [LEAD]. Weight: 10. Capacity:
+;  0/0/15/0. Skills: pattern [PATT] 1 (30), spirit [SPIR] 1 (30), gate
+;  lore [GATE] 1 (30). Can Study: magical healing [MHEA], farsight
+;  [FARS], mind reading [MIND], earth lore [EART].
+
+#end
+
