@@ -72,9 +72,9 @@ struct Materials
 class ItemType
 {
 	public:
-		char *name;
-		char *names;
-		char *abr;
+		const char *name;
+		const char *names;
+		const char *abr;
 
 		enum {
 			CANTGIVE = 0x1,
@@ -151,7 +151,7 @@ class MonType
 		int spoiltype;
 		int hostile; /* Percent */
 		int number;
-		char *name;
+		const char *name;
 };
 
 extern MonType * MonDefs;

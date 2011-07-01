@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "gamedefs.h"
 
-char *dr[] = {
+const char *dr[] = {
   "North",
   "Northeast",
   "Southeast",
@@ -33,9 +33,9 @@ char *dr[] = {
   "Northwest"
 };
 
-char ** DirectionStrs = dr;
+const char* *DirectionStrs = dr;
 
-char *da[] = {
+const char *da[] = {
     "N",
     "NE",
     "SE",
@@ -44,9 +44,9 @@ char *da[] = {
     "NW"
 };
 
-char ** DirectionAbrs = da;
+const char* *DirectionAbrs = da;
 
-char *mn[] = {
+const char *mn[] = {
   "January",
   "February",
   "March",
@@ -61,13 +61,14 @@ char *mn[] = {
   "December"
 };
 
-char ** MonthNames = mn;
+const char* *MonthNames = mn;
 
-char *weath[] = {
+const char *weath[] = {
 	"clear",
 	"winter",
 	"monsoon season",
 	"blizzard"
 };
 
-char ** SeasonNames = weath;
+const char* *SeasonNames = weath;
+

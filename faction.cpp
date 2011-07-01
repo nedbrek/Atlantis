@@ -37,7 +37,7 @@
 #include "gamedata.h"
 #include "game.h"
 
-char *as[] = {
+const char *as[] = {
 	"Hostile",
 	"Unfriendly",
 	"Neutral",
@@ -45,15 +45,15 @@ char *as[] = {
 	"Ally"
 };
 
-char **AttitudeStrs = as;
+const char **AttitudeStrs = as;
 
-char *fs[] = {
+const char *fs[] = {
 	"War",
 	"Trade",
 	"Magic"
 };
 
-char **FactionStrs = fs;
+const char **FactionStrs = fs;
 
 int ParseAttitude(AString *token)
 {

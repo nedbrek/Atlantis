@@ -59,12 +59,12 @@ enum {
 	NDIRS
 };
 
-extern char **DirectionStrs;
-extern char **DirectionAbrs;
+extern const char* *DirectionStrs;
+extern const char* *DirectionAbrs;
 
-extern char **MonthNames;
+extern const char* *MonthNames;
 
-extern char **SeasonNames;
+extern const char* *SeasonNames;
 
 extern int *allowedMages;
 extern int allowedMagesSize;
@@ -77,7 +77,7 @@ extern int allowedTradesSize;
 
 class GameDefs {
 public:
-	char *RULESET_NAME;
+	const char *RULESET_NAME;
 	ATL_VER RULESET_VERSION;
 
 	int FOOT_SPEED;
@@ -252,7 +252,7 @@ public:
 	int APPRENTICES_EXIST;
 
 	// What is the name of the world?
-	char *WORLD_NAME;
+	const char *WORLD_NAME;
 
 	// Does the nexus allow gating out of it
 	int NEXUS_GATE_OUT;

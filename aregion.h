@@ -62,7 +62,7 @@ struct Product
 class TerrainType
 {
 	public:
-		char * name;
+		const char * name;
 		int similar_type;
 
 		enum {
@@ -103,7 +103,7 @@ class Location : public AListElem
 Location *GetUnit(AList *,int);
 
 int AGetName(int town);
-char *AGetNameString(int name);
+const char* AGetNameString(int name);
 
 class ARegionPtr : public AListElem
 {
@@ -161,7 +161,7 @@ class ARegion : public AListElem
 		void Setup();
 
 		void ZeroNeighbors();
-		void SetName(char *);
+		void SetName(const char *);
 
 		void Writeout(Aoutfile *);
 		void Readin(Ainfile *,AList *, ATL_VER v);
@@ -294,7 +294,7 @@ class ARegionArray
 
 		void SetRegion(int,int,ARegion *);
 		ARegion * GetRegion(int,int);
-		void SetName(char *name);
+		void SetName(const char *name);
 
 		int x;
 		int y;
@@ -355,13 +355,13 @@ class ARegionList : public AList
 		// Public world creation stuff
 		//
 		void CreateLevels(int numLevels);
-		void CreateAbyssLevel(int level, char *name);
-		void CreateNexusLevel(int level, int xSize, int ySize, char *name);
+		void CreateAbyssLevel(int level, const char *name);
+		void CreateNexusLevel(int level, int xSize, int ySize, const char *name);
 		void CreateSurfaceLevel(int level, int xSize, int ySize,
-				int percentOcean, int continentSize, char *name);
-		void CreateIslandLevel(int level, int nPlayers, char *name);
-		void CreateUnderworldLevel(int level, int xSize, int ySize, char *name);
-		void CreateUnderdeepLevel(int level, int xSize, int ySize, char *name);
+				int percentOcean, int continentSize, const char *name);
+		void CreateIslandLevel(int level, int nPlayers, const char *name);
+		void CreateUnderworldLevel(int level, int xSize, int ySize, const char *name);
+		void CreateUnderdeepLevel(int level, int xSize, int ySize, const char *name);
 
 		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
 		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);

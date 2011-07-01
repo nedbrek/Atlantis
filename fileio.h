@@ -56,7 +56,7 @@ class Aoutfile {
 		int OpenByName(const AString &);
 		void Close();
 
-		void PutStr(char *);
+		void PutStr(const char *);
 		void PutStr(const AString &);
 		void PutInt(int);
 
