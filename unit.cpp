@@ -150,7 +150,7 @@ void Unit::SetMonFlags()
 	SetFlag(FLAG_HOLDING,1);
 }
 
-void Unit::MakeWMon(char * monname,int mon,int num)
+void Unit::MakeWMon(const char * monname,int mon,int num)
 {
 	AString * temp = new AString(monname);
 	SetName(temp);
@@ -2028,9 +2028,14 @@ void Unit::SkillStarvation()
 int Unit::CanUseWeapon(WeaponType *pWep, int riding)
 {
 	if (riding == -1)
+	{
 		if(pWep->flags & WeaponType::NOFOOT) return -1;
+	}
 	else
+	{
 		if(pWep->flags & WeaponType::NOMOUNT) return -1;
+	}
+
 	return CanUseWeapon(pWep);
 }
 

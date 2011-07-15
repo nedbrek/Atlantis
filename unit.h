@@ -119,7 +119,7 @@ class Unit : public AListElem
 		~Unit();
 
 		void SetMonFlags();
-		void MakeWMon(char *,int,int);
+		void MakeWMon(const char *,int,int);
 
 		void Writeout( Aoutfile *f );
 		void Readin( Ainfile *f, AList *, ATL_VER v );

@@ -25,50 +25,50 @@ OBJECTS = $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)) \
   $(GAME)/obj/i_rand.o
 
 $(GAME)-m: objdir $(OBJECTS)
-	$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
+	@$(CPLUS) $(CFLAGS) -o $(GAME)/$(GAME) $(OBJECTS)
 
 all: conquest ceran realms standard wyreth
 
 conquest: FORCE
-	$(MAKE) GAME=conquest
+	@$(MAKE) --no-print-directory GAME=conquest
 
 ceran: FORCE
-	$(MAKE) GAME=ceran
+	@$(MAKE) --no-print-directory GAME=ceran
 
 realms: FORCE
-	$(MAKE) GAME=realms
+	@$(MAKE) --no-print-directory GAME=realms
 
 standard: FORCE
-	$(MAKE) GAME=standard
+	@$(MAKE) --no-print-directory GAME=standard
 
 wyreth: FORCE
-	$(MAKE) GAME=wyreth
+	@$(MAKE) --no-print-directory GAME=wyreth
 
 $(GAME)/$(GAME): FORCE
-	$(MAKE) GAME=$(GAME)
+	@$(MAKE) --no-print-directory GAME=$(GAME)
 
 all-clean: conquest-clean ceran-clean realms-clean standard-clean wyreth-clean
 
 conquest-clean:
-	$(MAKE) GAME=conquest clean
+	@$(MAKE) GAME=conquest clean
 
 ceran-clean:
-	$(MAKE) GAME=ceran clean
+	@$(MAKE) GAME=ceran clean
 
 realms-clean:
-	$(MAKE) GAME=realms clean
+	@$(MAKE) GAME=realms clean
 
 standard-clean:
-	$(MAKE) GAME=standard clean
+	@$(MAKE) GAME=standard clean
 
 wyreth-clean:
-	$(MAKE) GAME=wyreth clean
+	@$(MAKE) GAME=wyreth clean
 
 clean:
-	rm -f $(OBJECTS)
-	if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
-	rm -f $(GAME)/html/$(GAME).html
-	rm -f $(GAME)/$(GAME)
+	@rm -f $(OBJECTS)
+	@if [ -d $(GAME)/obj ]; then rmdir $(GAME)/obj; fi
+	@rm -f $(GAME)/html/$(GAME).html
+	@rm -f $(GAME)/$(GAME)
 
 all-rules: conquest-rules ceran-rules realms-rules standard-rules wyreth-rules
 
@@ -95,14 +95,15 @@ rules: $(GAME)/$(GAME)
 FORCE:
 
 objdir:
-	if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
+	@if [ ! -d $(GAME)/obj ]; then mkdir $(GAME)/obj; fi
 
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(RULESET_OBJECTS)): $(GAME)/obj/%.o: $(GAME)/%.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+	@$(CPLUS) $(CFLAGS) -c -o $@ $<
 
 $(patsubst %.o,$(GAME)/obj/%.o,$(ENGINE_OBJECTS)): $(GAME)/obj/%.o: %.cpp
-	$(CPLUS) $(CFLAGS) -c -o $@ $<
+	@$(CPLUS) $(CFLAGS) -c -o $@ $<
 
 $(GAME)/obj/i_rand.o: i_rand.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
+

@@ -76,8 +76,8 @@ enum {
     QUIT_GAME_OVER,
 };
 
-extern char ** AttitudeStrs;
-extern char ** FactionStrs;
+extern const char* *AttitudeStrs;
+extern const char* *FactionStrs;
 
 int ParseAttitude(AString *);
 

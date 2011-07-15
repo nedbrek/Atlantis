@@ -40,7 +40,7 @@ class Object;
 
 class ObjectType {
 	public:
-		char *name;
+		const char *name;
 		enum {
 			DISABLED		= 0x001,
 			NOMONSTERGROWTH	= 0x002,

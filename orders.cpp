@@ -24,7 +24,7 @@
 // END A3HEADER
 #include "orders.h"
 
-char * od[] = {
+const char *od[] = {
 	"#atlantis",
 	"#end",
 	"unit",
@@ -87,7 +87,7 @@ char * od[] = {
 	"work",
 };
 
-char ** OrderStrs = od;
+const char* *OrderStrs = od;
 
 int Parse1Order(AString * token)
 {

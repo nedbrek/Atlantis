@@ -671,7 +671,7 @@ AString *ItemDescription(int item, int full)
 			if(atts > 0) {
 				if(atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
 					int max = WeaponType::NUM_ATTACKS_HALF_SKILL;
-					char *attd = "half the skill level (rounded up)";
+					const char *attd = "half the skill level (rounded up)";
 					if(atts >= WeaponType::NUM_ATTACKS_SKILL) {
 						max = WeaponType::NUM_ATTACKS_SKILL;
 						attd = "the skill level";

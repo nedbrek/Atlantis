@@ -45,7 +45,7 @@
 
 static void TrimWrite(Areport *f, char *buffer);
 
-static char *TemplateMap[] = {
+static const char *TemplateMap[] = {
  //12345678901234567890
   "        ____        ",   // 1
   "nw     /    \\     ne",  // 2
@@ -74,7 +74,7 @@ static int dircrd[] = {
 };
 
 
-static char *terfill[] = {
+static const char *terfill[] = {
  // block
  " #### ",
  " #### ",
@@ -334,7 +334,7 @@ void ARegion::WriteTemplateHeader( Areport *f,
     {
         GetMapLine(buffer, line, pRegs);
 
-        char* nextWeather = "";
+        const char* nextWeather = "";
         int nxtweather = pRegs->GetWeather( this, (month + 1) % 12 );
         if (nxtweather == W_WINTER)
             nextWeather = "winter";

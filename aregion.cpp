@@ -151,7 +151,7 @@ void ARegion::ZeroNeighbors()
 	}
 }
 
-void ARegion::SetName(char * c)
+void ARegion::SetName(const char * c)
 {
 	if(name) delete name;
 	name = new AString(c);
@@ -2865,7 +2865,7 @@ void ARegionList::NeighSetup(ARegion * r,ARegionArray * ar)
 	}
 }
 
-void ARegionList::CreateAbyssLevel(int level, char *name)
+void ARegionList::CreateAbyssLevel(int level, const char *name)
 {
 	MakeRegions(level, 4, 4);
 	pRegionArrays[level]->SetName(name);
@@ -2915,7 +2915,7 @@ void ARegionList::CreateAbyssLevel(int level, char *name)
 }
 
 
-void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
+void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,const char *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -2952,7 +2952,7 @@ void ARegionList::CreateNexusLevel(int level,int xSize,int ySize,char *name)
 }
 
 void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
-		int percentOcean, int continentSize, char *name)
+		int percentOcean, int continentSize, const char *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -2976,7 +2976,7 @@ void ARegionList::CreateSurfaceLevel(int level, int xSize, int ySize,
 	FinalSetup(pRegionArrays[level]);
 }
 
-void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
+void ARegionList::CreateIslandLevel(int level, int nPlayers, const char *name)
 {
 	int xSize, ySize;
 	xSize = 20 + (nPlayers + 3) / 4 * 6 - 2;
@@ -2995,7 +2995,7 @@ void ARegionList::CreateIslandLevel(int level, int nPlayers, char *name)
 }
 
 void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
-		char *name)
+		const char *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -3016,7 +3016,7 @@ void ARegionList::CreateUnderworldLevel(int level, int xSize, int ySize,
 }
 
 void ARegionList::CreateUnderdeepLevel(int level, int xSize, int ySize,
-		char *name)
+		const char *name)
 {
 	MakeRegions(level, xSize, ySize);
 
@@ -3862,7 +3862,7 @@ ARegion * ARegionArray::GetRegion(int xx,int yy)
 	return(regions[ xx / 2 + yy * x / 2 ]);
 }
 
-void ARegionArray::SetName(char *name)
+void ARegionArray::SetName(const char *name)
 {
 	if(name) {
 		strName = new AString(name);

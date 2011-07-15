@@ -36,7 +36,6 @@ class AString : public AListElem {
 public:
 
     AString();
-    AString(char *);
     AString(const char *);
     AString(int);
 	AString(unsigned int);
@@ -45,7 +44,6 @@ public:
     ~AString();
 
     int operator==(const AString &);
-    int operator==(char *);
     int operator==(const char *);
     int CheckPrefix(const AString &);
     AString operator+(const AString &);
@@ -65,7 +63,6 @@ public:
     AString *StripWhite();
 
 private:
-
     int len;
 	int size;
     char * str;
@@ -73,3 +70,4 @@ private:
 };
 
 #endif
+

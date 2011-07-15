@@ -66,8 +66,8 @@ struct SkillDepend
 class SkillType
 {
 	public:
-		char * name;
-		char * abbr;
+		const char * name;
+		const char * abbr;
 		int cost;
 
 		enum {
@@ -172,7 +172,7 @@ class DefenseMod {
 
 class SpecialType {
 	public:
-		char *specialname;
+		const char *specialname;
 
 		enum {
 			HIT_BUILDINGIF		= 0x001,	/* mutually exclusive (1) */
@@ -204,18 +204,18 @@ class SpecialType {
 
 		int shield[4];
 		DefenseMod defs[4];
-		char *shielddesc;
+		const char *shielddesc;
 
 		DamageType damage[4];
-		char *spelldesc;
-		char *spelldesc2;
-		char *spelltarget;
+		const char *spelldesc;
+		const char *spelldesc2;
+		const char *spelltarget;
 };
 extern SpecialType *SpecialDefs;
 
 class EffectType {
 	public:
-		char *name;
+		const char *name;
 		int attackVal;
 		DefenseMod defMods[4];
 		int cancelEffect;
