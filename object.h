@@ -1,3 +1,5 @@
+#ifndef OBJECT_CLASS
+#define OBJECT_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -26,8 +28,6 @@
 // Date			Person				Comments
 // ----			------				--------
 // 2000/MAR/21	Azthar Septragen	Added roads.
-#ifndef OBJECT_CLASS
-#define OBJECT_CLASS
 
 class Object;
 
@@ -35,13 +35,17 @@ class Object;
 #include "fileio.h"
 #include "gamedefs.h"
 #include "faction.h"
+class Unit;
 
+//----------------------------------------------------------------------------
 #define I_WOOD_OR_STONE -2
 
-class ObjectType {
+class ObjectType
+{
 	public:
 		const char *name;
-		enum {
+		enum
+		{
 			DISABLED		= 0x001,
 			NOMONSTERGROWTH	= 0x002,
 			NEVERDECAY		= 0x004,
@@ -92,9 +96,8 @@ class Object : public AListElem
 
 		Unit *GetUnit(int);
 		Unit *GetUnitAlias(int,int); /* alias, faction number */
-		Unit *GetUnitId(UnitId *,int);
+		Unit *GetUnitId(class UnitId *,int);
 
-		// AS
 		int IsRoad();
 
 		int IsBoat();

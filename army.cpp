@@ -34,12 +34,26 @@
 #include "gameio.h"
 #include "gamedata.h"
 
-enum {
+//----------------------------------------------------------------------------
+enum
+{
 	WIN_NO_DEAD,
 	WIN_DEAD,
 	LOSS
 };
 
+static
+UnitPtr* GetUnitList(AList *list, Unit *u)
+{
+	forlist (list) {
+		UnitPtr *p = (UnitPtr*)elem;
+		if (p->ptr == u) return p;
+	}
+
+	return NULL;
+}
+
+//----------------------------------------------------------------------------
 Soldier::Soldier(Unit * u,Object * o,int regtype,int r,int ass)
 {
 	race = r;

@@ -23,6 +23,9 @@
 //
 // END A3HEADER
 #include "alist.h"
+#ifndef NULL
+#define NULL 0
+#endif
 
 AListElem::~AListElem()
 {
@@ -86,44 +89,61 @@ void AList::Add(AListElem * e)
 	}
 }
 
-AListElem * AList::Next(AListElem * e)
+AListElem* AList::Next(AListElem *e)
 {
-	if (!e) return 0;
-	return e->next;
+	return e ? e->next : NULL;
 }
 
-AListElem * AList::First()
+const AListElem* AList::Next(AListElem *e) const
+{
+	return e ? e->next : NULL;
+}
+
+AListElem* AList::First()
 {
 	return list;
 }
 
-AListElem * AList::Get(AListElem * e)
+const AListElem* AList::First() const
 {
-	AListElem * temp = list;
-	while (temp) {
+	return list;
+}
+
+AListElem* AList::Get(AListElem *e) const
+{
+	AListElem *temp = list;
+	while (temp)
+	{
 		if (temp == e) return temp;
+
 		temp = temp->next;
 	}
-	return 0;
+
+	return NULL;
 }
 
-char AList::Remove(AListElem * e)
+bool AList::Remove(AListElem *e)
 {
-	if (!e) return 0;
-	if (!e->next) lastelem = 0;
+	if (!e) return false;
+	if (!e->next) lastelem = NULL;
 
-	for (AListElem **pp = &list; *pp; pp = &((*pp)->next)) {
-		if (*pp == e) {
+	for (AListElem **pp = &list; *pp; pp = &((**pp).next))
+	{
+		if (*pp == e)
+		{
 			*pp = e->next;
-			num--;
-			return 1;
+			--num;
+
+			return true;
 		}
+
 		if (!e->next) lastelem = *pp;
 	}
-	return 0;
+
+	return false;
 }
 
-int AList::Num()
+int AList::Num() const
 {
 	return num;
 }

@@ -24,19 +24,27 @@
 // END A3HEADER
 #include "shields.h"
 
-Shield * ShieldList::GetHighShield(int type)
+///@return the Shield of 'type' with the highest skill
+Shield* ShieldList::GetHighShield(int type)
 {
-	Shield * hi = 0;
+	Shield *hi = 0;
+
 	forlist(this) {
-		Shield * sh = (Shield *) elem;
-		if (sh->shieldtype == type) {
-			if (!hi) {
+		Shield *sh = (Shield*)elem;
+		if (sh->shieldtype == type)
+		{
+			if (!hi)
+			{
 				hi = sh;
-			} else {
+			}
+			else
+			{
 				if (sh->shieldskill > hi->shieldskill)
 					hi = sh;
 			}
 		}
 	}
+
 	return hi;
 }
+

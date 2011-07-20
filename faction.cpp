@@ -808,59 +808,85 @@ void Faction::SetAttitude(int num,int att)
 	}
 }
 
+///@return 1 if a unit from this faction can catch 't'
 int Faction::CanCatch(ARegion *r, Unit *t)
 {
+	// nowhere to hide at sea
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) return 1;
 
-	int def = t->GetDefenseRiding();
+	const int def = t->GetDefenseRiding();
 
+	//foreach object in the region
 	forlist(&r->objects) {
-		Object *o = (Object *) elem;
+		Object *o = (Object*)elem;
+
+		//foreach unit in the object
 		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			if (u == t && o->type != O_DUMMY) return 1;
-			if (u->faction == this && u->GetAttackRiding() >= def) return 1;
+			Unit *u = (Unit*)elem;
+
+			// units in buildings are easy to locate
+			if (u == t && o->type != O_DUMMY)
+				return 1;
+
+			// if this is our unit, and he can catch up
+			if (u->faction == this && u->GetAttackRiding() >= def)
+				return 1;
 		}
 	}
+
 	return 0;
 }
 
-int Faction::CanSee(ARegion * r,Unit * u, int practise)
+int Faction::CanSee(ARegion *r, Unit *u, int practise)
 {
-	int detfac = 0;
 	if (u->faction == this) return 2;
 	if (u->reveal == REVEAL_FACTION) return 2;
-	int retval = 0;
-	if (u->reveal == REVEAL_UNIT) retval = 1;
+
+	// live-out
+	int retval = u->reveal == REVEAL_UNIT ? 1 : 0;
+	int detfac = 0;
+
+	//foreach object in the region
 	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		int dummy = 0;
-		if (obj->type == O_DUMMY) dummy = 1;
+		Object *obj = (Object*)elem;
+		int dummy = obj->type == O_DUMMY ? 1 : 0;
+
+		//foreach unit in the object
 		forlist((&obj->units)) {
-			Unit * temp = (Unit *) elem;
+			Unit *temp = (Unit*)elem;
+
 			if (u == temp && dummy == 0) retval = 1;
-			if (temp->faction == this) {
-				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH)) {
-					if (practise) {
+
+			if (temp->faction != this)
+				continue;
+
+			if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH))
+			{
+				if (!practise)
+					return 2;
+
+				temp->Practise(S_OBSERVATION);
+				temp->Practise(S_TRUE_SEEING);
+				retval = 2;
+			}
+			else
+			{
+				if (temp->GetSkill(S_OBSERVATION) == u->GetSkill(S_STEALTH))
+				{
+					if (practise)
+					{
 						temp->Practise(S_OBSERVATION);
 						temp->Practise(S_TRUE_SEEING);
-						retval = 2;
 					}
-					else
-						return 2;
-				} else {
-					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH)) {
-						if (practise) {
-							temp->Practise(S_OBSERVATION);
-							temp->Practise(S_TRUE_SEEING);
-						}
-						if (retval < 1) retval = 1;
-					}
+
+					if (retval < 1) retval = 1;
 				}
-				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
 			}
+
+			if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
 		}
 	}
+
 	if (retval == 1 && detfac) return 2;
 	return retval;
 }
@@ -887,11 +913,10 @@ void Faction::SetNPC()
 
 int Faction::IsNPC()
 {
-	if (type[F_WAR] == -1) return 1;
-	return 0;
+	return type[F_WAR] == -1 ? 1 : 0;
 }
 
-Faction *GetFaction(AList *facs, int n)
+Faction* GetFaction(AList *facs, int n)
 {
 	forlist(facs)
 		if (((Faction *) elem)->num == n)

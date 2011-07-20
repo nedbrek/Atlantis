@@ -913,9 +913,7 @@ AString *ItemDescription(int item, int full)
 
 int IsSoldier(int item)
 {
-	if (ItemDefs[item].type & IT_MAN || ItemDefs[item].type & IT_MONSTER)
-		return 1;
-	return 0;
+	return (ItemDefs[item].type & IT_MAN || ItemDefs[item].type & IT_MONSTER) ? 1 : 0;
 }
 
 Item::Item()

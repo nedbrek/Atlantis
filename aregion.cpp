@@ -2465,16 +2465,24 @@ void ARegion::SetWeather(int newWeather)
 	weather = newWeather;
 }
 
+///@return 1 for ocean-like (not lake) or number of adjacent ocean-like
 int ARegion::IsCoastal()
 {
-	if ((type != R_LAKE) && (TerrainDefs[type].similar_type == R_OCEAN)) return 1;
+	if (type != R_LAKE && TerrainDefs[type].similar_type == R_OCEAN)
+		return 1;
+
 	int seacount = 0;
-	for (int i=0; i<NDIRS; i++) {
-		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN) {
-		if (!Globals->LAKESIDE_IS_COASTAL && neighbors[i]->type == R_LAKE) continue;
-		seacount++;
+	for (int i = 0; i < NDIRS; ++i)
+	{
+		// if neighbor is ocean-like
+		if (neighbors[i] && TerrainDefs[neighbors[i]->type].similar_type == R_OCEAN)
+		{
+			// if counting lakes or not lake
+			if (Globals->LAKESIDE_IS_COASTAL || neighbors[i]->type != R_LAKE)
+				++seacount;
+		}
 	}
-	}
+
 	return seacount;
 }
 
@@ -2490,36 +2498,55 @@ int ARegion::IsCoastalOrLakeside()
 	return seacount;
 }
 
+///@param[inout] road message which is updated for road usage
+///@return the cost to move into this region 'fromRegion' along 'dir' via 'movetype'
 int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 {
-	int cost = 1;
-	if(Globals->WEATHER_EXISTS) {
-		cost = 2;
+	int cost = 1; // base move cost
+
+	if (Globals->WEATHER_EXISTS)
+	{
+		// no movement in a blizzard
 		if (weather == W_BLIZZARD) return 10;
-		if (weather == W_NORMAL || clearskies) cost = 1;
+
+		// double cost in bad weather ('clearskies' overrides)
+		if (weather != W_NORMAL && !clearskies) cost = 2;
 	}
-	if (movetype == M_WALK || movetype == M_RIDE) {
-		cost = (TerrainDefs[type].movepoints * cost);
-		if(fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir)) {
+
+	if (movetype == M_WALK || movetype == M_RIDE)
+	{
+		// ground based units pay terrain costs
+		cost *= TerrainDefs[type].movepoints;
+
+		// and can benefit from roads
+		if (fromRegion->HasExitRoad(dir) && HasConnectingRoad(dir))
+		{
 			cost -= cost/2;
+
+			// update move message
 			if (road)
 				*road = " on a road";
 		}
 	}
+
+	// prevent underflow (just in case)
 	if(cost < 1) cost = 1;
 	return cost;
 }
 
-Unit * ARegion::Forbidden(Unit * u)
+Unit* ARegion::Forbidden(Unit *u)
 {
 	forlist((&objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object*)elem;
 		forlist ((&obj->units)) {
-			Unit * u2 = (Unit *) elem;
-			if (u2->Forbids(this,u)) return u2;
+			Unit *u2 = (Unit*)elem;
+
+			if (u2->Forbids(this, u))
+				return u2;
 		}
 	}
-	return 0;
+
+	return NULL;
 }
 
 Unit * ARegion::ForbiddenByAlly(Unit * u)

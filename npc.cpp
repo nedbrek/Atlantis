@@ -25,89 +25,92 @@
 #include "game.h"
 #include "gamedata.h"
 
+//----------------------------------------------------------------------------
 void Game::CreateCityMons()
 {
-    if( !Globals->CITY_MONSTERS_EXIST )
-    {
-        return;
-    }
+	if( !Globals->CITY_MONSTERS_EXIST )
+		return;
 
-    forlist(&regions) {
-        ARegion * r = (ARegion *) elem;
-        if (r->type == R_NEXUS || r->IsStartingCity() || r->town)
-        {
-            CreateCityMon( r, 100, 1 );
-        }
-    }
+	forlist(&regions) {
+		ARegion *r = (ARegion*)elem;
+		if (r->type == R_NEXUS || r->IsStartingCity() || r->town)
+		{
+			CreateCityMon( r, 100, 1 );
+		}
+	}
 }
 
 void Game::CreateWMons()
 {
-    if( !Globals->WANDERING_MONSTERS_EXIST )
-    {
-        return;
-    }
+	if( !Globals->WANDERING_MONSTERS_EXIST )
+		return;
 
-    GrowWMons( 50 );
+	GrowWMons( 50 );
 }
 
 void Game::CreateLMons()
 {
     if( !Globals->LAIR_MONSTERS_EXIST )
-    {
         return;
-    }
 
     GrowLMons( 50 );
 }
 
+// go through each 8x8 block of the map, and make monsters if needed
 void Game::GrowWMons(int rate)
 {
-    //
-    // Now, go through each 8x8 block of the map, and make monsters if
-    // needed.
-    //
-    int level;
-    for( level = 0; level < regions.numLevels; level++ )
-    {
-        ARegionArray *pArr = regions.pRegionArrays[ level ];
-        int xsec;
-        for (xsec=0; xsec< pArr->x / 8; xsec++)
-        {
-            for (int ysec=0; ysec< pArr->y / 16; ysec++)
-            {
-                /* OK, we have a sector. Count mons, and wanted */
-                int mons=0;
-                int wanted=0;
-                for (int x=0; x<8; x++)
+	//foreach level of the world
+	for (int level = 0; level < regions.numLevels; ++level)
+	{
+		ARegionArray *pArr = regions.pRegionArrays[ level ];
+
+		//foreach 8 wide x section
+		for (int xsec = 0; xsec < pArr->x / 8; ++xsec)
+		{
+			//foreach 8 high y section
+			for (int ysec = 0; ysec < pArr->y / 16; ++ysec)
+			{
+				// OK, we have a sector. Count mons, and wanted
+                int mons = 0;
+                int wanted = 0;
+                for (int x = 0; x < 8; ++x)
                 {
-                    for (int y=0; y<16; y+=2)
+                	// y increases by 2
+                    for (int y = 0; y < 16; y += 2)
                     {
-                        ARegion *reg = pArr->GetRegion(x+xsec*8,y+ysec*16+x%2);
+                        ARegion *reg = pArr->GetRegion(x+xsec*8, y+ysec*16+x%2);
                         if (!reg->IsGuarded())
                         {
                             mons += reg->CountWMons();
-							/*
-							 * Make sure there is at least one monster type
-							 * enabled for this region
-							 */
+
+							// Make sure there is at least one monster type
+							// enabled for this region
 							int avail = 0;
 							int mon = TerrainDefs[reg->type].smallmon;
-							if(!((mon == -1) ||
-							     (ItemDefs[mon].flags & ItemType::DISABLED)))
-								avail = 1;
-							mon = TerrainDefs[reg->type].bigmon;
-							if(!((mon == -1) ||
-							     (ItemDefs[mon].flags & ItemType::DISABLED)))
-								avail = 1;
-							mon = TerrainDefs[reg->type].humanoid;
-							if(!((mon == -1) ||
-							     (ItemDefs[mon].flags & ItemType::DISABLED)))
-								avail = 1;
 
-							if(avail)
+							if (!(mon == -1 ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+							{
+								avail = 1;
+							}
+
+							mon = TerrainDefs[reg->type].bigmon;
+							if (!(mon == -1 ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+							{
+								avail = 1;
+							}
+
+							mon = TerrainDefs[reg->type].humanoid;
+
+							if (!((mon == -1) ||
+							     (ItemDefs[mon].flags & ItemType::DISABLED)))
+							{
+								avail = 1;
+							}
+
+							if (avail)
 								wanted += TerrainDefs[reg->type].wmonfreq;
-							
                         }
                     }
                 }
@@ -117,38 +120,44 @@ void Game::GrowWMons(int rate)
                 wanted = (wanted*rate + getrandom(100))/100;
                 if (wanted > 0)
                 {
-                    for (int i=0; i< wanted;)
+                    for (int i = 0; i < wanted;)
                     {
-                        int m=getrandom(8);
-                        int n=getrandom(8)*2+m%2;
-                        ARegion *reg = pArr->GetRegion(m+xsec*8,n+ysec*16);
-                        if (!reg->IsGuarded() && MakeWMon( reg ))
+                        const int m = getrandom(8);
+                        const int n = getrandom(8)*2+m%2;
+
+                        ARegion *reg = pArr->GetRegion(m+xsec*8, n+ysec*16);
+
+                        if (!reg->IsGuarded() && MakeWMon(reg))
                         {
-                            i++;
+                        	++i;
                         }
                     }
                 }
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
-void Game::GrowLMons( int rate )
+void Game::GrowLMons(int rate)
 {
     forlist(&regions) {
         ARegion * r = (ARegion *) elem;
-        //
+
         // Don't make lmons in guarded regions
-        //
         if (r->IsGuarded()) continue;
         
         forlist(&r->objects) {
-            Object * obj = (Object *) elem;
+            Object *obj = (Object*)elem;
             if (obj->units.Num()) continue;
+
             int montype = ObjectDefs[obj->type].monster;
-			int grow=!(ObjectDefs[obj->type].flags&ObjectType::NOMONSTERGROWTH);
-            if ((montype != -1) && grow) {
-                if (getrandom(100) < rate) {
+
+			int grow = !(ObjectDefs[obj->type].flags & ObjectType::NOMONSTERGROWTH);
+
+            if (montype != -1 && grow)
+            {
+                if (getrandom(100) < rate)
+                {
                     MakeLMon( obj );
                 }
             }
@@ -156,50 +165,77 @@ void Game::GrowLMons( int rate )
     }
 }
 
-int Game::MakeWMon( ARegion *pReg )
+///@return 0 if no monster, 1 if monster
+int Game::MakeWMon(ARegion *pReg)
 {
-	if(!Globals->WANDERING_MONSTERS_EXIST) return 0;
+	if (!Globals->WANDERING_MONSTERS_EXIST) return 0;
 
 	if (TerrainDefs[pReg->type].wmonfreq == 0) return 0;
 
+	// determine monster type
+	//--- start small
 	int montype = TerrainDefs[ pReg->type ].smallmon;
+
+	//--- 50% chance of promotion to humanoid (if enabled)
 	if (getrandom(2) && (TerrainDefs[pReg->type].humanoid != -1))
+	{
 		montype = TerrainDefs[ pReg->type ].humanoid;
-	if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8)) {
+	}
+
+	//---12.5% chance of promotion to big (if enabled)
+	if (TerrainDefs[ pReg->type ].bigmon != -1 && !getrandom(8))
+	{
 		montype = TerrainDefs[ pReg->type ].bigmon;
 	}
-	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
-		return 0;
 
-	int mondef = ItemDefs[montype].index;
-	Faction *monfac = GetFaction( &factions, 2 );
-	Unit *u = GetNewUnit( monfac, 0 );
+	// if monster type is disabled
+	if (montype == -1 || (ItemDefs[montype].flags & ItemType::DISABLED))
+		return 0; // done
+
+	// create a new monster faction unit
+	Faction *monfac = GetFaction(&factions, 2);
+	Unit *u = GetNewUnit(monfac, 0);
+
+	// index into MonDefs
+	const int mondef = ItemDefs[montype].index;
+
 	u->MakeWMon( MonDefs[mondef].name, montype,
 			(MonDefs[mondef].number+getrandom(MonDefs[mondef].number)+1)/2);
+
 	u->MoveUnit( pReg->GetDummy() );
-	return( 1 );
+
+	return 1 ;
 }
 
-void Game::MakeLMon( Object *pObj )
+/// make a lair monster
+void Game::MakeLMon(Object *pObj)
 {
-	if(!Globals->LAIR_MONSTERS_EXIST) return;
-	if(ObjectDefs[pObj->type].flags & ObjectType::NOMONSTERGROWTH) return;
+	// if lair monsters disabled or object does not support them
+	if (!Globals->LAIR_MONSTERS_EXIST) return;
+	if (ObjectDefs[pObj->type].flags & ObjectType::NOMONSTERGROWTH) return;
 
 	int montype = ObjectDefs[ pObj->type ].monster;
 
-	if (montype == I_TRENT) {
+	if (montype == I_TRENT)
+	{
 		montype = TerrainDefs[ pObj->region->type].bigmon;
 	}
-	if (montype == I_CENTAUR) {
+
+	if (montype == I_CENTAUR)
+	{
 		montype = TerrainDefs[ pObj->region->type ].humanoid;
 	}
-	if((montype == -1) || (ItemDefs[montype].flags & ItemType::DISABLED))
+
+	if (montype == -1 || (ItemDefs[montype].flags & ItemType::DISABLED))
 		return;
 
-	int mondef = ItemDefs[montype].index;
 	Faction *monfac = GetFaction( &factions, 2 );
 	Unit *u = GetNewUnit( monfac, 0 );
-	switch(montype) {
+
+	int mondef = ItemDefs[montype].index;
+
+	switch (montype)
+	{
 		case I_IMP:
 			u->MakeWMon( "Demons", I_IMP,
 					getrandom( MonDefs[MONSTER_IMP].number + 1 ));
@@ -208,6 +244,7 @@ void Game::MakeLMon( Object *pObj )
 			u->items.SetNum( I_BALROG,
 					getrandom( MonDefs[MONSTER_BALROG].number + 1 ));
 			break;
+
 		case I_SKELETON:
 			u->MakeWMon( "Undead", I_SKELETON,
 					getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
@@ -216,6 +253,7 @@ void Game::MakeLMon( Object *pObj )
 			u->items.SetNum( I_LICH,
 					getrandom( MonDefs[MONSTER_LICH].number + 1 ));
 			break;
+
 		case I_MAGICIANS:
 			u->MakeWMon(MonDefs[MONSTER_WARRIORS].name, I_WARRIORS,
 					(MonDefs[MONSTER_WARRIORS].number +
@@ -229,6 +267,7 @@ void Game::MakeLMon( Object *pObj )
 					getrandom( MonDefs[MONSTER_SORCERERS].number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
 			break;
+
 		case I_DARKMAGE:
 			u->MakeWMon( MonDefs[MONSTER_DROW].name, I_DROW,
 					(MonDefs[MONSTER_DROW].number +
@@ -244,6 +283,7 @@ void Game::MakeLMon( Object *pObj )
 					getrandom( MonDefs[MONSTER_DARKMAGE].number + 1));
 			u->SetFlag(FLAG_BEHIND, 1);
 			break;
+
         case I_ILLYRTHID:
 			u->MakeWMon( "Undead", I_SKELETON,
 					getrandom( MonDefs[MONSTER_SKELETON].number + 1 ));
@@ -256,8 +296,10 @@ void Game::MakeLMon( Object *pObj )
 					 getrandom( MonDefs[MONSTER_ILLYRTHID].number ) + 1) / 2);
 			u->SetFlag(FLAG_BEHIND, 1);
 			break;
+
         case I_STORMGIANT:
-			if (getrandom(3) < 1) {
+			if (getrandom(3) < 1)
+			{
 				mondef = MONSTER_CLOUDGIANT;
 				montype = I_CLOUDGIANT;
 			}
@@ -265,11 +307,14 @@ void Game::MakeLMon( Object *pObj )
 					(MonDefs[mondef].number +
 					 getrandom( MonDefs[mondef].number ) + 1) / 2);
 			break;
+
 		default:
 			u->MakeWMon( MonDefs[mondef].name, montype,
 					(MonDefs[mondef].number +
 					 getrandom( MonDefs[mondef].number ) + 1) / 2);
 			break;
 	}
+
 	u->MoveUnit( pObj );
 }
+

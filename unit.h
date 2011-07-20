@@ -1,3 +1,5 @@
+#ifndef UNIT_CLASS
+#define UNIT_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -32,13 +34,6 @@
 // 2001/Feb/18 Joseph Traub    Added support for Apprentices.
 // 2001/Feb/25 Joseph Traub    Added a flag preventing units from crossing
 //                             water.
-
-#ifndef UNIT_CLASS
-#define UNIT_CLASS
-
-class Unit;
-class UnitId;
-
 #include "faction.h"
 #include "alist.h"
 #include "gameio.h"
@@ -48,7 +43,9 @@ class UnitId;
 #include "items.h"
 #include "object.h"
 
-enum {
+//----------------------------------------------------------------------------
+enum
+{
 	GUARD_NONE,
 	GUARD_GUARD,
 	GUARD_AVOID,
@@ -56,20 +53,23 @@ enum {
 	GUARD_ADVANCE
 };
 
-enum {
+enum
+{
 	TAX_NONE,
 	TAX_TAX,
 	TAX_PILLAGE,
 	TAX_AUTO,
 };
 
-enum {
+enum
+{
 	REVEAL_NONE,
 	REVEAL_UNIT,
 	REVEAL_FACTION
 };
 
-enum {
+enum
+{
 	U_NORMAL,
 	U_MAGE,
 	U_GUARD,
@@ -94,22 +94,25 @@ enum {
 #define FLAG_WALKSPOILS			0x0400
 #define FLAG_RIDESPOILS			0x0800
 
-class UnitId : public AListElem {
-	public:
-		UnitId();
-		~UnitId();
-		AString Print();
+//----------------------------------------------------------------------------
+class UnitId : public AListElem
+{
+public:
+	UnitId();
+	~UnitId();
+	AString Print();
 
-		int unitnum; /* if 0, it is a new unit */
-		int alias;
-		int faction;
+	int unitnum; // 0 -> new unit
+	int alias;
+	int faction;
 };
 
-class UnitPtr : public AListElem {
-	public:
-		Unit * ptr;
+//----------------------------------------------------------------------------
+class UnitPtr : public AListElem
+{
+public:
+	class Unit *ptr;
 };
-UnitPtr *GetUnitList(AList *, Unit *);
 
 class Unit : public AListElem
 {
@@ -141,11 +144,12 @@ class Unit : public AListElem
 		void SetDescribe(AString *);
 		void PostTurn(ARegion *reg);
 
-		int IsLeader();
-		int IsNormal();
 		int GetMons();
 		int GetMen();
 		int GetSoldiers();
+
+		int IsLeader();
+		int IsNormal();
 		int GetMen(int);
 		void SetMen(int,int);
 		int GetMoney();
@@ -165,10 +169,8 @@ class Unit : public AListElem
 		int GetAttackRiding();
 		int GetDefenseRiding();
 
-		//
 		// These are rule-set specific, in extra.cpp.
 		//
-		// LLS
 		int GetSkillBonus(int);
 		int GetProductionBonus(int);
 
@@ -182,8 +184,9 @@ class Unit : public AListElem
 		int Practise(int);
 		void AdjustSkills();
 
-		/* Return 1 if can see, 2 if can see faction */
+		// Return 1 if can see, 2 if can see faction
 		int CanSee(ARegion *,Unit *, int practise = 0);
+
 		int CanCatch(ARegion *,Unit *);
 		int AmtsPreventCrime(Unit *);
 		int GetAttitude(ARegion *,Unit *); /* Get this unit's attitude toward
@@ -229,8 +232,8 @@ class Unit : public AListElem
 		int num;
 		int type;
 		int alias;
-		int gm_alias; /* used for gm manual creation of new units */
-		int guard; /* Also, avoid- see enum above */
+		int gm_alias; // used for gm manual creation of new units
+		int guard; // Also, avoid- see enum above
 		int reveal;
 		int flags;
 		int taxing;
@@ -244,14 +247,14 @@ class Unit : public AListElem
 		int readyWeapon[MAX_READY];
 		int readyArmor[MAX_READY];
 		AList oldorders;
-		int needed; /* For assessing maintenance */
+		int needed; // For assessing maintenance
 		int hunger;
 		int stomach_space;
 		int losses;
 		int free;
 		int practised; // Has this unit practised a skill this turn
 
-		/* Orders */
+		// Orders
 		int destroy;
 		int enter;
 		Object *build;
@@ -284,3 +287,4 @@ protected:
 };
 
 #endif
+

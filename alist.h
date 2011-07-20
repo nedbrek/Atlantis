@@ -35,23 +35,35 @@ class AListElem {
 		AListElem * next;
 };
 
-class AList {
-	public:
-		AList();
-		~AList();
+class AList
+{
+public:
+	AList();
+	~AList();
 
-		void DeleteAll();
-		void Empty(); /* Clears the list without deleting members */
-		AListElem * Get(AListElem *);
-		char Remove(AListElem *);
-		void Insert(AListElem *); /* into the front */
-		void Add(AListElem *); /* to the back */
-		AListElem * Next(AListElem *);
-		AListElem * First();
-		int Num();
+	void DeleteAll(); ///< delete all elements
+	void Empty(); ///< clear without deleting elements
 
-		/* Helper function for forlist_safe */
-		int NextLive(AListElem **copy, int size, int pos);
+	/// remove 'e' from this
+	///@return true if element was removed
+	bool Remove(AListElem *e);
+
+	///@return number of items in the list
+	int Num() const;
+
+	///@return 'e' if this contains it, else NULL
+	AListElem* Get(AListElem *e) const;
+
+	void Insert(AListElem *); ///< into the front
+	void Add   (AListElem *); ///< to the back
+
+	      AListElem* Next(AListElem *);
+	const AListElem* Next(AListElem *) const;
+	      AListElem* First();
+	const AListElem* First() const;
+
+	/* Helper function for forlist_safe */
+	int NextLive(AListElem **copy, int size, int pos);
 
 	private:
 		AListElem *list;

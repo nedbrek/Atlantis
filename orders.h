@@ -1,3 +1,5 @@
+#ifndef ORDERS_CLASS
+#define ORDERS_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,8 +24,6 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ORDERS_CLASS
-#define ORDERS_CLASS
 
 class Order;
 class AttackOrder;
@@ -51,7 +51,9 @@ class EvictOrder;
 #include "gamedefs.h"
 #include "astring.h"
 #include "alist.h"
+class UnitId;
 
+//----------------------------------------------------------------------------
 enum {
 	O_ATLANTIS,
 	O_END,
