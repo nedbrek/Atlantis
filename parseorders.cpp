@@ -1650,6 +1650,7 @@ void Game::ProcessWorkOrder(Unit * u, OrdersCheck *pCheck)
 	ProduceOrder * order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
+
 	if (u->monthorders ||
 		(Globals->TAX_PILLAGE_MONTH_LONG &&
 		 ((u->taxing == TAX_TAX) || (u->taxing == TAX_PILLAGE)))) {

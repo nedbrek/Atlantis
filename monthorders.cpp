@@ -755,7 +755,10 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 
 	if (o->item == I_SILVER)
 	{
-		u->Error("Can't do that in this region.");
+		// suppress error due to idle units at sea and default work orders
+		// Ideally, default work orders would be marked as such
+		// (there is no way to differentiate default from player given orders)
+		//u->Error("Can't work in this region.");
 
 		delete u->monthorders;
 		u->monthorders = NULL;

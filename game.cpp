@@ -58,32 +58,43 @@ int Game::TurnNumber() {
 	return (year-1)*12 + month + 1;
 }
 
-// ALT, 25-Jul-2000
-// Default work order procedure
+// give idle units a work order
 void Game::DefaultWorkOrder()
 {
+	//foreach region
 	forlist( &regions ) {
-		ARegion * r = (ARegion *) elem;
-		if(r->type == R_NEXUS) continue;
+		ARegion *r = (ARegion*)elem;
+		if (r->type == R_NEXUS) continue; // except the Nexus
+
+		//foreach object in the region
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
+			Object *o = (Object*)elem;
+
+			//foreach unit in the object
 			forlist(&o->units) {
-				Unit * u = (Unit *) elem;
+				Unit *u = (Unit*)elem;
+
+				// if busy or an NPC, or (taxing takes all turn and taxing)
 				if (u->monthorders || u->faction->IsNPC() ||
-						(Globals->TAX_PILLAGE_MONTH_LONG &&
-						 u->taxing != TAX_NONE))
+				    (Globals->TAX_PILLAGE_MONTH_LONG &&
+				     u->taxing != TAX_NONE))
+				{
 					continue;
-				if(u->GetFlag(FLAG_AUTOTAX) &&
+				}
+
+				// check for autotax
+				if (u->GetFlag(FLAG_AUTOTAX) &&
 						(Globals->TAX_PILLAGE_MONTH_LONG && u->Taxers())) {
 					u->taxing = TAX_AUTO;
-				} else {
-					if(Globals->DEFAULT_WORK_ORDER) ProcessWorkOrder(u, 0);
+				}
+				else if (Globals->DEFAULT_WORK_ORDER)
+				{
+					ProcessWorkOrder(u, 0);
 				}
 			}
 		}
 	}
 }
-
 
 AString Game::GetXtraMap(ARegion * reg,int type)
 {
