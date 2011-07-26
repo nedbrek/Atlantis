@@ -2056,6 +2056,49 @@ void writeUnits(Aoutfile *f, Faction *fac, Object *op)
 			f->PutStr(*u->describe);
 		o << '}' << std::endl;
 
+		o << "Flags {" << std::endl;
+		if (u->guard == GUARD_GUARD) o << "GUARD 1";
+		else                         o << "GUARD 0";
+		o << std::endl;
+
+		if (!limit)
+		{
+			if (u->guard == GUARD_AVOID) o << "AVOID 1";
+			else                         o << "AVOID 0";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_BEHIND)) o << "BEHIND 1";
+			else                         o << "BEHIND 0";
+			o << std::endl;
+
+			if      (u->reveal == REVEAL_UNIT   ) o << "REVEAL UNIT";
+			else if (u->reveal == REVEAL_FACTION) o << "REVEAL FACTION";
+			else                                  o << "REVEAL {}";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_HOLDING)) o << "HOLDING 1";
+			else                          o << "HOLDING 0";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_AUTOTAX)) o << "AUTOTAX 1";
+			else                          o << "AUTOTAX 0";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_NOAID)) o << "NOAID 1";
+			else                        o << "NOAID 0";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_CONSUMING_UNIT))         o << "CONSUME UNIT";
+			else if (u->GetFlag(FLAG_CONSUMING_FACTION)) o << "CONSUME FACTION";
+			else                                         o << "CONSUME {}";
+			o << std::endl;
+
+			if (u->GetFlag(FLAG_NOCROSS_WATER)) o << "NOCROSS 1";
+			else                                o << "NOCROSS 0";
+			o << std::endl;
+		}
+		o << '}' << std::endl; // end flags
+
 		o << "Items {" << std::endl;
 		{
 			forlist(&u->items) {
@@ -2267,7 +2310,9 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 	o << '}' << std::endl;
 
 	//Ned, gates
-	//Ned, objects
+
+	// objects
+	// first pass, look for more objects than just the dummy
 	bool hasObjects = false;
 	{
 		forlist (&objects) {
@@ -2278,10 +2323,12 @@ void ARegion::WriteCReport(Aoutfile *f, Faction *fac, int month,
 				continue;
 			}
 
+			// write main block of units (they live in "dummy" object)
 			writeUnits(f, fac, op);
 		}
 	}
 
+	// more objects than dummy
 	if (hasObjects)
 	{
 		o << "Objects {" << std::endl;
