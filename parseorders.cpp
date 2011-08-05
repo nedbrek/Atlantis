@@ -1266,45 +1266,44 @@ void Game::ProcessFindOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 }
 
+/// consume UNIT    -> eat unit food
+/// consume FACTION -> eat any food
+/// consume         -> eat no food
 void Game::ProcessConsumeOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
+	int unitFlag = 0;
+	int facFlag  = 0;
+
 	AString *token = o->gettoken();
-	if (token) {
-		if (*token == "unit") {
-			if(!pCheck) {
-				u->SetFlag(FLAG_CONSUMING_UNIT, 1);
-				u->SetFlag(FLAG_CONSUMING_FACTION, 0);
-			}
-			delete token;
-			return;
-		}
-
-		if (*token == "faction") {
-			if(!pCheck) {
-				u->SetFlag(FLAG_CONSUMING_UNIT, 0);
-				u->SetFlag(FLAG_CONSUMING_FACTION, 1);
-			}
-			delete token;
-			return;
-		}
-
-		if (*token == "none") {
-			if(!pCheck) {
-				u->SetFlag(FLAG_CONSUMING_UNIT, 0);
-				u->SetFlag(FLAG_CONSUMING_FACTION, 0);
-			}
-			delete token;
-			return;
-		}
-
-		delete token;
-		ParseError(pCheck, u, 0, "CONSUME: Invalid value.");
-	} else {
-		if(!pCheck) {
-			u->SetFlag(FLAG_CONSUMING_UNIT, 0);
-			u->SetFlag(FLAG_CONSUMING_FACTION, 0);
-		}
+	if (!token)
+	{
+		// consume "" -> clear both flags
 	}
+	else if (*token == "unit")
+	{
+		unitFlag = 1;
+	}
+	else if (*token == "faction")
+	{
+		facFlag = 1;
+	}
+	else if (*token == "none")
+	{
+		// consume none -> clear both flags
+	}
+	else
+	{
+		ParseError(pCheck, u, 0, "CONSUME: Invalid value.");
+		delete token;
+		return;
+	}
+
+	if (!pCheck)
+	{
+		u->SetFlag(FLAG_CONSUMING_UNIT, unitFlag);
+		u->SetFlag(FLAG_CONSUMING_FACTION, facFlag);
+	}
+	delete token;
 }
 
 void Game::ProcessRevealOrder(Unit * u,AString * o, OrdersCheck *pCheck)

@@ -2254,131 +2254,171 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	}
 }
 
-int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
+int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 {
 	// Check there is enough to give
 	int amt = o->amount;
-	if (amt != -2 && amt > u->items.GetNum(o->item)) {
+	if (amt != -2 && amt > u->items.GetNum(o->item))
+	{
 		u->Error("GIVE: Not enough.");
 		amt = u->items.GetNum(o->item);
-	} else if (amt == -2) {
+	}
+	else if (amt == -2)
+	{
 		amt = u->items.GetNum(o->item);
-		if(o->except) {
-			if(o->except > amt) {
+		if (o->except)
+		{
+			if (o->except > amt)
+			{
 				amt = 0;
 				u->Error("GIVE: EXCEPT value greater than amount on hand.");
-			} else {
+			}
+			else
+			{
 				amt = amt - o->except;
 			}
 		}
 	}
 
-	if (o->target->unitnum == -1) {
-		/* Give 0 */
-		if (amt == -1) {
+	// if "Give 0" (discard)
+	if (o->target->unitnum == -1)
+	{
+		if (amt == -1)
+		{
 			u->Error("Can't discard a whole unit.");
 			return 0;
 		}
 
 		AString temp = "Discards ";
-		if (ItemDefs[o->item].type & IT_MAN) {
+		if (ItemDefs[o->item].type & IT_MAN)
+		{
 			u->SetMen(o->item,u->GetMen(o->item) - amt);
 			temp = "Disbands ";
-		} else if(Globals->RELEASE_MONSTERS &&
-				(ItemDefs[o->item].type & IT_MONSTER)) {
+		}
+		else if (Globals->RELEASE_MONSTERS &&
+				(ItemDefs[o->item].type & IT_MONSTER))
+		{
 			temp = "Releases ";
 			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
-			if(Globals->WANDERING_MONSTERS_EXIST) {
+
+			if (Globals->WANDERING_MONSTERS_EXIST)
+			{
 				Faction *mfac = GetFaction(&factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
 				int mondef = ItemDefs[o->item].index;
 				mon->MakeWMon(MonDefs[mondef].name, o->item, amt);
 				mon->MoveUnit(r->GetDummy());
-				// This will result in 0 unless MONSTER_NO_SPOILS or
+
+				// 0 unless MONSTER_NO_SPOILS or
 				// MONSTER_SPOILS_RECOVERY are set.
 				mon->free = Globals->MONSTER_NO_SPOILS +
-					Globals->MONSTER_SPOILS_RECOVERY;
+				            Globals->MONSTER_SPOILS_RECOVERY;
 			}
-		} else {
+		}
+		else
+		{
 			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
 		}
+
 		u->Event(temp + ItemString(o->item, amt) + ".");
 		return 0;
 	}
+	//else
 
-	Unit * t = r->GetUnitId(o->target,u->faction->num);
-	if (!t) {
+	// find target unit
+	Unit *t = r->GetUnitId(o->target,u->faction->num);
+	if (!t)
+	{
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
+
 		return 0;
 	}
 
-	if(u == t) {
+	if (u == t)
+	{
 		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item,amt)+
 				" to self.");
 		return 0;
 	}
 
-	// New RULE -- Must be able to see unit to give something to them!
-	if(!u->CanSee(r, t) &&
-			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
+	// Must be able to see unit to give something to them!
+	if (!u->CanSee(r, t) &&
+	    (t->faction->GetAttitude(u->faction->num) < A_FRIENDLY))
+	{
 		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
 				").");
 		return 0;
 	}
 
 	if (o->item != I_SILVER &&
-			t->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
+	    t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)
+	{
 		u->Error("GIVE: Target is not a member of a friendly faction.");
 		return 0;
 	}
 
-	if (amt == -1) {
-		/* Give unit */
-		if (u->type == U_MAGE) {
-			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-				if (CountMages(t->faction) >= AllowedMages( t->faction )) {
+	// if give unit
+	if (amt == -1)
+	{
+		if (u->type == U_MAGE)
+		{
+			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED)
+			{
+				if (CountMages(t->faction) >= AllowedMages( t->faction ))
+				{
 					u->Error("GIVE: Faction has too many mages.");
 					return 0;
 				}
 			}
 		}
-		if(u->type == U_APPRENTICE) {
-			if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-				if(CountApprentices(t->faction) >=
-						AllowedApprentices(t->faction)){
+
+		if (u->type == U_APPRENTICE)
+		{
+			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED)
+			{
+				if (CountApprentices(t->faction) >=
+						AllowedApprentices(t->faction))
+				{
 					u->Error("GIVE: Faction has too many apprentices.");
 					return 0;
 				}
 			}
 		}
 
-		int notallied = 1;
-		if (t->faction->GetAttitude(u->faction->num) == A_ALLY) {
-			notallied = 0;
-		}
-
+		// do the swap
 		u->Event(AString("Gives unit to ") + *(t->faction->name) + ".");
 		u->faction = t->faction;
 		u->Event("Is given to your faction.");
 
+		int notallied = 1;
+		if (t->faction->GetAttitude(u->faction->num) == A_ALLY)
+		{
+			notallied = 0;
+		}
+
 		if (notallied && u->monthorders && u->monthorders->type == O_MOVE &&
-				((MoveOrder *) u->monthorders)->advancing) {
+				((MoveOrder*)u->monthorders)->advancing)
+		{
 			u->Error("Unit cannot advance after being given.");
 			delete u->monthorders;
 			u->monthorders = 0;
 		}
 
-		/* Check if any new skill reports have to be shown */
+		// Check if any new skill reports have to be shown
 		forlist(&(u->skills)) {
-			Skill * skill = (Skill *) elem;
+			Skill *skill = (Skill*)elem;
+
 			int newlvl = u->GetRealSkill(skill->type);
 			int oldlvl = u->faction->skills.GetDays(skill->type);
-			if (newlvl > oldlvl) {
-				for (int i=oldlvl+1; i<=newlvl; i++) {
+			if (newlvl > oldlvl)
+			{
+				for (int i = oldlvl+1; i <= newlvl; ++i)
+				{
 					u->faction->shows.Add(new ShowSkill(skill->type,i));
 				}
-				u->faction->skills.SetDays(skill->type,newlvl);
+
+				u->faction->skills.SetDays(skill->type, newlvl);
 			}
 		}
 
@@ -2386,66 +2426,84 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		// about it in case they don't know about it yet.
 		{
 			forlist(&u->items) {
-				Item *i = (Item *)elem;
+				Item *i = (Item*)elem;
 				u->faction->DiscoverItem(i->type, 0, 1);
 			}
 		}
 
 		return notallied;
 	}
+	//else !give unit
 
-	/* If the item to be given is a man, combine skills */
-	if (ItemDefs[o->item].type & IT_MAN) {
-		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
-				t->type == U_MAGE || t->type == U_APPRENTICE) {
-			u->Error("GIVE: Magicians can't transfer men.");
-			return 0;
-		}
-		if (o->item == I_LEADERS && t->IsNormal()) {
-			u->Error("GIVE: Can't mix leaders and normal men.");
-			return 0;
-		} else {
-			if (o->item != I_LEADERS && t->IsLeader()) {
-				u->Error("GIVE: Can't mix leaders and normal men.");
-				return 0;
-			}
-		}
-		// Small hack for Ceran
-		if(o->item == I_MERC && t->GetMen()) {
-			u->Error("GIVE: Can't mix mercenaries with other men.");
-			return 0;
-		}
-
-		if (u->faction != t->faction) {
-			u->Error("GIVE: Can't give men to another faction.");
-			return 0;
-		}
-
-		if (u->nomove) t->nomove = 1;
-
-		SkillList * temp = u->skills.Split(u->GetMen(),amt);
-		t->skills.Combine(temp);
-		delete temp;
-	}
-
-	if( ItemDefs[ o->item ].flags & ItemType::CANTGIVE ) {
+	if( ItemDefs[ o->item ].flags & ItemType::CANTGIVE )
+	{
 		u->Error(AString("GIVE: Can't give ") + ItemDefs[o->item].names + ".");
 		return 0;
 	}
 
+	// If the item to be given is a man, combine skills
+	if (ItemDefs[o->item].type & IT_MAN)
+	{
+		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
+		    t->type == U_MAGE || t->type == U_APPRENTICE)
+		{
+			u->Error("GIVE: Magicians can't transfer men.");
+			return 0;
+		}
+
+		if (o->item == I_LEADERS && t->IsNormal())
+		{
+			u->Error("GIVE: Can't mix leaders and normal men.");
+			return 0;
+		}
+
+		if (o->item != I_LEADERS && t->IsLeader())
+		{
+			u->Error("GIVE: Can't mix leaders and normal men.");
+			return 0;
+		}
+
+		// hack for Ceran
+		if (o->item == I_MERC && t->GetMen())
+		{
+			u->Error("GIVE: Can't mix mercenaries with other men.");
+			return 0;
+		}
+
+		if (u->faction != t->faction)
+		{
+			u->Error("GIVE: Can't give men to another faction.");
+			return 0;
+		}
+
+		// propagate damaged/no move flag
+		if (u->nomove) t->nomove = 1;
+
+		SkillList *temp = u->skills.Split(u->GetMen(), amt);
+		t->skills.Combine(temp);
+
+		delete temp;
+	}
+
 	u->Event(AString("Gives ") + ItemString(o->item,amt) + " to " +
 			*t->name + ".");
-	if (u->faction != t->faction) {
+
+	// if giving to another player, notify that player
+	if (u->faction != t->faction)
+	{
 		t->Event(AString("Receives ") + ItemString(o->item,amt) +
 				" from " + *u->name + ".");
 	}
+
 	u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
 	t->items.SetNum(o->item,t->items.GetNum(o->item) + amt);
 	t->faction->DiscoverItem(o->item, 0, 1);
 
-	if (ItemDefs[o->item].type & IT_MAN) {
+	if (ItemDefs[o->item].type & IT_MAN)
+	{
 		t->AdjustSkills();
 	}
+
 	return 0;
 }
 

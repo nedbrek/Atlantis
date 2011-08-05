@@ -465,18 +465,24 @@ void Soldier::Alive(int state)
 {
 	RestoreItems();
 
-	if (state == LOSS) {
+	if (state == LOSS)
+	{
 		unit->canattack = 0;
-		/* Guards with amuletofi will not go off guard */
+
+		// Guards with amuletofi will not go off guard
 		if (!amuletofi &&
-			(unit->guard == GUARD_GUARD || unit->guard == GUARD_SET)) {
+			(unit->guard == GUARD_GUARD || unit->guard == GUARD_SET))
+		{
 			unit->guard = GUARD_NONE;
 		}
-	} else {
+	}
+	else
+	{
 		unit->advancefrom = 0;
 	}
 
-	if (state == WIN_DEAD) {
+	if (state == WIN_DEAD)
+	{
 		unit->canattack = 0;
 		unit->nomove = 1;
 	}
@@ -751,6 +757,7 @@ void Army::DoHeal(Battle * b)
 	// Do magical healing
 	for(int i = 5; i > 0; --i)
 		DoHealLevel(b, i, 0);
+
 	// Do Normal healing
 	DoHealLevel(b, 1, 1);
 }
@@ -796,28 +803,31 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 
 void Army::Win(Battle * b,ItemList * spoils)
 {
-	int wintype;
-
 	DoHeal(b);
 	WriteLosses(b);
 
+	// check for casualties
 	int na = NumAlive();
 
+	int wintype = WIN_NO_DEAD;
 	if (count - na) wintype = WIN_DEAD;
-	else wintype = WIN_NO_DEAD;
 
 	AList units;
 
 	forlist(spoils) {
 		Item *i = (Item *) elem;
-		if(i && na) {
+		if (i && na)
+		{
 			Unit *u;
 			UnitPtr *up;
 
 			// Make a list of units who can get this type of spoil
-			for(int x = 0; x < na; x++) {
+			for(int x = 0; x < na; ++x)
+			{
 				u = soldiers[x]->unit;
-				if(u->CanGetSpoil(i)) {
+
+				if (u->CanGetSpoil(i))
+				{
 					up = new UnitPtr;
 					up->ptr = u;
 					units.Add(up);
@@ -825,9 +835,11 @@ void Army::Win(Battle * b,ItemList * spoils)
 			}
 
 			int ns = units.Num();
-			if(ns > 0) {
+			if (ns > 0)
+			{
 				int n = i->num/ns; // Divide spoils equally
-				if(n >= 1) {
+				if (n >= 1)
+				{
 					forlist(&units) {
 						up = (UnitPtr *)elem;
 						up->ptr->items.SetNum(i->type,
@@ -835,21 +847,29 @@ void Army::Win(Battle * b,ItemList * spoils)
 						up->ptr->faction->DiscoverItem(i->type, 0, 1);
 					}
 				}
+
 				n = i->num % ns; // allocate the remainder
-				if(n) {
-					for(int x = 0; x < n; x++) {
+				if (n)
+				{
+					for(int x = 0; x < n; ++x)
+					{
 						int t = getrandom(ns);
 						up = (UnitPtr *)units.First();
-						if(up) {
+						if (up)
+						{
 							UnitPtr *p;
-							while(t > 0) {
+							while (t > 0)
+							{
 								p = (UnitPtr *)units.Next(up);
 								if(p) up = p;
 								else break;
+
 								--t;
 							}
+
 							up->ptr->items.SetNum(i->type,
 									up->ptr->items.GetNum(i->type)+1);
+
 							up->ptr->faction->DiscoverItem(i->type, 0, 1);
 						}
 					}
@@ -859,10 +879,12 @@ void Army::Win(Battle * b,ItemList * spoils)
 		}
 	}
 
-	for(int x = 0; x < count; x++) {
+	for(int x = 0; x < count; ++x)
+	{
 		Soldier * s = soldiers[x];
-		if (x<NumAlive()) s->Alive(wintype);
+		if (x < NumAlive()) s->Alive(wintype);
 		else s->Dead();
+
 		delete s;
 	}
 }
@@ -903,9 +925,9 @@ int Army::NumFront()
 	return (canfront + notfront - canbehind);
 }
 
-Soldier * Army::GetAttacker(int i,int &behind)
+Soldier* Army::GetAttacker(int i, int &behind)
 {
-	Soldier * retval = soldiers[i];
+	Soldier *retval = soldiers[i];
 	if (i<canfront) {
 		soldiers[i] = soldiers[canfront-1];
 		soldiers[canfront-1] = soldiers[canbehind-1];
@@ -1051,12 +1073,12 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		int attackLevel, int flags, int weaponClass, int effect,
 		int mountBonus)
 {
-	/* 1. Check against Global effects (not sure how yet) */
-	/* 2. Attack shield */
-	Shield *hi;
+	// 1. Check against Global effects (not sure how yet)
+	// 2. Attack shield
 	int combat = 0;
 	int canShield = 0;
-	switch(attackType) {
+	switch (attackType)
+	{
 		case ATTACK_RANGED:
 			canShield = 1;
 			// fall through
@@ -1064,6 +1086,7 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		case ATTACK_RIDING:
 			combat = 1;
 			break;
+
 		case ATTACK_ENERGY:
 		case ATTACK_WEATHER:
 		case ATTACK_SPIRIT:
@@ -1071,11 +1094,14 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 			break;
 	}
 
-	if(canShield) {
+	Shield *hi = NULL;
+	if (canShield)
+	{
 		int shieldType = attackType;
 
 		hi = shields.GetHighShield(shieldType);
-		if (hi) {
+		if (hi)
+		{
 			/* Check if we get through shield */
 			if(!Hits(attackLevel, hi->shieldskill)) {
 				return -1;
@@ -1089,120 +1115,152 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 		}
 	}
 
-	//
 	// Now, loop through and do attacks
-	//
 	int ret = 0;
-	for(int i = 0; i < numAttacks; i++) {
-		/* 3. Get the target */
+	for(int i = 0; i < numAttacks; ++i)
+	{
+		// 3. Get the target
 		int tarnum = GetTargetNum(special);
 		if (tarnum == -1) continue;
-		Soldier * tar = GetTarget(tarnum);
+
+		Soldier *tar = GetTarget(tarnum);
 		int tarFlags = 0;
-		if(tar->weapon != -1) {
+		if (tar->weapon != -1)
+		{
 			tarFlags = WeaponDefs[ItemDefs[tar->weapon].index].flags;
 		}
 
-		/* 4. Add in any effects, if applicable */
+		// 4. Add in any effects, if applicable
 		int tlev = 0;
-		if(attackType != NUM_ATTACK_TYPES)
+		if (attackType != NUM_ATTACK_TYPES)
 			tlev = tar->dskill[ attackType ];
-		if(special > 0) {
-			if((SpecialDefs[special].effectflags&SpecialType::FX_NOBUILDING) &&
-					tar->building) {
+
+		if (special > 0)
+		{
+			if ((SpecialDefs[special].effectflags&SpecialType::FX_NOBUILDING) &&
+			    tar->building)
+			{
 				tlev -= 2;
 			}
 		}
 
-		/* 4.1 Check whether defense is allowed against this weapon */
-		if((flags & WeaponType::NODEFENSE) && (tlev > 0)) tlev = 0;
+		// 4.1 Check whether defense is allowed against this weapon
+		if ((flags & WeaponType::NODEFENSE) && tlev > 0)
+			tlev = 0;
 
-		if(!(flags & WeaponType::RANGED)) {
-			/* 4.2 Check relative weapon length */
-			int attLen = 1;
+		if (!(flags & WeaponType::RANGED))
+		{
+			// 4.2 Check relative weapon length
+			int attLen = 1; // start at NORMAL
 			int defLen = 1;
-			if(flags & WeaponType::LONG) attLen = 2;
-			else if(flags & WeaponType::SHORT) attLen = 0;
-			if(tarFlags & WeaponType::LONG) defLen = 2;
-			else if(tarFlags & WeaponType::SHORT) defLen = 0;
-			if(attLen > defLen) attackLevel++;
-			else if(defLen > attLen) tlev++;
+
+			if      (flags & WeaponType::LONG ) attLen = 2;
+			else if (flags & WeaponType::SHORT) attLen = 0;
+
+			if      (tarFlags & WeaponType::LONG ) defLen = 2;
+			else if (tarFlags & WeaponType::SHORT) defLen = 0;
+
+			if      (attLen > defLen) attackLevel++;
+			else if (defLen > attLen) tlev++;
 		}
 
-		/* 4.3 Add bonuses versus mounted */
-		if(tar->riding != -1) attackLevel += mountBonus;
+		// 4.3 Add bonuses versus mounted
+		if (tar->riding != -1) attackLevel += mountBonus;
 
-		/* 5. Attack soldier */
-		if (attackType != NUM_ATTACK_TYPES) {
-			if(!(flags & WeaponType::ALWAYSREADY)) {
-				if(getrandom(2)) {
-					continue;
-				}
+		// 5. Attack soldier
+		if (attackType != NUM_ATTACK_TYPES)
+		{
+			// see if weapon is ready
+			if (!(flags & WeaponType::ALWAYSREADY) && getrandom(2))
+			{
+				continue; // no
 			}
 
-			if (!Hits(attackLevel,tlev)) {
-				continue;
+			// check for hit
+			if (!Hits(attackLevel, tlev))
+			{
+				continue; // miss
 			}
 		}
 
-		/* 6. If attack got through, apply effect, or kill */
-		if (!effect) {
-			/* 7. Last chance... Check armor */
-			if (tar->ArmorProtect(weaponClass)) {
+		// 6. If attack got through, apply effect, or kill
+		if (!effect)
+		{
+			// 7. Last chance... Check armor
+			if (tar->ArmorProtect(weaponClass))
+			{
 				continue;
 			}
 
-			/* 8. Seeya! */
+			// 8. Seeya!
 			Kill(tarnum);
-			ret++;
-		} else {
-			if (tar->HasEffect(effect)) {
+			++ret;
+		}
+		else
+		{
+			if (tar->HasEffect(effect))
+			{
 				continue;
 			}
+
 			tar->SetEffect(effect);
-			ret++;
+			++ret;
 		}
 	}
+
 	return ret;
 }
 
+// apply one hit to the soldier indicated by offset 'killed'
 void Army::Kill(int killed)
 {
 	Soldier *temp = soldiers[killed];
 
 	if (temp->amuletofi) return;
 
-	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
-		hitsalive--;
+	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
+		--hitsalive;
+
 	temp->damage++;
 	temp->hits--;
-	if(temp->hits > 0) return;
+
+	// if soldier can take multiple hits
+	if (temp->hits > 0) return; // done
+
+	// notify the unit of the loss
 	temp->unit->losses++;
-	if(Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE) {
-		if(ItemDefs[temp->race].type & IT_MONSTER) {
+
+	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_FIGURE)
+	{
+		if (ItemDefs[temp->race].type & IT_MONSTER)
+		{
 			hitsalive -= MonDefs[ItemDefs[temp->race].index].hits;
-		} else {
-			// Assume everything that is a solder and isn't a monster is a
-			// man.
+		}
+		else
+		{
+			// Assume everything that isn't a monster is a man.
 			hitsalive--;
 		}
 	}
 
-	if (killed < canfront) {
+	if (killed < canfront)
+	{
 		soldiers[killed] = soldiers[canfront-1];
 		soldiers[canfront-1] = temp;
 		killed = canfront - 1;
 		canfront--;
 	}
 
-	if (killed < canbehind) {
+	if (killed < canbehind)
+	{
 		soldiers[killed] = soldiers[canbehind-1];
 		soldiers[canbehind-1] = temp;
 		killed = canbehind-1;
 		canbehind--;
 	}
 
-	if (killed < notfront) {
+	if (killed < notfront)
+	{
 		soldiers[killed] = soldiers[notfront-1];
 		soldiers[notfront-1] = temp;
 		killed = notfront-1;
@@ -1213,3 +1271,4 @@ void Army::Kill(int killed)
 	soldiers[notbehind-1] = temp;
 	notbehind--;
 }
+

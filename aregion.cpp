@@ -1431,48 +1431,63 @@ void ARegion::SetLoc(int x,int y,int z)
 	zloc = z;
 }
 
-void ARegion::Kill(Unit * u)
+// kill 'u' living in this region
+void ARegion::Kill(Unit *u)
 {
-	Unit * first = 0;
+	// find the first friendly unit not 'u'
+	Unit *first = NULL;
 	forlist((&objects)) {
-		Object * obj = (Object *) elem;
-		if (obj) {
-			forlist((&obj->units)) {
-				if (((Unit *) elem)->faction->num == u->faction->num &&
-					((Unit *) elem) != u) {
-					first = (Unit *) elem;
-					break;
-				}
+		Object *obj = (Object*)elem;
+		if (!obj) continue;
+
+		forlist((&obj->units)) {
+			if (((Unit *) elem)->faction->num == u->faction->num &&
+				((Unit *) elem) != u)
+			{
+				first = (Unit*)elem;
+				break;
 			}
 		}
+
 		if (first) break;
 	}
 
-	if (first) {
-		/* give u's stuff to first */
+	// found someone to give stuff to
+	if (first)
+	{
+		// give u's stuff to first
 		forlist(&u->items) {
-			Item * i = (Item *) elem;
-			if (!IsSoldier(i->type)) {
-				first->items.SetNum(i->type,first->items.GetNum(i->type) +
+			Item *i = (Item*)elem;
+
+			if (!IsSoldier(i->type))
+			{
+				first->items.SetNum(i->type, first->items.GetNum(i->type) +
 									i->num);
+
 				// If we're in ocean and not in a structure, make sure that
 				// the first unit can actually hold the stuff and not drown
 				// If the item would cause them to drown then they won't
 				// pick it up.
-				if(TerrainDefs[type].similar_type == R_OCEAN) {
-					if(first->object->type == O_DUMMY) {
-						if(!first->CanReallySwim()) {
+				if (TerrainDefs[type].similar_type == R_OCEAN)
+				{
+					if (first->object->type == O_DUMMY)
+					{
+						if (!first->CanReallySwim())
+						{
 							first->items.SetNum(i->type,
 									first->items.GetNum(i->type) - i->num);
 						}
 					}
 				}
 			}
-			u->items.SetNum(i->type,0);
+
+			u->items.SetNum(i->type, 0);
 		}
 	}
 
+	// exit any building
 	u->MoveUnit(0);
+
 	hell.Add(u);
 }
 
@@ -1481,34 +1496,39 @@ void ARegion::ClearHell()
 	hell.DeleteAll();
 }
 
-Object * ARegion::GetObject(int num)
+Object* ARegion::GetObject(int num)
 {
 	forlist(&objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object*)elem;
 		if (o->num == num) return o;
 	}
-	return 0;
+
+	return NULL;
 }
 
-Object *ARegion::GetDummy()
+Object* ARegion::GetDummy()
 {
 	forlist(&objects) {
-		Object * o = (Object *) elem;
+		Object *o = (Object*)elem;
 		if (o->type == O_DUMMY) return o;
 	}
-	return 0;
+
+	return NULL;
 }
 
-Unit * ARegion::GetUnit(int num)
+Unit* ARegion::GetUnit(int num)
 {
 	forlist((&objects)) {
-		Object * obj = (Object *) elem;
+		Object *obj = (Object*)elem;
+
 		Unit *u = obj->GetUnit(num);
-		if(u) {
+		if (u)
+		{
 			return(u);
 		}
 	}
-	return 0;
+
+	return NULL;
 }
 
 Location * ARegion::GetLocation(UnitId * id,int faction)
