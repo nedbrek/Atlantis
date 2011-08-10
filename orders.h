@@ -105,6 +105,7 @@ enum {
 	O_REVEAL,
 	O_SAIL,
 	O_SELL,
+	O_SHARE,
 	O_SHOW,
 	O_SPOILS,
 	O_STEAL,

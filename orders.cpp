@@ -75,6 +75,7 @@ const char *od[] = {
 	"reveal",
 	"sail",
 	"sell",
+	"share",
 	"show",
 	"spoils",
 	"steal",
