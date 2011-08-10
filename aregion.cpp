@@ -2096,8 +2096,8 @@ void writeUnits(Aoutfile *f, Faction *fac, Object *op)
 			else                                  o << "REVEAL {}";
 			o << std::endl;
 
-			if (u->GetFlag(FLAG_HOLDING)) o << "HOLDING 1";
-			else                          o << "HOLDING 0";
+			if (u->GetFlag(FLAG_HOLDING)) o << "HOLD 1";
+			else                          o << "HOLD 0";
 			o << std::endl;
 
 			if (u->GetFlag(FLAG_AUTOTAX)) o << "AUTOTAX 1";
@@ -2149,6 +2149,16 @@ void writeUnits(Aoutfile *f, Faction *fac, Object *op)
 				o << '}' << std::endl; // end this skill
 			}
 			o << '}' << std::endl; // end skills
+
+			{
+				o << "Orders {" << std::endl;
+				forlist(&(u->oldorders)) {
+					o << '{';
+					f->PutStr(*((AString *) elem));
+					o << '}' << std::endl;
+				}
+				o << '}' << std::endl; // end orders
+			}
 		}
 
 		o << '}' << std::endl; // end unit
