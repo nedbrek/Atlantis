@@ -1857,7 +1857,6 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 	int turnDepth = 1;
 	int turnLast = 1;
 	int formDepth = 0;
-	int atsign;
 
 	TurnOrder *tOrder = new TurnOrder;
 	tOrder->repeating = repeat;
@@ -1873,7 +1872,7 @@ AString *Game::ProcessTurnOrder(Unit * unit, Aorders *f, OrdersCheck *pCheck,
 		}
 		AString	saveorder = *order;
 		token = order->gettoken();
-		atsign = order->getat();
+		order->getat(); // remove @
 
 		if (token) {
 			int i = Parse1Order(token);
