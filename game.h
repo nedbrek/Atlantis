@@ -63,7 +63,7 @@ public:
     Game();
     ~Game();
 
-    int NewGame();
+    int NewGame(int seed);
     int OpenGame();
     void DummyGame();
 

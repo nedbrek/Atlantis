@@ -67,7 +67,11 @@ int main(int argc, char *argv[])
 
 	do {
 		if (AString(argv[1]) == "new") {
-			if(!game.NewGame()) {
+			int seed = 0;
+			if (argc > 2)
+				seed = AString(argv[2]).value();
+
+			if (!game.NewGame(seed)) {
 				Awrite( "Couldn't make the new game!" );
 				break;
 			}

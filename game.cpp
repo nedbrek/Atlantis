@@ -277,7 +277,7 @@ int Game::ViewMap(const AString & typestr,const AString & mapfile)
     return( 1 );
 }
 
-int Game::NewGame()
+int Game::NewGame(int seed)
 {
     factionseq = 1;
 	guardfaction = 0;
@@ -292,7 +292,10 @@ int Game::NewGame()
     //
     // Seed the random number generator with a different value each time.
     //
-    seedrandomrandom();
+    if (seed == 0)
+        seedrandomrandom();
+    else
+        seedrandom(seed);
 
     CreateWorld();
 	CreateNPCFactions();
