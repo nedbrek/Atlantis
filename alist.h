@@ -1,3 +1,5 @@
+#ifndef ALIST_CLASS
+#define ALIST_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,45 +24,78 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ALIST_CLASS
-#define ALIST_CLASS
 
-class AListElem;
-class AList;
+/**
+ * Base class for intrusive single-linked list
+ */
+class AListElem
+{
+public:
+	virtual ~AListElem();
 
-class AListElem {
-	public:
-		virtual ~AListElem();
-
-		AListElem * next;
+	AListElem *next;
 };
 
-class AList {
-	public:
-		AList();
-		~AList();
+/**
+ * a collection of AListElem
+ */
+class AList
+{
+public:
+	AList();
+	~AList();
 
-		void DeleteAll();
-		void Empty(); /* Clears the list without deleting members */
-		AListElem * Get(AListElem *);
-		char Remove(AListElem *);
-		void Insert(AListElem *); /* into the front */
-		void Add(AListElem *); /* to the back */
-		AListElem * Next(AListElem *);
-		AListElem * First();
-		int Num();
+	/// delete all elements
+	void DeleteAll() { deleteAll(); }
+	void deleteAll();
 
-		/* Helper function for forlist_safe */
-		int NextLive(AListElem **copy, int size, int pos);
+	/// clear this without deleting members
+	void Empty() { clear(); }
+	void clear();
 
-	private:
-		AListElem *list;
-		AListElem *lastelem;
-		int num;
+	///@return 'e' if it is in this, else NULL
+	AListElem* Get(AListElem *e) { return get(e); }
+	AListElem* get(AListElem *e);
+
+	///@return the element after 'e'
+	AListElem* Next(AListElem *e) { return next(e); }
+	AListElem* next(AListElem *e);
+
+	///@return true if 'e' was in this (before being removed)
+	bool Remove(AListElem *e) { return remove(e); }
+	bool remove(AListElem *e);
+
+	/// into the front
+	void Insert(AListElem *e) { push_front(e); }
+	void push_front(AListElem *e);
+
+	/// to the back
+	void Add(AListElem *e) { push_back(e); }
+	void push_back(AListElem *e);
+
+	///@return the first element
+	AListElem* First() const { return front(); }
+	AListElem* front() const;
+
+	///@return number of elements in this
+	int Num() const  { return size(); }
+	int size() const;
+
+	// Helper function for forlist_safe
+	int NextLive(AListElem **copy, int size, int pos) const
+	{
+		return nextLive(copy, size, pos);
+	}
+	int nextLive(AListElem **copy, int size, int pos) const;
+
+private:
+	AListElem *list;
+	AListElem *lastelem;
+	int num;
 };
 
 #define forlist(l) \
-	AListElem * elem, * _elem2; \
+	AListElem *elem, *_elem2; \
 	for (elem=(l)->First(), \
 			_elem2 = (elem ? (l)->Next(elem) : 0); \
 			elem; \

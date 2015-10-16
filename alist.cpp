@@ -37,14 +37,14 @@ AList::AList()
 
 AList::~AList()
 {
-	DeleteAll();
+	deleteAll();
 }
 
-void AList::DeleteAll()
+void AList::deleteAll()
 {
-	AListElem * temp;
-	while (list) {
-		temp = list->next;
+	while (list)
+	{
+		AListElem *temp = list->next;
 		delete list;
 		list = temp;
 	}
@@ -52,11 +52,10 @@ void AList::DeleteAll()
 	num = 0;
 }
 
-void AList::Empty()
+void AList::clear()
 {
-	AListElem * temp;
 	while (list) {
-		temp = list->next;
+		AListElem *temp = list->next;
 		list->next = 0;
 		list = temp;
 	}
@@ -64,75 +63,91 @@ void AList::Empty()
 	num = 0;
 }
 
-void AList::Insert(AListElem * e)
+void AList::push_front(AListElem *e)
 {
-	num ++;
+	++num;
 	e->next = list;
 	list = e;
-	if (!lastelem) lastelem = list;
+	if (!lastelem)
+		lastelem = list;
 }
 
-void AList::Add(AListElem * e)
+void AList::push_back(AListElem *e)
 {
-	num ++;
-	if (list) {
+	++num;
+	if (list)
+	{
 		lastelem->next = e;
 		e->next = 0;
 		lastelem = e;
-	} else {
+	}
+	else
+	{
 		list = e;
 		e->next = 0;
 		lastelem = list;
 	}
 }
 
-AListElem * AList::Next(AListElem * e)
+AListElem* AList::next(AListElem *e)
 {
-	if (!e) return 0;
-	return e->next;
+	return e ? e->next : 0;
 }
 
-AListElem * AList::First()
+AListElem* AList::front() const
 {
 	return list;
 }
 
-AListElem * AList::Get(AListElem * e)
+AListElem* AList::get(AListElem *e)
 {
-	AListElem * temp = list;
-	while (temp) {
-		if (temp == e) return temp;
+	AListElem *temp = list;
+	while (temp)
+	{
+		if (temp == e)
+			return temp;
 		temp = temp->next;
 	}
 	return 0;
 }
 
-char AList::Remove(AListElem * e)
+bool AList::remove(AListElem *e)
 {
-	if (!e) return 0;
-	if (!e->next) lastelem = 0;
+	if (!e)
+		return false;
 
-	for (AListElem **pp = &list; *pp; pp = &((*pp)->next)) {
-		if (*pp == e) {
+	// if e is the last item
+	if (!e->next)
+		lastelem = 0;
+
+	for (AListElem **pp = &list; *pp; pp = &((*pp)->next))
+	{
+		if (*pp == e)
+		{
 			*pp = e->next;
-			num--;
-			return 1;
+			--num;
+			return true;
 		}
-		if (!e->next) lastelem = *pp;
+
+		if (!e->next)
+			lastelem = *pp;
 	}
-	return 0;
+	return false;
 }
 
-int AList::Num()
+int AList::size() const
 {
 	return num;
 }
 
-int AList::NextLive(AListElem **copy, int size, int pos)
+int AList::nextLive(AListElem **copy, int size, int pos) const
 {
-	while (++pos < size) {
-		for (AListElem *elem = First(); elem; elem = elem->next) {
-			if (elem == copy[pos]) return pos;
+	while (++pos < size)
+	{
+		for (AListElem *elem = front(); elem; elem = elem->next)
+		{
+			if (elem == copy[pos])
+				return pos;
 		}
 	}
 	return pos;
