@@ -1,3 +1,5 @@
+#ifndef ASTRING_CLASS
+#define ASTRING_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,51 +24,79 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ASTRING_CLASS
-#define ASTRING_CLASS
-
-#include <iostream>
-using namespace std;
-
 #include "alist.h"
+#include <iostream>
 
-class AString : public AListElem {
-    friend ostream & operator <<(ostream &os, const AString &);
-    friend istream & operator >>(istream &is, AString &);
+class AString : public AListElem
+{
+	friend std::ostream& operator<<(std::ostream &os, const AString&);
+	friend std::istream& operator>>(std::istream &is, AString&);
+
 public:
+	AString();
+	AString(const char*);
+	AString(int);
+	AString(unsigned);
+	AString(char);
+	AString(const AString&);
+	~AString();
 
-    AString();
-    AString(const char *);
-    AString(int);
-	AString(unsigned int);
-    AString(char);
-    AString(const AString &);
-    ~AString();
+	bool operator==(const AString&) const;
+	bool operator==(const char*) const;
 
-    int operator==(const AString &);
-    int operator==(const char *);
-    int CheckPrefix(const AString &);
-    AString operator+(const AString &);
-    AString & operator+=(const AString &);
+	AString operator+(const AString&) const;
+	AString& operator+=(const AString&);
 
-    AString & operator=(const AString &);
-    AString & operator=(const char *);
+	AString& operator=(const AString&);
+	AString& operator=(const char*);
 
-    char *Str();
-    int Len();
+	///@deprecated
+	AString* StripWhite() const { return stripWhite(); }
+	///@return a new string without leading whitespace (space and tab)
+	AString* stripWhite() const;
 
-    AString *gettoken();
-    int getat();
-    AString *getlegal();
-    AString *Trunc(int, int back=30);
-    int value();
-    AString *StripWhite();
+	///@deprecated
+	char* Str() { return str(); }
+	///@return the underlying char array
+	char* str();
+
+	///@deprecated
+	int Len() const { return len(); }
+	///@return the string length
+	int len() const;
+
+	///@return the integer representation of this
+	int value() const;
+
+	///@return a new string with only legal chars, or NULL if this is all blanks or illegal
+	AString* getlegal() const;
+
+	/**
+	 * @NOTE: this is modified to only contain the remainder after consuming the token
+	 * @return a new string with the token
+	 */
+	AString* gettoken();
+
+	/**
+	 * @NOTE: changes the first '@' to space
+	 * @return 1 if there was an '@' in this, else 0
+	 */
+	int getat();
+
+	///@deprecated
+	AString* Trunc(int a, int back=30) { return trunc(a, back); }
+	/*
+	 * truncate this in some fashion
+	 * @return a new string representing the remainder of the string
+	 */
+	AString* trunc(int, int back=30);
 
 private:
-    int len;
-	int size;
-    char * str;
-    int isEqual(const char *);
+	bool isEqual(const char*) const;
+
+private:
+	int len_;
+	char *str_;
 };
 
 #endif
