@@ -1,3 +1,5 @@
+#ifndef GAME_IO
+#define GAME_IO
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,32 +24,37 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef GAME_IO
-#define GAME_IO
+class AString;
 
-#include "astring.h"
-
+/// initialize system resources
 void initIO();
+/// deconstruct system resources
 void doneIO();
 
-/* Get a random number from 0 to (int-1) */
-int getrandom(int);
-/* Seed the random number generator */
+///@return a random number from 0 to (r-1)
+int getrandom(int r);
+
+/// Seed the random number generator
 void seedrandom(int);
 void seedrandomrandom();
 
+///@return an int from the user
 int Agetint();
 
+/// write a string to stdout
 void Awrite(const AString &);
 
+/// write a dot ('.') to stdout
 void Adot();
 
-void message(char *);
+/// print a message and wait for user to acknowledge
+void message(const char *);
 
-void morewait();
+///@return a new string from the user (with prompt)
+AString* getfilename(const AString &prompt);
 
-AString * getfilename(const AString &);
-AString *AGetString();
+///@return a new string from the user
+AString* AGetString();
 
 #endif
 

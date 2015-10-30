@@ -23,36 +23,37 @@
 //
 // END A3HEADER
 #include "gameio.h"
-#include "gamedefs.h"
+#include "astring.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <time.h>
-
 #include <iostream>
-#include <fstream>
-using namespace std;
-
 extern "C" {
 #include "i_rand.h"
 }
 
 static randctx isaac_ctx;
 
-#define ENDLINE '\n'
 char buf[256];
 
-void cleartoendl()
+static void clearToEndl()
 {
-    char ch = ' ';
-    while (!(cin.eof()) && (ch != ENDLINE))
-    {
-        ch = cin.get();
-    }
+	char ch = ' ';
+	while (!std::cin.eof() && ch != '\n')
+	{
+		ch = std::cin.get();
+	}
+}
+
+static void morewait()
+{
+	std::cout << '\n';
+	std::cin.getline(buf, sizeof(buf), '\n');
+	std::cout << '\n';
 }
 
 void initIO()
 {
-    seedrandom( 1783 );
+	seedrandom( 1783 );
 }
 
 void doneIO()
@@ -61,76 +62,74 @@ void doneIO()
 
 int getrandom(int range)
 {
-	int neg = (range < 0) ? 1 : 0;
+	if (!range)
+		return 0;
+
+	const bool neg = (range < 0);
+	if (neg)
+		range = -range;
+
+	unsigned i = isaac_rand( &isaac_ctx );
+	i %= range;
+
 	int ret = 0;
+	if (neg)
+		ret = (int)(i * -1);
+	else
+		ret = (int)i;
 
-    if (!range) return 0;
-	if (neg) range = -range;
-
-    unsigned long i = isaac_rand( &isaac_ctx );
-    i = i % range;
-
-	if (neg) ret = (int)(i * -1);
-	else ret = (int)i;
-    return ret;
+	return ret;
 }
 
 void seedrandom(int num)
 {
-    ub4 i;
-    isaac_ctx.randa = isaac_ctx.randb = isaac_ctx.randc = (ub4)0;
-    for (i=0; i<256; ++i)
-    {
-        isaac_ctx.randrsl[i]=(ub4)num+i;
-    }
-    randinit( &isaac_ctx, TRUE );
+	isaac_ctx.randa = isaac_ctx.randb = isaac_ctx.randc = (ub4)0;
+
+	for (ub4 i = 0; i < RANDSIZ; ++i)
+	{
+		isaac_ctx.randrsl[i] = (ub4)num + i;
+	}
+	randinit( &isaac_ctx, TRUE );
 }
 
 void seedrandomrandom()
 {
-    seedrandom( time( 0 ) );
+	seedrandom( time(0) );
 }
 
 int Agetint()
 {
-    int x;
-    cin >> x;
-    cleartoendl();
-    return x;
+	int x;
+	std::cin >> x;
+	clearToEndl();
+	return x;
 }
 
-void Awrite(const AString & s)
+void Awrite(const AString &s)
 {
-    cout << s << ENDLINE;
+	std::cout << s << '\n';
 }
 
 void Adot()
 {
-    cout << ".";
+	std::cout << ".";
 }
 
-void message(char * c)
+void message(const char *c)
 {
-    cout << c << ENDLINE;
-    morewait();
+	std::cout << c << '\n';
+	// wait for user to acknowledge
+	morewait();
 }
 
-void morewait()
+AString* getfilename(const AString &s)
 {
-    cout << ENDLINE;
-    cin.getline(buf,256,ENDLINE);
-    cout << ENDLINE;
+	std::cout << s;
+	return AGetString();
 }
 
-
-AString * getfilename(const AString & s)
+AString* AGetString()
 {
-    cout << s;
-    return( AGetString() );
-}
-
-AString *AGetString()
-{
-    cin.getline( buf, 256, ENDLINE );
-    return( new AString( buf ));
+	std::cin.getline(buf, sizeof(buf), '\n');
+	return new AString(buf);
 }
