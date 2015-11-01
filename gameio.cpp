@@ -69,7 +69,7 @@ int getrandom(int range)
 	if (neg)
 		range = -range;
 
-	unsigned i = isaac_rand( &isaac_ctx );
+	unsigned long i = isaac_rand( &isaac_ctx );
 	i %= range;
 
 	int ret = 0;
