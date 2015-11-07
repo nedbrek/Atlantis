@@ -24,29 +24,31 @@
 // END A3HEADER
 #include "fileio.h"
 #include "gameio.h"
-
-#include <fstream>
-#include <iostream>
-
-#define F_ENDLINE '\n'
-
-extern long _ftype,_fcreator;
+#include "astring.h"
 
 static char buf[1024];
 
-Aoutfile::Aoutfile()
+static void skipwhite(std::ifstream *f)
 {
-	file = new ofstream;
+	if (f->eof())
+		return;
+
+	int ch = f->peek();
+	while ((ch == ' ') || (ch == '\n') || (ch == '\t') ||
+			(ch == '\r') || (ch == '\0'))
+	{
+		f->get();
+		if (f->eof())
+			return;
+
+		ch = f->peek();
+	}
 }
 
-Aoutfile::~Aoutfile()
-{
-	delete file;
-}
-
+//----------------------------------------------------------------------------
 Ainfile::Ainfile()
 {
-	file = new ifstream;
+	file = new std::ifstream;
 }
 
 Ainfile::~Ainfile()
@@ -54,76 +56,94 @@ Ainfile::~Ainfile()
 	delete file;
 }
 
-Aorders::Aorders()
-{
-	file = new ifstream;
-}
-
-Aorders::~Aorders()
-{
-	delete file;
-}
-
-Areport::Areport()
-{
-	file = new ofstream;
-}
-
-Areport::~Areport()
-{
-	delete file;
-}
-
-Arules::Arules()
-{
-	file = new ofstream;
-}
-
-Arules::~Arules()
-{
-	delete file;
-}
-
-void Aoutfile::Open(const AString &s)
-{
-	while(!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(), ios::out|ios::ate);
-		delete name;
-		// Handle a broke ios::ate implementation on some boxes
-		file->seekp(0, ios::end);
-		if((int)file->tellp()!= 0) file->close();
-	}
-}
-
-int Aoutfile::OpenByName(const AString &s)
-{
-	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::ate);
-	if(!file->rdbuf()->is_open()) return -1;
-	// Handle a broke ios::ate implementation on some boxes
-	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
-		file->close();
-		return -1;
-	}
-	return 0;
-}
-
 void Ainfile::Open(const AString &s)
 {
-	while (!(file->rdbuf()->is_open())) {
+	while (!file->rdbuf()->is_open())
+	{
 		AString *name = getfilename(s);
-		file->open(name->Str(),ios::in);
+		file->open(name->str(), std::ios::in);
 		delete name;
 	}
 }
 
 int Ainfile::OpenByName(const AString &s)
 {
-	AString temp = s;
-	file->open(temp.Str(),ios::in);
-	if (!(file->rdbuf()->is_open())) return -1;
+	file->open(s.str(), std::ios::in);
+
+	if (!file->rdbuf()->is_open())
+		return -1;
+
+	return 0;
+}
+
+void Ainfile::Close()
+{
+	file->close();
+}
+
+AString* Ainfile::GetStr()
+{
+	skipwhite(file);
+	return GetStrNoSkip();
+}
+
+AString* Ainfile::GetStrNoSkip()
+{
+	if (file->peek() == -1 || file->eof())
+		return 0;
+
+	file->getline(buf, sizeof(buf)-1, '\n');
+	return new AString(&buf[0]);
+}
+
+int Ainfile::GetInt()
+{
+	int x = 0;
+	*file >> x;
+	return x;
+}
+
+//----------------------------------------------------------------------------
+Aoutfile::Aoutfile()
+{
+	file = new std::ofstream;
+}
+
+Aoutfile::~Aoutfile()
+{
+	delete file;
+}
+
+void Aoutfile::Open(const AString &s)
+{
+	while (!file->rdbuf()->is_open())
+	{
+		AString *name = getfilename(s);
+		file->open(name->str(), std::ios::out|std::ios::ate);
+		delete name;
+
+		// Handle a broke ios::ate implementation on some boxes
+		file->seekp(0, std::ios::end);
+
+		if ((int)file->tellp() != 0)
+			file->close();
+	}
+}
+
+int Aoutfile::OpenByName(const AString &s)
+{
+	file->open(s.str(), std::ios::out|std::ios::ate);
+	if (!file->rdbuf()->is_open())
+		return -1;
+
+	// Handle a broke ios::ate implementation on some boxes
+	file->seekp(0, std::ios::end);
+
+	if ((int)file->tellp() != 0)
+	{
+		file->close();
+		return -1;
+	}
 	return 0;
 }
 
@@ -132,136 +152,53 @@ void Aoutfile::Close()
 	file->close();
 }
 
-void Ainfile::Close()
-{
-	file->close();
-}
-
-void Aorders::Close()
-{
-	file->close();
-}
-
-void Areport::Close()
-{
-	file->close();
-}
-
-void skipwhite(ifstream *f)
-{
-	if (f->eof()) return;
-	int ch = f->peek();
-	while((ch == ' ') || (ch == '\n') || (ch == '\t') ||
-			(ch == '\r') || (ch == '\0')) {
-		f->get();
-		if (f->eof()) return;
-		ch = f->peek();
-	}
-}
-
-AString * Ainfile::GetStr()
-{
-	skipwhite(file);
-	if (file->peek() == -1 || file->eof()) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString * s = new AString((char *) &(buf[0]));
-	return s;
-}
-
-AString * Ainfile::GetStrNoSkip()
-{
-	if (file->peek() == -1 || file->eof()) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString * s = new AString((char *) &(buf[0]));
-	return s;
-}
-
-int Ainfile::GetInt()
-{
-	int x;
-	*file >> x;
-	return x;
-}
-
 void Aoutfile::PutInt(int x)
 {
-	*file << x;
-	*file << F_ENDLINE;
+	*file << x << '\n';
 }
 
 void Aoutfile::PutStr(const char *s)
 {
-	*file << s << F_ENDLINE;
+	*file << s << '\n';
 }
 
 void Aoutfile::PutStr(const AString &s)
 {
-	*file << s << F_ENDLINE;
+	*file << s << '\n';
 }
 
-void Aorders::Open(const AString &s)
+void Aoutfile::putNoNewline(const char *s)
 {
-	while (!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::in);
-		delete name;
-	}
+	*file << s;
 }
 
-int Aorders::OpenByName(const AString &s)
+//----------------------------------------------------------------------------
+Areport::Areport()
+: tabs(0)
 {
-	AString temp = s;
-	file->open(temp.Str(),ios::in);
-	if (!(file->rdbuf()->is_open())) return -1;
-	return 0;
-}
-
-AString * Aorders::GetLine()
-{
-	skipwhite(file);
-	if (file->eof()) return 0;
-	if (file->peek() == -1) return 0;
-	file->getline(buf,1023,F_ENDLINE);
-	AString *s = new AString((char *) &(buf[0]));
-	return s;
 }
 
 void Areport::Open(const AString &s)
 {
-	while(!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::out|ios::ate);
-        delete name;
-		// Handle a broke ios::ate implementation on some boxes
-		file->seekp(0, ios::end);
-		if((int)file->tellp()!=0) file->close();
-    }
-    tabs = 0;
+	Aoutfile::Open(s);
+	tabs = 0;
 }
 
 int Areport::OpenByName(const AString &s)
 {
-	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::ate);
-    if (!file->rdbuf()->is_open()) return -1;
-	// Handle a broke ios::ate implementation on some boxes
-	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
-		file->close();
-		return -1;
-	}
-    tabs = 0;
-    return 0;
+	tabs = 0;
+	return Aoutfile::OpenByName(s);
 }
 
 void Areport::AddTab()
 {
-	tabs++;
+	++tabs;
 }
 
 void Areport::DropTab()
 {
-	if (tabs > 0) tabs--;
+	if (tabs > 0)
+		--tabs;
 }
 
 void Areport::ClearTab()
@@ -269,73 +206,92 @@ void Areport::ClearTab()
 	tabs = 0;
 }
 
-void Areport::PutStr(const AString &s,int comment)
+void Areport::PutStr(const AString &s, int comment)
 {
 	AString temp;
-	for (int i=0; i<tabs; i++) temp += "  ";
+	for (int i = 0; i < tabs; ++i)
+		temp += "  ";
+
 	temp += s;
 	AString *temp2 = temp.Trunc(70);
-	if (comment) *file << ";";
-	*file << temp << F_ENDLINE;
-	while (temp2) {
+
+	if (comment)
+		Aoutfile::putNoNewline(";");
+
+	Aoutfile::PutStr(temp);
+
+	while (temp2)
+	{
 		temp = "  ";
-		for (int i=0; i<tabs; i++) temp += "  ";
+		for (int i = 0; i < tabs; ++i)
+			temp += "  ";
+
 		temp += *temp2;
+
 		delete temp2;
 		temp2 = temp.Trunc(70);
-		if (comment) *file << ";";
-		*file << temp << F_ENDLINE;
+
+		if (comment)
+			Aoutfile::putNoNewline(";");
+
+		Aoutfile::PutStr(temp);
 	}
 }
 
 void Areport::PutNoFormat(const AString &s)
 {
-	*file << s << F_ENDLINE;
+	Aoutfile::PutStr(s);
 }
 
 void Areport::EndLine()
 {
-	*file << F_ENDLINE;
+	Aoutfile::PutStr("");
+}
+
+//----------------------------------------------------------------------------
+Arules::Arules()
+: tabs(0)
+, wraptab(0)
+{
 }
 
 void Arules::Open(const AString &s)
 {
-	while(!(file->rdbuf()->is_open())) {
-		AString *name = getfilename(s);
-		file->open(name->Str(),ios::out|ios::ate);
-        delete name;
-		// Handle a broke ios::ate implementation on some boxes
-		file->seekp(0, ios::end);
-		if((int)file->tellp()!=0) file->close();
-    }
-    tabs = 0;
+	Aoutfile::Open(s);
+	tabs = 0;
 	wraptab = 0;
 }
 
 int Arules::OpenByName(const AString &s)
 {
-	AString temp = s;
-	file->open(temp.Str(), ios::out|ios::trunc);
-    if (!file->rdbuf()->is_open()) return -1;
+	//NOTE: parent method uses ios::ate
+	file->open(s.str(), std::ios::out|std::ios::trunc);
+	if (!file->rdbuf()->is_open())
+		return -1;
+
 	// Handle a broke ios::ate implementation on some boxes
-	file->seekp(0, ios::end);
-	if((int)file->tellp() != 0) {
+	file->seekp(0, std::ios::end);
+
+	if ((int)file->tellp() != 0)
+	{
 		file->close();
 		return -1;
 	}
-    tabs = 0;
+
+	tabs = 0;
 	wraptab = 0;
-    return 0;
+	return 0;
 }
 
 void Arules::AddTab()
 {
-	tabs++;
+	++tabs;
 }
 
 void Arules::DropTab()
 {
-	if (tabs > 0) tabs--;
+	if (tabs > 0)
+		--tabs;
 }
 
 void Arules::ClearTab()
@@ -345,12 +301,13 @@ void Arules::ClearTab()
 
 void Arules::AddWrapTab()
 {
-	wraptab++;
+	++wraptab;
 }
 
 void Arules::DropWrapTab()
 {
-	if(wraptab > 0) wraptab--;
+	if (wraptab > 0)
+		--wraptab;
 }
 
 void Arules::ClearWrapTab()
@@ -361,53 +318,74 @@ void Arules::ClearWrapTab()
 void Arules::PutStr(const AString &s)
 {
 	AString temp;
-	for (int i=0; i<tabs; i++) temp += "  ";
+	for (int i = 0; i < tabs; ++i)
+		temp += "  ";
+
 	temp += s;
 	AString *temp2 = temp.Trunc(78, 70);
-	*file << temp << F_ENDLINE;
-	while (temp2) {
+
+	Aoutfile::PutStr(temp);
+
+	while (temp2)
+	{
 		temp = "";
-		for (int i=0; i<tabs; i++) temp += "  ";
+		for (int i = 0; i < tabs; ++i)
+			temp += "  ";
+
 		temp += *temp2;
+
 		delete temp2;
 		temp2 = temp.Trunc(78, 70);
-		*file << temp << F_ENDLINE;
+
+		Aoutfile::PutStr(temp);
 	}
 }
 
 void Arules::WrapStr(const AString &s)
 {
 	AString temp;
-	for (int i=0; i<wraptab; i++) temp += "  ";
+	for (int i = 0; i < wraptab; ++i)
+		temp += "  ";
+
 	temp += s;
 	AString *temp2 = temp.Trunc(70);
-	*file << temp << F_ENDLINE;
-	while (temp2) {
+
+	Aoutfile::PutStr(temp);
+
+	while (temp2)
+	{
 		temp = "  ";
-		for (int i=0; i<wraptab; i++) temp += "  ";
+		for (int i = 0; i < wraptab; ++i)
+			temp += "  ";
+
 		temp += *temp2;
+
 		delete temp2;
 		temp2 = temp.Trunc(70);
-		*file << temp << F_ENDLINE;
+
+		Aoutfile::PutStr(temp);
 	}
 }
 
 void Arules::PutNoFormat(const AString &s)
 {
-	*file << s << F_ENDLINE;
+	Aoutfile::PutStr(s);
 }
 
 void Arules::EndLine()
 {
-	*file << F_ENDLINE;
+	Aoutfile::PutStr("");
 }
 
 void Arules::Enclose(int flag, const AString &tag)
 {
-	if(flag) {
+	if (flag)
+	{
 		PutStr(AString("<") + tag + ">");
 		AddTab();
-	} else {
+	}
+	else
+	{
 		DropTab();
 		PutStr(AString("</")+ tag + ">");
 	}
@@ -420,8 +398,7 @@ void Arules::TagText(const AString &tag, const AString &text)
 	Enclose(0, tag);
 }
 
-void Arules::ClassTagText(const AString &tag, const AString &cls,
-		const AString &text)
+void Arules::ClassTagText(const AString &tag, const AString &cls, const AString &text)
 {
 	AString temp = tag;
 	temp +=  " CLASS=\"";
@@ -450,10 +427,11 @@ void Arules::CommandExample(const AString &header, const AString &examp)
 
 AString Arules::Link(const AString &href, const AString &text)
 {
-	return (AString("<A HREF=\"")+href+"\">"+text+"</A>");
+	return AString("<A HREF=\"")+href+"\">"+text+"</A>";
 }
 
 void Arules::LinkRef(const AString &name)
 {
 	PutStr(AString("<A NAME=\"")+name+"\"></A>");
 }
+

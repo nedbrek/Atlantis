@@ -1,3 +1,5 @@
+#ifndef FILE_IO
+#define FILE_IO
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,115 +24,111 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef FILE_IO
-#define FILE_IO
-
-#include "astring.h"
-
 #include <fstream>
 #include <iostream>
-using namespace std;
+class AString;
 
-class Ainfile {
-	public:
-		Ainfile();
-		~Ainfile();
+/// a file for reading
+class Ainfile
+{
+public:
+	Ainfile();
+	~Ainfile();
 
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
+	void Open(const AString&);
+	int OpenByName(const AString&);
+	void Close();
 
-		AString * GetStr();
-		AString * GetStrNoSkip();
-		int GetInt();
+	AString* GetStr();
+	AString* GetStrNoSkip();
+	int GetInt();
 
-		ifstream * file;
+private:
+	std::ifstream *file;
 };
 
-class Aoutfile {
-	public:
-		Aoutfile();
-		~Aoutfile();
+/// a file for writing
+class Aoutfile
+{
+public:
+	Aoutfile();
+	~Aoutfile();
 
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
+	void Open(const AString&);
+	int OpenByName(const AString&);
+	void Close();
 
-		void PutStr(const char *);
-		void PutStr(const AString &);
-		void PutInt(int);
+	void PutStr(const char*);
+	void PutStr(const AString&);
+	void PutInt(int);
 
-		ofstream * file;
+	void putNoNewline(const char*);
+
+protected:
+	std::ofstream *file;
 };
 
-class Aorders {
-	public:
-		Aorders();
-		~Aorders();
-
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
-
-		AString * GetLine();
-
-		ifstream * file;
+/// Orders files are inputs
+class Aorders : public Ainfile
+{
+public:
+	AString* GetLine() { return GetStr(); }
 };
 
-class Areport {
-	public:
-		Areport();
-		~Areport();
+/// Reports are outputs
+class Areport : public Aoutfile
+{
+public:
+	Areport();
 
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
+	void Open(const AString&);
+	int OpenByName(const AString&);
 
-		void AddTab();
-		void DropTab();
-		void ClearTab();
+	void AddTab();
+	void DropTab();
+	void ClearTab();
 
-		void PutStr(const AString &,int = 0);
-		void PutNoFormat(const AString &);
-		void EndLine();
+	void PutStr(const AString&, int = 0);
+	void PutNoFormat(const AString&);
+	void EndLine();
 
-		ofstream * file;
-		int tabs;
+private:
+	int tabs;
 };
 
-class Arules {
-	public:
-		Arules();
-		~Arules();
+/// Rules are outputs (HTML)
+class Arules : public Aoutfile
+{
+public:
+	Arules();
 
-		void Open(const AString &);
-		int OpenByName(const AString &);
-		void Close();
+	void Open(const AString&);
+	int OpenByName(const AString&);
 
-		void AddTab();
-		void DropTab();
-		void ClearTab();
+	void AddTab();
+	void DropTab();
+	void ClearTab();
 
-		void AddWrapTab();
-		void DropWrapTab();
-		void ClearWrapTab();
+	void AddWrapTab();
+	void DropWrapTab();
+	void ClearWrapTab();
 
-		void PutStr(const AString &);
-		void WrapStr(const AString &);
-		void PutNoFormat(const AString &);
-		void EndLine();
+	void PutStr(const AString&);
+	void WrapStr(const AString&);
+	void PutNoFormat(const AString&);
+	void EndLine();
 
-		void Enclose(int flag, const AString &tag);
-		void TagText(const AString &tag, const AString &text);
-		void ClassTagText(const AString &tag, const AString &cls,
-				const AString &text);
-		void Paragraph(const AString &text);
-		void CommandExample(const AString &header, const AString &examp);
-		AString Link(const AString &href, const AString &text);
-		void LinkRef(const AString &name);
+	void Enclose(int flag, const AString &tag);
+	void TagText(const AString &tag, const AString &text);
+	void ClassTagText(const AString &tag, const AString &cls, const AString &text);
+	void Paragraph(const AString &text);
+	void CommandExample(const AString &header, const AString &examp);
+	AString Link(const AString &href, const AString &text);
+	void LinkRef(const AString &name);
 
-		ofstream * file;
-		int tabs;
-		int wraptab;
+private:
+	int tabs;
+	int wraptab;
 };
 #endif
+

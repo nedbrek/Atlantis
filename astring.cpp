@@ -189,6 +189,11 @@ char* AString::str()
 	return str_;
 }
 
+const char* AString::str() const
+{
+	return str_;
+}
+
 int AString::len() const
 {
 	return len_;

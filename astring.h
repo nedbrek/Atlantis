@@ -59,6 +59,7 @@ public:
 	char* Str() { return str(); }
 	///@return the underlying char array
 	char* str();
+	const char* str() const;
 
 	///@deprecated
 	int Len() const { return len(); }
