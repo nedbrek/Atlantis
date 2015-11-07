@@ -1,3 +1,5 @@
+#ifndef SHIELD_CLASS
+#define SHIELD_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,20 +24,20 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef SHIELD_CLASS
-#define SHIELD_CLASS
-
 #include "alist.h"
 
-class Shield : public AListElem {
+class Shield : public AListElem
+{
 public:
-  int shieldtype;
-  int shieldskill;
+	int shieldtype;
+	int shieldskill;
 };
 
-class ShieldList : public AList {
+class ShieldList : public AList
+{
 public:
-  Shield * GetHighShield(int);
+	///@return the highest shield skill in this of 'type'
+	Shield* GetHighShield(int type);
 };
 
 #endif /* SHIELD_CLASS */
