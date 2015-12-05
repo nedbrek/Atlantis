@@ -1,3 +1,5 @@
+#ifndef GAME_DEFS
+#define GAME_DEFS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,34 +24,11 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATONS
-// Date	    Person            Comments
-// ----	    ------            --------
-// 2000/SEP/06 Joseph Traub	  Added base man cost to allow races to have
-//	                           different base costs
-// 2001/FEB/01 Joseph Traub	  Added options for flying over water and
-//	                           easier underworld viewing and farseeing
-// 2001/FEB/07 Joseph Traub	  Added option to make starting cities safe
-//	                           or not and to control the guard numbers
-//	                           and to make them slightly tougher.
-//	                           Added option to give starting city guards
-//	                           mage support.
-// 2001/Feb/18 Joseph Traub	  Added Apprentices idea from Lacandon Conquest
-// 2001/Feb/18 Joseph Traub	  Added back in support for Conquest
-// 2001/Feb/19 Joseph Traub	  Removed the ENGINE_VERSION from the gamedef
-//	                           since it wasn't being used.
-// 2001/Feb/21 Joseph Traub	  Added a FACLIM_UNLIMITED option
-// 2001/Apr/08 Joseph Traub	  Added WORLD_NAME option
-// 2001/Apr/28 Joseph Traub	  Added MORE_PROFITABLE_TRADE_GOODS option
-//
-
-#ifndef GAME_DEFS
-#define GAME_DEFS
-
 #include "helper.h"
 
-/* Directions */
-enum {
+/// Movement Directions
+enum
+{
 	D_NORTH,
 	D_NORTHEAST,
 	D_SOUTHEAST,
@@ -59,13 +38,14 @@ enum {
 	NDIRS
 };
 
-extern const char* *DirectionStrs;
-extern const char* *DirectionAbrs;
+extern const char* *DirectionStrs; ///< full names for directions
+extern const char* *DirectionAbrs; ///< short names for directions
 
-extern const char* *MonthNames;
+extern const char* *MonthNames; ///< normal months (0-11)
 
-extern const char* *SeasonNames;
+extern const char* *SeasonNames; ///< four seasons (clear, winter, monsoon, blizzard)
 
+// Data for faction points
 extern int *allowedMages;
 extern int allowedMagesSize;
 extern int *allowedApprentices;
@@ -75,240 +55,160 @@ extern int allowedTaxesSize;
 extern int *allowedTrades;
 extern int allowedTradesSize;
 
-class GameDefs {
+/// Global settings (set at compile time in rules.cpp)
+class GameDefs
+{
 public:
-	const char *RULESET_NAME;
-	ATL_VER RULESET_VERSION;
+	const char *RULESET_NAME; ///< name of the rules
+	ATL_VER RULESET_VERSION; ///< numeric version
 
-	int FOOT_SPEED;
-	int HORSE_SPEED;
-	int SHIP_SPEED;
-	int FLY_SPEED;
-	int MAX_SPEED;
+	int FOOT_SPEED;  ///< speed on land (without a mount)
+	int HORSE_SPEED; ///< speed on land (with any mount)
+	int SHIP_SPEED;  ///< speed on water (includes swimming)
+	int FLY_SPEED;   ///< speed when flying
+	int MAX_SPEED;   ///< speed which cannot be exceeded
 
-	int STUDENTS_PER_TEACHER;
+	int STUDENTS_PER_TEACHER; ///< number of students per man in the teaching unit
 
-	int MAINTENANCE_COST;
-	int LEADER_COST;
+	//---maintenance
+	int MAINTENANCE_COST; ///< cost in silver per man per month
+	int LEADER_COST; ///< base maintenance cost of leaders
 
-	// If we use skill level multiplier then no units, all units, leaders,
-	// or just mages pay X per level of skill they have per man.   The
-	// first value (MAINTENCE_MULTIPLIER) is how much is payed per skill
-	// level.   The second value (MULTIPLIER_USE) is set to one of the
-	// values in the given enumeration.
-	// The costs listed above are used for any units NOT covered by the
-	// multiplier use
-	int MAINTENANCE_MULTIPLIER;
+	// Settings for using skill level multiplier (units pay X per level of skill they have per man)
+	int MAINTENANCE_MULTIPLIER; ///< cost (in silver) per level of skill
 
-	enum {
-		MULT_NONE,
-		MULT_MAGES,
-		MULT_LEADERS,
-		MULT_ALL,
+	enum
+	{
+		MULT_NONE,    ///< no one pays extra per skill level
+		MULT_MAGES,   ///< mages pay extra
+		MULT_LEADERS, ///< leaders pay extra
+		MULT_ALL      ///< everyone pays
 	};
-	int MULTIPLIER_USE;
+	int MULTIPLIER_USE; ///< who uses skill multiplier
 
-	int STARVE_PERCENT;
+	//---starvation (failure to pay maintenance)
+	int STARVE_PERCENT; ///< chance for a man to be lost
 
-	enum {
-		STARVE_NONE,
-		STARVE_MAGES,
-		STARVE_LEADERS,
-		STARVE_ALL,
+	enum
+	{
+		STARVE_NONE,    ///< disable skill starvation
+		STARVE_MAGES,   ///< apply it to mage units
+		STARVE_LEADERS, ///< apply it to leaders
+		STARVE_ALL      ///< apply it to all
 	};
+	int SKILL_STARVATION; ///< who loses skill levels instead of dying
 
-	// Instead of dying, lose skill levels, but only for the types of
-	// units listed below.   Any unit which should lose a skill level and
-	// is unable to will die, period.
-	int SKILL_STARVATION;
+	//---other settings
+	int START_MONEY; ///< amount of silver given to new factions
 
-	int START_MONEY;
-	int WORK_FRACTION;
-	int ENTERTAIN_FRACTION;
-	int ENTERTAIN_INCOME;
+	int WORK_FRACTION; ///< factor in determining max amount of work in the region
+	int ENTERTAIN_FRACTION; ///< factor in determining max amount of entertainment in the region
 
-	int TAX_INCOME;
+	int ENTERTAIN_INCOME; ///< amount of silver per entertainer
+	int TAX_INCOME; ///< amount of silver per taxer
 
-	int HEALS_PER_MAN;
+	int HEALS_PER_MAN; ///< number of men healed by one healer
 
-	int GUARD_REGEN; /* percent */
-	int CITY_GUARD;
-	int GUARD_MONEY;
-	int CITY_POP;
+	int GUARD_REGEN; ///< percent chance per turn to regenerate 10% of the guards
+	int CITY_GUARD; ///< number of men in city guard units
+	int GUARD_MONEY; ///< amount of silver per guard
+	int CITY_POP; ///< max pop (city) - town is 1/2, village is 1/4
 
-	int WMON_FREQUENCY;
-	int LAIR_FREQUENCY;
+	int WMON_FREQUENCY; ///< percent chance of wandering monsters appearing
+	int LAIR_FREQUENCY; ///< percent chance of a lair appearing
 
-	int FACTION_POINTS;
+	int FACTION_POINTS; ///< number of faction points (set max tax and production regions, and mages)
 
-	int TIMES_REWARD;
+	int TIMES_REWARD; ///< amount of silver given to the faction winning the times reward
 
-	int TOWNS_EXIST;
-	int LEADERS_EXIST;
-	int SKILL_LIMIT_NONLEADERS;
-	int MAGE_NONLEADERS;
-	int RACES_EXIST;
-	int GATES_EXIST;
-	int FOOD_ITEMS_EXIST;
-	int CITY_MONSTERS_EXIST;
-	int WANDERING_MONSTERS_EXIST;
-	int LAIR_MONSTERS_EXIST;
-	int WEATHER_EXISTS;
-	int OPEN_ENDED;
-	int NEXUS_EXISTS;
-	int CONQUEST_GAME;
+	int TOWNS_EXIST; ///< generate towns (includes cities and villages)
+	int LEADERS_EXIST; ///< allow leaders to be recruited
+	int SKILL_LIMIT_NONLEADERS; ///< apply racial skill limits to non-leaders
+	int MAGE_NONLEADERS; ///< allow non-leaders to study magic
+	int RACES_EXIST; ///< allow non-leaders to be recruited
+	int GATES_EXIST; ///< generate teleportation gates
+	int FOOD_ITEMS_EXIST; ///< allow grain and livestock to be produced
+	int CITY_MONSTERS_EXIST; ///< actually city guards
+	int WANDERING_MONSTERS_EXIST; ///< create wandering monsters
+	int LAIR_MONSTERS_EXIST; ///< create lairs
+	int WEATHER_EXISTS; ///< allow weather to vary
+	int OPEN_ENDED; ///< 0: check victory conditions, 1: game ends when players quit
+	int NEXUS_EXISTS; ///< start players in the nexus
+	int CONQUEST_GAME; ///< special combat oriented rules
 
-	//
-	// RANDOM_ECONOMY determines whether the economy for different regions
-	// is randomized, or is always the same.
-	//
-	int RANDOM_ECONOMY;
+	//---some economic controls
+	int RANDOM_ECONOMY; ///< economic settings in towns are randomized
+	int VARIABLE_ECONOMY; ///< economic settings are altered each turn
 
-	//
-	// If VARIABLE_ECONOMY is set, the economy of a region is altered after
-	// each turn.
-	//
-	int VARIABLE_ECONOMY;
+	int CITY_MARKET_NORMAL_AMT; ///< base number of items for sale
+	int CITY_MARKET_ADVANCED_AMT; ///< base number of items for sale (for those marked advanced)
+	int CITY_MARKET_TRADE_AMT; ///< base number of items that are desired to buy in town
+	int CITY_MARKET_MAGIC_AMT; ///< base number of magic items (not set NOMARKET) for sale
+	int MORE_PROFITABLE_TRADE_GOODS; ///< raise prices on trade goods
 
-	//
-	// Some economy figures.
-	//
-	int CITY_MARKET_NORMAL_AMT;
-	int CITY_MARKET_ADVANCED_AMT;
-	int CITY_MARKET_TRADE_AMT;
-	// If any magic items are not set NOMARKET, how many are allowed?
-	int CITY_MARKET_MAGIC_AMT;
-	// JLT -- Allow higher margins on trade goods.
-	int MORE_PROFITABLE_TRADE_GOODS;
+	int BASE_MAN_COST; ///< base cost of a man (racial cost scales this up)
 
-	// JLT -- Allow races to have differing base costs
-	int BASE_MAN_COST;
+	//---other settings
+	int LASTORDERS_MAINTAINED_BY_SCRIPTS; ///< lastorders values maintained by external scripts
+	int MAX_INACTIVE_TURNS; ///< number of turns to allow a faction to be inactive (-1 disables)
 
-	// Are the lastorders values maintained by external scripts?
-	int LASTORDERS_MAINTAINED_BY_SCRIPTS;
+	int EASIER_UNDERWORLD; ///< give explicit information about z level
 
-	// How many turns to allow a faction to be inactive.
-	// Set to -1 if you don't want this check performed.
-	int MAX_INACTIVE_TURNS;
+	int DEFAULT_WORK_ORDER; ///< units with no orders 'work' by default
 
-	// Is it easier to deal with the underworld (allows teleport and
-	// farsight into the underworld)
-	int EASIER_UNDERWORLD;
-
-	// Should units with no orders perform a default 'work' order
-	int DEFAULT_WORK_ORDER;
-
-	//
-	// The type of faction limits that are in effect in this game.
-	//
-	enum {
-	    FACLIM_MAGE_COUNT,
-	    FACLIM_FACTION_TYPES,
-		FACLIM_UNLIMITED,
+	enum
+	{
+		FACLIM_MAGE_COUNT,    ///< only mages (and apprentices) are limited
+		FACLIM_FACTION_TYPES, ///< limit taxes and production (and mages/apprentices)
+		FACLIM_UNLIMITED      ///< no limits
 	};
-	int FACTION_LIMIT_TYPE;
+	int FACTION_LIMIT_TYPE; ///< type of faction limits that are in effect in this game
 
-	//
-	// The type of flight over water that is available.
-	//
-	enum {
-		WFLIGHT_NONE,
-		WFLIGHT_MUST_LAND,
-		WFLIGHT_UNLIMITED,
+	enum
+	{
+		WFLIGHT_NONE,      ///< no flying over water
+		WFLIGHT_MUST_LAND, ///< flying units must reach land by end of turn
+		WFLIGHT_UNLIMITED  ///< flying units can end turn over water
 	};
-	int FLIGHT_OVER_WATER;
+	int FLIGHT_OVER_WATER; ///< how to handle flight over water
 
-	//
-	// Are starting cities safe regions?  Also controls if guards in
-	// the starting cities get amulets of invulnerability.
-	//
-	int SAFE_START_CITIES;
+	int SAFE_START_CITIES; ///< guards in starting cities get amulets of invulnerability
+	int AMT_START_CITY_GUARDS; ///< number of guards in starting cities
+	int START_CITY_GUARDS_PLATE; ///< guards in starting cities get plate armor
+	int START_CITY_MAGES; ///< fire skill level for mages in starting cities (0 for no mages)
+	int START_CITY_TACTICS; ///< tactician skill for guards in starting cities (0 for none)
 
-	//
-	// How many guards in starting cities?
-	//
-	int AMT_START_CITY_GUARDS;
+	int APPRENTICES_EXIST; ///< enable apprentices (users of magic items)
 
-	//
-	// Should starting city guards be made tougher than normal city guards?
-	// (this means giving them plate armor)
-	//
-	int START_CITY_GUARDS_PLATE;
+	const char *WORLD_NAME; ///< name of the world
 
-	//
-	// Do starting cities have a fire mages.  (0 for no mages, otherwise
-	// this is the level of their fire skill)
-	//
-	//
-	int START_CITY_MAGES;
+	int NEXUS_GATE_OUT; ///< can you cast gate from the nexus
+	int NEXUS_IS_CITY; ///< make the nexus a city
 
-	// Do the starting city guards also have tactician skill (0 for
-	// no tactician, otherwise this is their level of tactician)
-	int START_CITY_TACTICS;
+	int BATTLE_FACTION_INFO; ///< battle reports show faction
 
-	//
-	// Are we allowing apprentices?
-	//
-	int APPRENTICES_EXIST;
+	int ALLOW_WITHDRAW; ///< allow units to withdraw items (not just silver)
 
-	// What is the name of the world?
-	const char *WORLD_NAME;
+	int CITY_RENAME_COST; ///< cost is the city size (1, 2, 3) * this value (0 to disable)
 
-	// Does the nexus allow gating out of it
-	int NEXUS_GATE_OUT;
+	int TAX_PILLAGE_MONTH_LONG; ///< make taxing and pillaging month-long actions
 
-	// Is the nexus also a city?
-	int NEXUS_IS_CITY;
+	int MULTI_HEX_NEXUS; ///< enable multi-hex nexus
 
-	// Do battle reports show factions if ANY unit on the opposing side
-	// could see it.   Non-involved observers will ALSO see this
-	// information.
-	int BATTLE_FACTION_INFO;
+	int UNDERWORLD_LEVELS; ///< number of levels of underworld (1/4 size)
+	int UNDERDEEP_LEVELS; ///< number of levels of underdeep (1/16 size)
+	int ABYSS_LEVEL; ///< 0: no abyss, else: one level of abyss (1/64 size)
 
-	// Is the withdraw order enabled
-	int ALLOW_WITHDRAW;
+	int TOWN_PROBABILITY; ///< town probability: 100 = default
 
-	// Do cities have a cost to rename them?  If this value is set,
-	// the cost is the city size (1, 2, 3) * this value
-	int CITY_RENAME_COST;
+	// Default = 0. For high values the town probability will need to be adjusted
+	// downwards to get comparable number of towns
+	int TOWN_SPREAD; ///< lessen effects of economy on chance for towns
 
-	// Are taxing and pillaging month-long actions?
-	int TAX_PILLAGE_MONTH_LONG;
+	int TOWNS_NOT_ADJACENT; ///< discourage adjacent towns (except near starting cities, 100 disallows)
+	int LESS_ARCTIC_TOWNS; ///< make settlements near the arctic less likely and smaller. suggested: 0-5
 
-	// Are we allowing a multi-hex nexus
-	int MULTI_HEX_NEXUS;
-
-	// How many levels of the underworld do we want?
-	int UNDERWORLD_LEVELS;
-
-	// How many levels of the underdeep do we want?
-	int UNDERDEEP_LEVELS;
-
-	// Is there an abyss level?
-	int ABYSS_LEVEL;
-
-	// Town probability; 100 = default
-	int TOWN_PROBABILITY;
-
-	// Raising this value will lessen the effects
-	// of a region type's economy on the chance
-	// for creating towns (overall probability
-	// will also vary a bit).
-	// Default = 0. For high values the town probability
-	// will need to be adjusted downwards to get
-	// comparable number of towns.
-	int TOWN_SPREAD;
-
-	// Flag for disallowing settlements in adjacent regions
-	// (except near starting cities)
-	int TOWNS_NOT_ADJACENT;
-
-	// Make settlements near the arctic less likely and smaller
-	// Higher values decrease likeliness of settlements
-	// suggested: 0-5
-	int LESS_ARCTIC_TOWNS;
-
-	// Enable Archipelago Creation
+	/// Enable Archipelago Creation
 	// = chance of creating archipelagos vs continents
 	// (note that archipelagos are smaller so that
 	//  the overall contribution of archipelagos to
@@ -318,51 +218,40 @@ public:
 	// suggested value: 10, 25, 50+ it's really a matter of taste
 	int ARCHIPELAGO;
 
-	// Chance for Lake Creation
+	/// Chance for Lake Creation
 	// Setting LAKES_EXIST means that smaller inland seas will be
 	// converted into continent mass - this is the chance that
 	// such regions will end up as lakes.
 	// suggested value: around 12.
 	int LAKES_EXIST;
 
-	// Lake Effect on Wages Options
 	// Lakes will add one to adjacent regions wages if set
-	enum {
+	enum
+	{
 		NO_EFFECT = 0x00,
 		ALL = 0x01,
 		TOWNS = 0x02,
 		NONPLAINS = 0x04,
 		NONPLAINS_TOWNS_ONLY=0x08,
-		DESERT_ONLY = 0x10,
+		DESERT_ONLY = 0x10
 	};
+	int LAKE_WAGE_EFFECT; ///< effect on surrounding wages
 
-	// LAKE_WAGE_EFFECT: effect on surrounding wages
-	int LAKE_WAGE_EFFECT;
+	int LAKESIDE_IS_COASTAL; ///< count lakeside regions as coastal for all purposes (races and such)
 
-	// LAKESIDE_IS_COASTAL: lakeside regions count as
-	// coastal for all purposes - races and such
-	int LAKESIDE_IS_COASTAL;
+	int ODD_TERRAIN; ///< chance (x 0.1%) for single-hex terrain oddities. suggested: 5-40
 
-	// ODD_TERRAIN: chance (x 0.1%) for single-hex terrain oddities
-	// suggested: between 5 and 40
-	int ODD_TERRAIN;
+	int IMPROVED_FARSIGHT; ///< farsight makes use of a mage's other skills
 
-	// Does farsight make use of a mages other skills
-	int IMPROVED_FARSIGHT;
+	int GM_REPORT; ///< generate report.1 every turn
 
-	// Should the GM get a full world report every turn
-	int GM_REPORT;
+	int DECAY; ///< objects decay according to the parameters in the object definition table
 
-	// Do we allow objects to decay according to the parameters in the object
-	// definition table
-	int DECAY;
-
-	// Do we limit the number of mages which can study inside of certain
-	// buildings.
-	int LIMITED_MAGES_PER_BUILDING;
+	int LIMITED_MAGES_PER_BUILDING; ///< limit number of mages which can study inside of certain buildings
 
 	// Transit report options
-	enum {
+	enum
+	{
 		REPORT_NOTHING = 0x0000,
 		// Various things which can be shown
 		REPORT_SHOW_PEASANTS = 0x0001,
@@ -373,11 +262,11 @@ public:
 		REPORT_SHOW_ENTERTAINMENT = 0x0020,
 		// Collection of the the above
 		REPORT_SHOW_ECONOMY = (REPORT_SHOW_PEASANTS |
-							   REPORT_SHOW_REGION_MONEY |
-							   REPORT_SHOW_WAGES |
-							   REPORT_SHOW_MARKETS |
-							   REPORT_SHOW_RESOURCES |
-							   REPORT_SHOW_ENTERTAINMENT),
+		                  REPORT_SHOW_REGION_MONEY |
+		                  REPORT_SHOW_WAGES |
+		                  REPORT_SHOW_MARKETS |
+		                  REPORT_SHOW_RESOURCES |
+		                  REPORT_SHOW_ENTERTAINMENT),
 		// Which type of exits to show
 		REPORT_SHOW_USED_EXITS = 0x0040,
 		REPORT_SHOW_ALL_EXITS = 0x0080,
@@ -387,138 +276,103 @@ public:
 		REPORT_SHOW_OUTDOOR_UNITS = 0x0400,
 		// Collection of the above
 		REPORT_SHOW_UNITS = (REPORT_SHOW_GUARDS | REPORT_SHOW_INDOOR_UNITS |
-							 REPORT_SHOW_OUTDOOR_UNITS),
+		                     REPORT_SHOW_OUTDOOR_UNITS),
 		// Various types of buildings
 		REPORT_SHOW_BUILDINGS = 0x0800,
 		REPORT_SHOW_ROADS = 0x1000,
 		REPORT_SHOW_SHIPS = 0x2000,
 		// Collection of the above
 		REPORT_SHOW_STRUCTURES = (REPORT_SHOW_BUILDINGS |
-								  REPORT_SHOW_ROADS |
-								  REPORT_SHOW_SHIPS),
+		                    REPORT_SHOW_ROADS |
+		                    REPORT_SHOW_SHIPS),
 		// Should the unit get to use their advanced skills?
 		REPORT_USE_UNIT_SKILLS = 0x8000,
 
 		// Some common collections
 		REPORT_SHOW_REGION = (REPORT_SHOW_ECONOMY | REPORT_SHOW_ALL_EXITS),
 		REPORT_SHOW_EVERYTHING = (REPORT_SHOW_REGION |
-								  REPORT_SHOW_UNITS |
-								  REPORT_SHOW_STRUCTURES),
+		                    REPORT_SHOW_UNITS |
+		                    REPORT_SHOW_STRUCTURES)
 	};
+	int TRANSIT_REPORT; ///< information shown to a unit just passing through a hex
 
-	// What sort of information should be shown to a unit just passing
-	// through a hex?
-	int TRANSIT_REPORT;
+	int MARKETS_SHOW_ADVANCED_ITEMS; ///< show advanced items in markets at all times
 
-	// Should advanced items be shown in markets at all times.
-	int MARKETS_SHOW_ADVANCED_ITEMS;
-
-	// Do we require the 'ready' command to set up battle items
-	// If prepare is strict, then the READY command MUST be used
-	// and there will be no automatic selection of battle items.
-	enum {
-		PREPARE_NONE = 0,
-		PREPARE_NORMAL = 1,
-		PREPARE_STRICT = 2,
+	enum
+	{
+		PREPARE_NONE = 0,   ///< PREPARE disabled
+		PREPARE_NORMAL = 1, ///< PREPARE enabled
+		PREPARE_STRICT = 2  ///< PREPARE must be used (no automatic selection)
 	};
-	int USE_PREPARE_COMMAND;
+	int USE_PREPARE_COMMAND; ///< treatment of PREPARE command
 
-	// Monsters have the option of advancing occasionally instead of just
-	// using move.
-	// There are two values which control this.
-	// MONSTER_ADVANCE_MIN_PERCENT is the minimum amount which monsters
-	// should advance.
-	// MONSTER_ADVANCE_HOSTILE_PERCENT is the percent of their hostile
-	// rating which should be used to determine if they advance.
+	// Monsters have the option of occasionally advancing instead of just using
+	// move. There are two values which control this.
+	//
 	// If you don't want monsters to EVER advance, use 0 for both.
 	// If you want a flat percent, use MIN_PERCENT and set HOSTILE_PERCENT
 	// to 0.  If you only want it based on the HOSTILE value, set MIN_PERCENT
-	// to 0 and HOSTILE_PERCENT to what you want.
-	int MONSTER_ADVANCE_MIN_PERCENT;
-	int MONSTER_ADVANCE_HOSTILE_PERCENT;
+	// to 0 and HOSTILE_PERCENT to what you want
+	int MONSTER_ADVANCE_MIN_PERCENT; ///< minimum amount which monsters should advance
+	int MONSTER_ADVANCE_HOSTILE_PERCENT; ///< percent of hostile rating used to determine if they advance
 
-	// Set this to 1 if your scripts can handle the following commands
-	// #create, #resend, #times, #rumor, #remind, #email
+	/// Set this to 1 if your scripts can handle the following commands
+	/// #create, #resend, #times, #rumor, #remind, #email
 	int HAVE_EMAIL_SPECIAL_COMMANDS;
 
-	// Should starting cities begin with unlimited markets at world
-	// generation time.
-	int START_CITIES_START_UNLIMITED;
+	int START_CITIES_START_UNLIMITED; ///< starting cities begin with unlimited markets at world generation time
 
-	// If this is enabled, then when a unit has more men than Amulets of
-	// True Seeing, and it is targetted by an assassin, then there is a
-	// chance that the target picked will be one of the men carrying
-	// the amulet and the attempt will be foiled.  If not enabled, the
-	// attempt always succeeds.
+	/// If enabled, then when a unit has more men than Amulets of True Seeing,
+	/// and it is targetted by an assassin, then there is a chance that the
+	/// target picked will be one of the men carrying the amulet and the
+	/// attempt will be foiled. If not enabled, the attempt always succeeds
 	int PROPORTIONAL_AMTS_USAGE;
 
-	// If this is enabled, then the ARMOR and WEAPON commands for selecting
-	// armor/weapon priorities for a unit are enabled. If a preferred weapon
-	// or armor isn't available, then the code will fall back to the internal
-	// list.
+	/// If enabled, then the ARMOR and WEAPON commands for selecting armor/weapon
+	/// priorities for a unit are enabled. If a preferred weapon or armor
+	/// isn't available, then the code will fall back to the internal list
 	int USE_WEAPON_ARMOR_COMMAND;
 
-	// Set MONSTER_NO_SPOILS > 0 to disable spoils from released monsters
-	// for that many months.
-	int MONSTER_NO_SPOILS;
-	// Set MONSTER_SPOILS_RECOVERY > 0 to set a time in months over which
-	// monster spoils are slowly regained.
-	// This has no effect unles MONSTER_NO_SPOILS is also set.
-	int MONSTER_SPOILS_RECOVERY;
+	int MONSTER_NO_SPOILS; ///< >0: disable spoils from released monsters for that many months
 
-	// Use this to limit the number of attacks an assassin gets in the free
-	// round.
-	int MAX_ASSASSIN_FREE_ATTACKS;
+	// (has no effect unles MONSTER_NO_SPOILS is also set)
+	int MONSTER_SPOILS_RECOVERY; ///< time in months over which monster spoils are slowly regained (0 disables)
 
-	// Set to 1 to allow 'GIVE 0 <num> <monster>' for summoned monsters
-	// (dragons, wolves, eagles currently)
-	int RELEASE_MONSTERS;
+	int MAX_ASSASSIN_FREE_ATTACKS; ///< limit number of attacks assassin gets in free round
 
-	// Set to 1 to check for demons breaking free and undead decaying before
-	// movemeent rather than at the end of the turn.  This prevents 'balrog
-	// missiles'
-	int CHECK_MONSTER_CONTROL_MID_TURN;
+	int RELEASE_MONSTERS; ///< allow 'GIVE 0 <num> <monster>' for summoned monsters (dragons, wolves, eagles currently)
 
-	// Set to 1 if CAST GATE DETECT shows the actual gate numbers.
-	int DETECT_GATE_NUMBERS;
+	int CHECK_MONSTER_CONTROL_MID_TURN; ///< check for demons breaking free and undead decaying before movement, rather than at the end of the turn. This prevents 'balrog missiles'
 
-	// Should army routes be basd on the number of hits lost rather than the
-	// number of figures lost.
-	enum {
-		// Default -- rout if half of the total figures die.  All figures are
-		// treated equally.
-		ARMY_ROUT_FIGURES = 0,
-		// Rout if half the total hits die, all hits are counted independantly
-		// This means you could rout even if none of your men are dead but
-		// you have just taken a lot of hits and are getting clobbered
+	int DETECT_GATE_NUMBERS; ///< should 'CAST GATE DETECT' show actual gate numbers
+
+	enum
+	{
+		ARMY_ROUT_FIGURES = 0, ///< rout if half of the total figures die. All figures are treated equally
+
+		/// Rout if half the total hits die, all hits are counted independently.
+		/// This means you could rout even if none of your men are dead but
+		/// you have just taken a lot of hits and are getting clobbered
 		ARMY_ROUT_HITS_INDIVIDUAL,
-		// Rout if half of the total hits die, but figures hits only stop
-		// counting toward the total when the figure is fully dead.
-		ARMY_ROUT_HITS_FIGURE,
+
+		/// Rout if half of the total hits die, but figures hits only stop
+		/// counting toward the total when the figure is fully dead
+		ARMY_ROUT_HITS_FIGURE
 	};
+	int ARMY_ROUT; ///< panic based on number of hits lost rather than the number of figures lost
 
-	int ARMY_ROUT;
+	int FULL_TRUESEEING_BONUS; ///< If 0 then mages get TRUE_SEEING skill/2 rounded up as a bonus to observation
 
-	// If this is set to 0 then a mage gets his TRUE_SEEING skill/2
-	// rounded up as a bonus to observation.  Lacandon (and perhaps others)
-	// should set this to 1.
-	int FULL_TRUESEEING_BONUS;
+	int IMPROVED_AMTS; ///< If 1 then an AMTS will give 3 bonus to OBSE rather than 2
 
-	// If this is set to 1 then an AMTS will give 3 bonus to OBSE rather
-	// than 2. This was added for Lacandon
-	int IMPROVED_AMTS;
-
-	// If this is set to 1 then a mage automatically gets his INVISIBILITY
-	// skill added to his stealth.  I only recommend setting this if you
-	// also set the FULL_TRUESEEING_BONUS above.  This was added for
-	// Lacandon.
+	/// If 1 then mages get INVISIBILITY skill added to stealth.
+	/// recommended only if you also set FULL_TRUESEEING_BONUS
 	int FULL_INVIS_ON_SELF;
 
-	// Do monsters regenerate during battle?
-	int MONSTER_BATTLE_REGEN;
+	int MONSTER_BATTLE_REGEN; ///< monsters regenerate during battle
 
-	// Options to control who is able to tax
-	enum {
+	enum
+	{
 		TAX_ANYONE = 0x00001,
 		TAX_COMBAT_SKILL = 0x00002,
 		TAX_BOW_SKILL = 0x00004,
@@ -552,33 +406,30 @@ public:
 		TAX_ILLUSIONS = 0x80000, // What if they're not really there?
 
 		// Abbreviation for "the usual"
-		TAX_NORMAL = TAX_COMBAT_SKILL | TAX_USABLE_WEAPON,
+		TAX_NORMAL = TAX_COMBAT_SKILL | TAX_USABLE_WEAPON
 	};
-	int WHO_CAN_TAX;
+	int WHO_CAN_TAX; ///< who is able to tax
 
-	// Amount of skill improvement when a skill is used
-	int SKILL_PRACTISE_AMOUNT;
+	int SKILL_PRACTISE_AMOUNT; ///< amount of skill improvement when a skill is used
 
-	// Options on using food for upkeep
-	// Note that all these values are in silver equivalents!
-	int UPKEEP_MINIMUM_FOOD;
-	// MAXIMUM_FOOD is the maximum contribution of food to upkeep
-	// per man, and therefore CAN be lower than MINIMUM_FOOD
-	// (although this seems a silly thing to do).
-	// A negative value for this def indicates no maximum.
+	//---Options on using food for upkeep. Note that all these values are in silver equivalents!
+	int UPKEEP_MINIMUM_FOOD; ///< amount of actual food required for upkeep
+
+	/// MAXIMUM_FOOD is the maximum contribution of food to upkeep
+	/// per man, and therefore CAN be lower than MINIMUM_FOOD
+	/// (although this seems a silly thing to do).
+	/// A negative value for this def indicates no maximum
 	int UPKEEP_MAXIMUM_FOOD;
-	int UPKEEP_FOOD_VALUE;
+	int UPKEEP_FOOD_VALUE; ///< conversion factor from food to silver
 
-	// Should ships be prevented from sailing through single hex landmasses
-	// during the same turn. (does not prevent them from stopping in a
-	// single hex one turn and sailing on through the next turn.
+	/// prevent ships from sailing through single hex landmasses during the same turn
+	/// (does not prevent them from stopping in a single hex one turn and sailing on through the next turn)
 	int PREVENT_SAIL_THROUGH;
 
-	// If we are preventing sail through, should we also prevent the 'easy
-	// portage' that the above allows by default?
+	/// If we are preventing sail through, should we also prevent the 'easy portage' that the above allows by default?
 	int ALLOW_TRIVIAL_PORTAGE;
 };
 
-extern GameDefs * Globals;
+extern GameDefs *Globals;
 
 #endif
