@@ -1,3 +1,5 @@
+#ifndef GAMEDATA_H
+#define GAMEDATA_H
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,19 +24,10 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/16	Larry Stanbery		Added new items for Realms of the Arcane.
-//									Corrected Runesword bug.
-// 2000/MAR/21	Azthar Septragen	Added roads.
-#ifndef RULES_H
-#define RULES_H
 
-//
-// The items
-//
-enum {
+/// All the items in the game
+enum ItemDef
+{
 	I_LEADERS,
 	I_VIKING,
 	I_BARBARIAN,
@@ -152,7 +145,6 @@ enum {
 	I_IBALROG,
 	I_PORTAL,
 	I_PEASANT,
-	// LLS
 	I_PICK,
 	I_SPEAR,
 	I_AXE,
@@ -172,7 +164,7 @@ enum {
 	I_MERFOLK,
 	I_ELEMENTAL,
 	I_MAN,
-	/* Additional items for Ceran */
+	// Additional items for Ceran
 	I_FAIRY,
 	I_LIZARDMAN,
 	I_URUK,
@@ -241,10 +233,9 @@ enum {
 	NITEMS
 };
 
-//
-// Types of men.
-//
-enum {
+/// Different types of men who can be recruited
+enum ManDef
+{
 	MAN_NONE,
 	MAN_LEADER,
 	MAN_VIKING,
@@ -264,7 +255,7 @@ enum {
 	MAN_DESERTDWARF,
 	MAN_ORC,
 	MAN_MAN,
-	/* Additional races for Ceran */
+	// Additional races for Ceran
 	MAN_FAIRY,
 	MAN_LIZARDMAN,
 	MAN_URUK,
@@ -284,10 +275,9 @@ enum {
 	NUMMAN
 };
 
-//
-// Types of monsters
-//
-enum {
+/// All the monsters
+enum MonsterDef
+{
 	MONSTER_NONE,
 	MONSTER_LION,
 	MONSTER_WOLF,
@@ -323,7 +313,6 @@ enum {
 	MONSTER_DEMON,
 	MONSTER_BALROG,
 	MONSTER_EAGLE,
-	// LLS
 	MONSTER_PIRATES,
 	MONSTER_KRAKEN,
 	MONSTER_MERFOLK,
@@ -347,13 +336,9 @@ enum {
 	NUMMONSTERS
 };
 
-//
-// Types of weapons
-//
-// LLS
-// Changed priority of weapons.
-// Added new items.
-enum {
+/// Types of weapons
+enum WeaponDef
+{
 	WEAPON_NONE,
 	WEAPON_RUNESWORD,
 	WEAPON_SUPERBOW,
@@ -388,12 +373,9 @@ enum {
 	NUMWEAPONS
 };
 
-//
-// Types of armor
-//
-// LLS
-// Added new items.
-enum {
+/// Types of armor
+enum ArmorDef
+{
 	ARMOR_NONE,
 	ARMOR_CLOAKOFI,
 	ARMOR_ADPLATE,
@@ -409,10 +391,9 @@ enum {
 	NUMARMORS
 };
 
-//
-// Types of mounts
-//
-enum {
+/// Types of mounts
+enum MountDef
+{
 	MOUNT_NONE,
 	MOUNT_WHORSE,
 	MOUNT_HORSE,
@@ -423,12 +404,9 @@ enum {
 	NUMMOUNTS
 };
 
-//
-// Other battle items
-//
-// LLS
-// Changed order of battle items to match Runesword
-enum {
+/// Other battle items
+enum BattleItemDef
+{
 	BATTLE_NONE,
 	BATTLE_RUNESWORD,
 	BATTLE_STAFFOFL,
@@ -440,10 +418,9 @@ enum {
 	NUMBATTLEITEMS
 };
 
-//
-// Types of skills.
-//
-enum {
+/// Types of skills
+enum SkillDef
+{
 	S_MINING,
 	S_LUMBERJACK,
 	S_QUARRYING,
@@ -541,10 +518,9 @@ enum {
 	NSKILLS
 };
 
-//
-// Types of special attacks
-//
-enum {
+/// Types of special attacks
+enum SpecialAttackDef
+{
 	SPECIAL_NONE_DUMMY,
 	SPECIAL_FIREBALL,
 	SPECIAL_HELLFIRE,
@@ -569,10 +545,9 @@ enum {
 	NUMSPECIALS
 };
 
-//
-// Types of objects.
-//
-enum {
+/// Types of objects
+enum ObjectDef
+{
 	O_DUMMY,
 	O_LONGBOAT,
 	O_CLIPPER,
@@ -596,13 +571,11 @@ enum {
 	O_TIMBERYARD,
 	O_INN,
 	O_QUARRY,
-	// LLS
 	// New ocean lairs
 	O_ISLE,
 	O_DERELICT,
 	O_OCAVE,
 	O_WHIRL,
-	// AS
 	O_ROADN,
 	O_ROADNW,
 	O_ROADNE,
@@ -614,7 +587,6 @@ enum {
 	O_AMINE,
 	O_PRESERVE,
 	O_SACGROVE,
-	// JT
 	// Abyss Lair
 	O_BKEEP,
 	O_PALACE,
@@ -648,11 +620,9 @@ enum {
 	NOBJECTS
 };
 
-//
-// Types of terrain
-//
-/* ARegion Types */
-enum {
+/// Types of terrain (for ARegion)
+enum TerrainDef
+{
 	R_OCEAN,
 	R_PLAIN,
 	R_FOREST,
@@ -717,16 +687,18 @@ enum {
 	R_NUM
 };
 
-// Types of effects
-enum {
+/// Types of effects
+enum EffectDef
+{
 	EFFECT_DAZZLE,
 	EFFECT_FEAR,
 	EFFECT_STORM,
 	NUMEFFECTS
 };
 
-// Types of ranges
-enum {
+/// Types of ranges
+enum RangeDef
+{
 	RANGE_TELEPORT,
 	RANGE_PORTAL_LORE,
 	RANGE_FARSIGHT,
