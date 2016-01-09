@@ -290,7 +290,7 @@ int ParseEnabledItem(AString *);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);
-AString *ItemDescription(int item, int full);
+AString AttType(int atype);
 
 int IsSoldier(int);
 
