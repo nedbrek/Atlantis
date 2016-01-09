@@ -26,6 +26,7 @@
 #include "gameio.h"
 #include "items.h"
 #include "gamedata.h"
+#include "astring.h"
 
 Production::Production()
 {

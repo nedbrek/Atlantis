@@ -1,3 +1,5 @@
+#ifndef ITEMS_H
+#define ITEMS_H
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,311 +24,300 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comments
-// ----        ------          --------
-// 2000/MAR/14 Larry Stanbery  Added enhanced production capability.
-#ifndef ITEMS_CLASS
-#define ITEMS_CLASS
-
-class Item;
-class ItemType;
-
-#include "fileio.h"
-#include "gamedefs.h"
 #include "alist.h"
-#include "astring.h"
+class Ainfile;
+class Aoutfile;
+class AString;
 
-enum {
-	ATTACK_COMBAT,
-	ATTACK_ENERGY,
-	ATTACK_SPIRIT,
-	ATTACK_WEATHER,
-	ATTACK_RIDING,
-	ATTACK_RANGED,
+/// Types of damage sources
+enum
+{
+	ATTACK_COMBAT,  ///< normal melee fighting
+	ATTACK_ENERGY,  ///< power of raw energy
+	ATTACK_SPIRIT,  ///< spiritual assault
+	ATTACK_WEATHER, ///< manipulation of the environment
+	ATTACK_RIDING,  ///< weapon which requires height, leverage, and momentum
+	ATTACK_RANGED,  ///< fighting at a distance with projectiles
 	NUM_ATTACK_TYPES
 };
 
-enum {
-	IT_NORMAL = 0x0001,
-	IT_ADVANCED = 0x0002,
-	IT_TRADE = 0x0004,
-	IT_MAN = 0x0008,
-	IT_MONSTER = 0x0010,
-	IT_MAGIC = 0x0020,
-	IT_WEAPON = 0x0040,
-	IT_ARMOR = 0x0080,
-	IT_MOUNT = 0x0100,
-	IT_BATTLE = 0x0200,
-	IT_SPECIAL = 0x0400,
-	IT_TOOL = 0x0800,
-	IT_FOOD = 0x1000
+/// Categories of items
+enum ItemFlags
+{
+	IT_NORMAL   = 0x0001, ///< usually used in the sense of "not normal" for unusual objects
+	IT_ADVANCED = 0x0002, ///< requires advanced skills to use and produce
+	IT_TRADE    = 0x0004, ///< item is primarily for buying and selling for profit
+	IT_MAN      = 0x0008, ///< item is actually a type of man who can be recruited
+	IT_MONSTER  = 0x0010, ///< item is a monster (computer controlled entity)
+	IT_MAGIC    = 0x0020, ///< item is magical
+	IT_WEAPON   = 0x0040, ///< item can be used in combat
+	IT_ARMOR    = 0x0080, ///< item protects in combat
+	IT_MOUNT    = 0x0100, ///< item can be ridden
+	IT_BATTLE   = 0x0200, ///< item has some application in battle (like healing potions)
+	IT_SPECIAL  = 0x0400, ///< item has some other feature
+	IT_TOOL     = 0x0800, ///< item is used to make items
+	IT_FOOD     = 0x1000  ///< item can be used to support a unit
 };
 
+/// items which go into production of an item
 struct Materials
 {
-	int item;
-	int amt;
+	int item; ///< index of the input item
+	int amt;  ///< number of input items required to produce 1 batch of this item
 };
 
+/// Description of an item in the game
 class ItemType
 {
-	public:
-		const char *name;
-		const char *names;
-		const char *abr;
+public:
+	const char *name;  ///< full name of the item
+	const char *names; ///< plural
+	const char *abr;   ///< short form
 
-		enum {
-			CANTGIVE = 0x1,
-			DISABLED = 0x2,
-			NOMARKET = 0x4,
-			// This item requires ANY of its inputs, not ALL of them
-			ORINPUTS = 0x8,
-			// A number of items are produced equal to the producer's
-			// skill, based on a fixed number of inputs
-			SKILLOUT = 0x10,
-		};
-		int flags;
+	enum
+	{
+		CANTGIVE = 0x01, ///< item cannot be target of GIVE command
+		DISABLED = 0x02, ///< item is disabled in this ruleset
+		NOMARKET = 0x04, ///< item does not appear in city markets
+		ORINPUTS = 0x08, ///< item requires ANY one of its inputs (not ALL of them)
+		SKILLOUT = 0x10, ///< batch size equal to the producer's skill, based on a fixed number of inputs
+	};
+	int flags;
 
-		int pSkill; // production skill
-		int pLevel; // production skill level
-		int pMonths; // Man months required for production
-		int pOut; // How many of the item we get
-		Materials pInput[4];
+	int pSkill; ///< skill required to produce this
+	int pLevel; ///< skill level required to produce this
+	int pMonths; ///< man months required to produce this
+	int pOut; ///< how many of this we get in a batch
+	Materials pInput[4]; ///< normal production inputs
 
-		int mSkill; // magical production skill
-		int mLevel; // magical production skill level
-		int mOut; // How many of the item are conjured
-		Materials mInput[4];
+	int mSkill; ///< skill required for magical production
+	int mLevel; ///< skill level for magical production
+	int mOut; ///< how many of this are conjured in a batch
+	Materials mInput[4]; ///< inputs for magical production
 
-		int weight;
-		int type;
-		int baseprice;
-		int combat;
-		int index;
-		int battleindex;
+	int weight; ///< in units (stones?)
+	int type; ///< bitwise or of ItemFlags
+	int baseprice; ///< normal price in market
+	int combat; ///< bool? use in combat
+	int index; ///< ?combat index?
+	int battleindex; ///< ?special battle properties?
 
-		int walk;
-		int ride;
-		int fly;
-		int swim;
+	int walk; ///< carrying capacity while moving on foot
+	int ride; ///< carrying capacity while moving while mounted
+	int fly;  ///< carrying capacity while moving through air
+	int swim; ///< carrying capacity while moving through water
 
-		int hitchItem;
-		int hitchwalk;
-		// LLS
-		int mult_item;
-		int mult_val;
+	int hitchItem; ///< index of item this can be attached to for increased capacity
+	int hitchwalk; ///< added capacity
+
+	int mult_item; ///< index of item which can increase production
+	int mult_val;  ///< number of additional items produced
 };
+extern ItemType *ItemDefs;
 
-extern ItemType * ItemDefs;
-
+/// Skill specializations for men
 class ManType
 {
-	public:
-		int speciallevel;
-		int defaultlevel;
-		int skills[6];
+public:
+	int speciallevel; ///< highest level that can be attained in specialized skills
+	int defaultlevel; ///< highest level that can be attained in everything else
+	int skills[6]; ///< indexes of specialized skills
 };
+extern ManType *ManDefs;
 
-extern ManType * ManDefs;
-
+/// Properties of monsters
 class MonType
 {
-	public:
-		int attackLevel;
-		int defense[NUM_ATTACK_TYPES];
+public:
+	int attackLevel; ///< effectiveness of attack
+	int defense[NUM_ATTACK_TYPES]; ///< resistance to each attack type
 
-		int numAttacks;
-		int hits;
-		int regen;
+	int numAttacks; ///< number of attacks per round
+	int hits; ///< amount of damage absorbed before death
+	int regen; ///< number of hit points regained each round (when enabled)
 
-		int tactics;
-		int stealth;
-		int obs;
+	int tactics; ///< same as the skill for men (gives first strike)
+	int stealth; ///< same as the skill for men (avoid detection)
+	int obs;     ///< same as the skill for men (defeat stealth)
 
-		int special;
-		int specialLevel;
+	int special;
+	int specialLevel;
 
-		int silver;
-		int spoiltype;
-		int hostile; /* Percent */
-		int number;
-		const char *name;
+	int silver;
+	int spoiltype;
+	int hostile; // percent
+	int number;
+	const char *name; ///< long name
 };
+extern MonType *MonDefs;
 
-extern MonType * MonDefs;
-
-enum {
-	SLASHING,		// e.g. sword attack (This is default)
-	PIERCING,		// e.g. spear or arrow attack
-	CRUSHING,		// e.g. mace attack
-	CLEAVING,		// e.g. axe attack
-	ARMORPIERCING,	// e.g. crossbow double bow
-	MAGIC_ENERGY,	// e.g. fire, dragon breath
-	MAGIC_SPIRIT,	// e.g. black wind
-	MAGIC_WEATHER,	// e.g. tornado
+/// Attack types
+enum AttackDef
+{
+	SLASHING,		///< e.g. sharpened edge attack (This is default)
+	PIERCING,		///< e.g. spear or arrow attack
+	CRUSHING,		///< e.g. mace attack
+	CLEAVING,		///< e.g. axe attack
+	ARMORPIERCING,	///< e.g. crossbow double bow
+	MAGIC_ENERGY,	///< e.g. fire, dragon breath
+	MAGIC_SPIRIT,	///< e.g. black wind
+	MAGIC_WEATHER,	///< e.g. tornado
 	NUM_WEAPON_CLASSES
 };
 
-
+/// Properties of a weapon
 class WeaponType
 {
-	public:
-		enum {
-			NEEDSKILL = 0x1, // No bonus or use unless skilled
-			ALWAYSREADY = 0x2, // Ignore the 50% chance to attack
-			NODEFENSE = 0x4, // No combat defense against this weapon
-			NOFOOT = 0x8, // Weapon cannot be used on foot (e.g. lance)
-			NOMOUNT = 0x10, // Weapon cannot be used mounted (e.g. pike)
-			SHORT = 0x20, // Short melee weapon (e.g. shortsword, hatchet)
-			LONG = 0x40, // Long melee weapon (e.g. lance, pike)
-			RANGED = 0x80, // Missile weapon
-			NOATTACKERSKILL = 0x100, // Attacker gets no combat/skill defense.
-			RIDINGBONUS = 0x200, // Unit gets riding bonus on att and def.
-			RIDINGBONUSDEFENSE = 0x400, // Unit gets riding bonus on def only.
-		};
-		int flags;
+public:
+	enum
+	{
+		NEEDSKILL          = 0x001, ///< No bonus or use unless skilled
+		ALWAYSREADY        = 0x002, ///< Ignore the 50% chance to attack
+		NODEFENSE          = 0x004, ///< No combat defense against this weapon
+		NOFOOT             = 0x008, ///< Weapon cannot be used on foot (e.g. lance)
+		NOMOUNT            = 0x010, ///< Weapon cannot be used mounted (e.g. pike)
+		SHORT              = 0x020, ///< Short melee weapon (e.g. shortsword, hatchet)
+		LONG               = 0x040, ///< Long melee weapon (e.g. lance, pike)
+		RANGED             = 0x080, ///< Missile weapon
+		NOATTACKERSKILL    = 0x100, ///< Attacker gets no combat/skill defense.
+		RIDINGBONUS        = 0x200, ///< Unit gets riding bonus on att and def.
+		RIDINGBONUSDEFENSE = 0x400, ///< Unit gets riding bonus on def only.
+	};
+	int flags; ///< combination of the above
 
-		int baseSkill;
-		int orSkill;
+	int baseSkill;
+	int orSkill;
 
-		int weapClass;
-		int attackType;
-		//
-		// For numAttacks:
-		// - A positive number is the number of attacks per round.
-		// - A negative number is the number of rounds per attack.
-		// - NUM_ATTACKS_HALF_SKILL indicates that the weapon gives as many
-		//   attacks as the skill of the user divided by 2, rounded up.
-		// - NUM_ATTACKS_HALF_SKILL+1 indicates that the weapon gives an extra
-		//   attack above that, etc.
-		// - NUM_ATTACKS_SKILL indicates the the weapon gives as many attacks
-		//   as the skill of the user.
-		// - NUM_ATTACKS_SKILL+1 indicates the the weapon gives as many
-		//   attacks as the skill of the user + 1, etc.
-		//
-		enum {
-			NUM_ATTACKS_HALF_SKILL = 50,
-			NUM_ATTACKS_SKILL = 100,
-		};
-		int numAttacks;
+	int weapClass;
+	int attackType;
 
-		int attackBonus;
-		int defenseBonus;
-		int mountBonus;
+	// For numAttacks:
+	// - A positive number is the number of attacks per round.
+	// - A negative number is the number of rounds per attack.
+	// - NUM_ATTACKS_HALF_SKILL indicates that the weapon gives as many
+	//   attacks as the skill of the user divided by 2, rounded up.
+	// - NUM_ATTACKS_HALF_SKILL+1 indicates that the weapon gives an extra
+	//   attack above that, etc.
+	// - NUM_ATTACKS_SKILL indicates the the weapon gives as many attacks
+	//   as the skill of the user.
+	// - NUM_ATTACKS_SKILL+1 indicates the the weapon gives as many
+	//   attacks as the skill of the user + 1, etc.
+	//
+	enum
+	{
+		NUM_ATTACKS_HALF_SKILL = 50,
+		NUM_ATTACKS_SKILL = 100
+	};
+	int numAttacks; ///< 1 for typical weapons, -2 (every other) for slow ones
+
+	int attackBonus;  ///< amount added to attack combat factor
+	int defenseBonus; ///< amount added to defense combat factor
+	int mountBonus;   ///< ?
 };
-
 extern WeaponType *WeaponDefs;
 
+/// Properties for armor
 class ArmorType
 {
-	public:
-		enum {
-			USEINASSASSINATE = 0x1,
-		};
+public:
+	enum
+	{
+		USEINASSASSINATE = 0x1 ///< can be used to protect from assassination
+	};
+	int flags; ///< combination of above
 
-		int flags;
-		//
-		// Against attacks, the chance of the armor protecting the wearer
-		// is: <type>Chance / from
-		//
-		int from;
-		int saves[NUM_WEAPON_CLASSES];
+	int from; ///< denominator in protection calculation
+	int saves[NUM_WEAPON_CLASSES]; ///< numerator in calculation (by attack type)
 };
-
 extern ArmorType *ArmorDefs;
 
+/// Properties of a mount
 class MountType
 {
-	public:
-		//
-		// This is the skill needed to use this mount.
-		//
-		int skill;
+public:
+	int skill; ///< index of skill needed to use this
 
-		//
-		// This is the minimum bonus (and minimal skill level) for this mount.
-		//
-		int minBonus;
+	int minBonus; ///< minimum combat bonus (and minimal skill level) for this
+	int maxBonus; ///< maximum combat bonus
 
-		//
-		// This is the maximum bonus this mount will grant.
-		//
-		int maxBonus;
+	/// max combat bonus granted if this can normally fly but the region
+	/// doesn't allow flying mounts
+	int maxHamperedBonus;
 
-		//
-		// This is the max bonus a mount will grant if it can normally fly
-		// but the region doesn't allow flying mounts
-		int maxHamperedBonus;
-
-		// If the mount has a special effect it generates when ridden in
-		// combat
-		int mountSpecial;
-		int specialLev;
+	int mountSpecial; ///< If the mount has a special effect it generates when ridden in combat
+	int specialLev; ///< ?amount of specialness?
 };
-
 extern MountType *MountDefs;
 
+/// Properties of items for battle
 class BattleItemType
 {
-	public:
-		enum {
-			MAGEONLY = 0x1,
-			SPECIAL = 0x2,
-			SHIELD = 0x4,
-		};
+public:
+	enum
+	{
+		MAGEONLY = 0x1, ///< can only be used by those who know magic
+		SPECIAL  = 0x2, ///< special
+		SHIELD   = 0x4  ///< absorbs damage
+	};
+	int flags; ///< combination of above
 
-		int flags;
-		int itemNum;
-		int index;
-		int skillLevel;
+	int itemNum;
+	int index;
+	int skillLevel;
 };
-
 extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
-int ParseAllItems(AString *);
+int ParseAllItems(const AString *token);
 int ParseEnabledItem(AString *);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);
 AString AttType(int atype);
 
-int IsSoldier(int);
+bool IsSoldier(int);
 
-class Item : public AListElem
+/// Properties of an item held by a unit
+struct Item : public AListElem
 {
-	public:
-		Item();
-		~Item();
+	Item(int t = 0, int n = 0);
 
-		void Readin(Ainfile *);
-		void Writeout(Aoutfile *);
+	void Readin(Ainfile *f);
+	void Writeout(Aoutfile *f) const;
 
-		AString Report(int);
+	///@return a string describing this
+	AString Report(int see_illusions) const;
 
-		int type;
-		int num;
-		int selling;
+	int type; ///< index into global table
+	int num;  ///< number on hand
+	int selling; ///< ?number intending to sell?
 };
 
+/// Group of Items for a unit
 class ItemList : public AList
 {
-	public:
-		void Readin(Ainfile *);
-		void Writeout(Aoutfile *);
+public:
+	void Readin(Ainfile *f);
+	void Writeout(Aoutfile *f);
 
-		AString Report(int,int,int);
-		AString BattleReport();
+	AString Report(int obs, int see_illusions, int no_first_comma);
+	AString BattleReport();
 
-		int Weight();
-		int GetNum(int);
-		void SetNum(int,int); /* type, number */
-		int CanSell(int);
-		void Selling(int, int); /* type, number */
+	///@return sum of weights of all items
+	int Weight();
+
+	///@return number of items held matching 'type'
+	int GetNum(int type);
+	///@return number of items matching 'type' which can be sold
+	int CanSell(int type);
+
+	/// change the number of items of 'type' to 'num'
+	void SetNum(int type, int num);
+
+	/// mark 'num' items of 'type' as going to sell
+	void Selling(int type, int num);
 };
 
-extern AString ShowSpecial(int special, int level, int expandLevel,
-		int fromItem);
+AString ShowSpecial(int special, int level, int expandLevel, int fromItem);
 
 #endif

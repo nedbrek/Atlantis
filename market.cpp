@@ -31,6 +31,8 @@
 #include "items.h"
 #include "gameio.h"
 #include "gamedata.h"
+#include "gamedefs.h"
+#include "astring.h"
 
 Market::Market() {
   activity = 0;
