@@ -707,4 +707,126 @@ enum RangeDef
 	NUMRANGES
 };
 
+//----------------------------------------------------------------------------
+class DamageType
+{
+public:
+	int type;
+	int minnum;
+	int value;
+	int flags;
+	int dclass;
+	int effect;
+};
+
+//----------------------------------------------------------------------------
+class DefenseMod
+{
+public:
+	int type;
+	int val;
+};
+
+//----------------------------------------------------------------------------
+class SpecialType
+{
+public:
+	const char *specialname;
+
+	enum
+	{
+		HIT_BUILDINGIF     = 0x001, // mutually exclusive (1)
+		HIT_BUILDINGEXCEPT = 0x002, // mutually exclusive (1)
+		HIT_SOLDIERIF      = 0x004, // mutually exclusive (2)
+		HIT_SOLDIEREXCEPT  = 0x008, // mutually exclusive (2)
+		HIT_MOUNTIF        = 0x010, // mutually exclusive (2)
+		HIT_MOUNTEXCEPT    = 0x020, // mutually exclusive (2)
+		HIT_EFFECTIF       = 0x040, // mutually exclusive (3)
+		HIT_EFFECTEXCEPT   = 0x080, // mutually exclusive (3)
+		HIT_ILLUSION       = 0x100,
+		HIT_NOMONSTER      = 0x200
+	};
+	int targflags;
+
+	int buildings[3];
+	int targets[7];
+	int effects[3];
+
+	enum
+	{
+		FX_SHIELD       = 0x01,
+		FX_DAMAGE       = 0x02,
+		FX_USE_LEV      = 0x04,
+		FX_DEFBONUS     = 0x08,
+		FX_NOBUILDING   = 0x10,
+		FX_DONT_COMBINE = 0x20
+	};
+	int effectflags; ///< combination of above
+
+	int shield[4];
+	DefenseMod defs[4];
+	const char *shielddesc;
+
+	DamageType damage[4];
+	const char *spelldesc;
+	const char *spelldesc2;
+	const char *spelltarget;
+};
+extern SpecialType *SpecialDefs;
+
+//----------------------------------------------------------------------------
+class EffectType
+{
+public:
+	const char *name;
+	int attackVal;
+	DefenseMod defMods[4];
+	int cancelEffect;
+
+	enum
+	{
+		EFF_ONESHOT = 0x1,
+		EFF_NOSET   = 0x2
+	};
+	int flags; ///< combination of above
+};
+extern EffectType *EffectDefs;
+
+//----------------------------------------------------------------------------
+class HealType
+{
+public:
+	int num;
+	int rate;
+};
+extern HealType *HealDefs;
+
+//----------------------------------------------------------------------------
+class RangeType
+{
+public:
+	enum
+	{
+		RNG_NEXUS_TARGET = 0x1, ///< Can cast *to* Nexus
+		RNG_NEXUS_SOURCE = 0x2, ///< Can cast *from* Nexus
+		RNG_CROSS_LEVELS = 0x4, ///< Spell can cross levels
+		RNG_SURFACE_ONLY = 0x8  ///< Target region must be on surface
+	};
+	int flags; ///< combination of above
+
+	enum
+	{
+		RNG_ABSOLUTE = 0, ///< Range is not based on skill
+		RNG_LEVEL,        ///< Range is based on skill
+		RNG_LEVEL2,       ///< Range is based on skill level squared
+		RNG_LEVEL3,       ///< Range is based on skill level cubed
+		NUMRANGECLASSES
+	};
+	int rangeClass; ///< combination of above
+
+	int rangeMult;
+	int crossLevelPenalty; ///< How much extra distance to cross levels?
+};
+extern RangeType *RangeDefs;
+
 #endif

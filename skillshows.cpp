@@ -22,12 +22,8 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person            Comments
-// ----        ------            --------
-// 2001/Feb/23 Joseph Traub      Made skill texts runtime generated
-//
 #include "skills.h"
+#include "faction.h"
 #include "items.h"
 #include "object.h"
 #include "gamedata.h"
@@ -40,25 +36,32 @@
 #define OBJECT_ENABLED(X) (!(ObjectDefs[(X)].flags & ObjectType::DISABLED))
 #define OBJECT_DISABLED(X) (ObjectDefs[(X)].flags & ObjectType::DISABLED)
 
-
-AString *ShowSkill::Report(Faction *f)
+//----------------------------------------------------------------------------
+ShowSkill::ShowSkill(int s, int l)
+: skill(s)
+, level(l)
 {
-	if(SkillDefs[skill].flags & SkillType::DISABLED) return NULL;
+}
+
+AString* ShowSkill::Report(Faction *f)
+{
+	if (SkillDefs[skill].flags & SkillType::DISABLED)
+		return NULL;
 
 	AString *str = new AString;
 	int val;
 	RangeType *range = NULL;
 
 	// Here we pick apart the skill
-	switch (skill) {
+	switch (skill)
+	{
 		case S_FARMING:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of grain production.";
 			break;
 		case S_RANCHING:
 			if(level > 1) break;
-			*str += "This skill deals with all aspects of livestock "
-				"production.";
+			*str += "This skill deals with all aspects of livestock production.";
 			break;
 		case S_MINING:
 			if(level > 1) break;
@@ -1259,203 +1262,284 @@ AString *ShowSkill::Report(Faction *f)
 	int last = -1;
 	int last1 = -1;
 	int last2 = -1;
-	unsigned int c;
+	unsigned c;
 	int i;
 
-	// If this is a combat spell, note it.
-	if(level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT)) {
+	// If this is a combat spell, note it
+	if (level == 1 && (SkillDefs[skill].flags & SkillType::COMBAT))
+	{
 		*str += AString(" A mage with this skill can cast ") +
-			ShowSpecial(SkillDefs[skill].special, level, 0, 0);
+		   ShowSpecial(SkillDefs[skill].special, level, 0, 0);
 		*str += " In order to use this spell in combat, the mage should use "
 			"the COMBAT order to set it as his combat spell.";
 	}
 
 	// production and ability to see items
-	temp += "A unit with this skill is able to determine if a region "
-		"contains ";
+	temp += "A unit with this skill is able to determine if a region contains ";
 	temp1 += "A unit with this skill may PRODUCE ";
 	temp2 += "A unit with this skill may create ";
-	for(i = NITEMS - 1; i >= 0; i--) {
-		if(ITEM_DISABLED(i)) continue;
-		if(ItemDefs[i].mSkill==skill &&
-				ItemDefs[i].mLevel==level &&
-				last2==-1) {
+
+	for (i = NITEMS - 1; i >= 0; --i)
+	{
+		if (ITEM_DISABLED(i))
+			continue;
+
+		if (ItemDefs[i].mSkill==skill &&
+		    ItemDefs[i].mLevel==level &&
+		    last2 == -1)
+		{
 			int canmagic = 1;
-			for(c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
-				if(ItemDefs[i].mInput[c].item == -1) continue;
-				if(ITEM_DISABLED(ItemDefs[i].mInput[c].item)) {
+			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			{
+				if (ItemDefs[i].mInput[c].item == -1)
+					continue;
+
+				if (ITEM_DISABLED(ItemDefs[i].mInput[c].item))
 					canmagic = 0;
-				}
 			}
-			if(canmagic) {
+
+			if (canmagic)
 				last2 = i;
-			}
-		}
-		if(ItemDefs[i].pSkill == skill && ItemDefs[i].pLevel == level) {
-			int canmake = 1;
-			int resource = 1;
-			for(c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
-				if(ItemDefs[i].pInput[c].item == -1) continue;
-				resource = 0;
-				if(ITEM_DISABLED(ItemDefs[i].pInput[c].item)) {
-					canmake = 0;
-				}
-			}
-			if(canmake && last1 == -1) {
-				last1 = i;
-			}
-			if(resource && (ItemDefs[i].type & IT_ADVANCED) && last == -1) {
-				last = i;
-			}
 		}
 
+		if (ItemDefs[i].pSkill == skill && ItemDefs[i].pLevel == level)
+		{
+			int canmake = 1;
+			int resource = 1;
+			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			{
+				if (ItemDefs[i].pInput[c].item == -1)
+					continue;
+
+				resource = 0;
+				if (ITEM_DISABLED(ItemDefs[i].pInput[c].item))
+					canmake = 0;
+			}
+
+			if (canmake && last1 == -1)
+				last1 = i;
+
+			if (resource && (ItemDefs[i].type & IT_ADVANCED) && last == -1)
+				last = i;
+		}
 	}
-	for(i = 0; i < NITEMS; i++) {
-		if(ITEM_DISABLED(i)) continue;
+
+	for (i = 0; i < NITEMS; ++i)
+	{
+		if (ITEM_DISABLED(i))
+			continue;
+
 		int illusion = ((ItemDefs[i].type & IT_MONSTER) &&
 				(ItemDefs[i].index == MONSTER_ILLUSION));
-		if(ItemDefs[i].mSkill == skill && ItemDefs[i].mLevel == level) {
+
+		if (ItemDefs[i].mSkill == skill && ItemDefs[i].mLevel == level)
+		{
 			int canmagic = 1;
-			for(c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); c++) {
-				if(ItemDefs[i].mInput[c].item == -1) continue;
-				if(ITEM_DISABLED(ItemDefs[i].mInput[c].item)) {
+			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			{
+				if (ItemDefs[i].mInput[c].item == -1)
+					continue;
+
+				if (ITEM_DISABLED(ItemDefs[i].mInput[c].item))
 					canmagic = 0;
-				}
 			}
-			if(canmagic) {
-				if(comma2) {
-					if(last2 == i) {
-						if(comma2 > 1) temp2 += ",";
+
+			if (canmagic)
+			{
+				if (comma2)
+				{
+					if (last2 == i)
+					{
+						if (comma2 > 1)
+							temp2 += ",";
+
 						temp2 += " and ";
-					} else {
+					}
+					else
+					{
 						temp2 += ", ";
 					}
 				}
-				comma2++;
-				temp2 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
-				if(f) {
+
+				++comma2;
+				temp2 += AString(illusion ? "illusory " : "") + ItemDefs[i].names;
+
+				if (f)
 					f->DiscoverItem(i, 1, 1);
-				}
 			}
 		}
-		if(ItemDefs[i].pSkill == skill && ItemDefs[i].pLevel == level) {
+
+		if (ItemDefs[i].pSkill == skill && ItemDefs[i].pLevel == level)
+		{
 			int canmake = 1;
 			int resource = 1;
-			for(c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); c++) {
-				if(ItemDefs[i].pInput[c].item == -1) continue;
+			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			{
+				if (ItemDefs[i].pInput[c].item == -1)
+					continue;
+
 				resource = 0;
-				if(ITEM_DISABLED(ItemDefs[i].pInput[c].item)) {
+				if (ITEM_DISABLED(ItemDefs[i].pInput[c].item))
 					canmake = 0;
-				}
 			}
-			if(canmake) {
-				if(comma1) {
-					if(last1 == i) {
-						if(comma1 > 1) temp1 += ",";
+
+			if (canmake)
+			{
+				if (comma1)
+				{
+					if (last1 == i)
+					{
+						if (comma1 > 1)
+							temp1 += ",";
 						temp1 += " and ";
-					} else {
+					}
+					else
+					{
 						temp1 += ", ";
 					}
 				}
-				comma1++;
-				temp1 += AString(illusion?"illusory ":"") + ItemDefs[i].names;
-				if(f) {
+				++comma1;
+				temp1 += AString(illusion ? "illusory " : "") + ItemDefs[i].names;
+
+				if (f)
 					f->DiscoverItem(i, 1, 1);
-				}
 			}
-			if(resource && (ItemDefs[i].type & IT_ADVANCED)) {
-				if(comma) {
-					if(last == i) {
-						if(comma > 1) temp += ",";
+
+			if (resource && (ItemDefs[i].type & IT_ADVANCED))
+			{
+				if (comma)
+				{
+					if (last == i)
+					{
+						if (comma > 1)
+							temp += ",";
 						temp += " and ";
-					} else {
+					}
+					else
+					{
 						temp += ", ";
 					}
 				}
-				comma++;
-				temp += AString(illusion?"illusory ":"") + ItemDefs[i].names;
+				++comma;
+				temp += AString(illusion ? "illusory " : "") + ItemDefs[i].names;
 			}
 		}
 	}
-	if(comma1) {
-		if(!(*str == "")) *str += " ";
+
+	if (comma1)
+	{
+		if (!(*str == ""))
+			*str += " ";
 		*str += temp1 + ".";
 	}
-	if(comma) {
-		if(!(*str == "")) *str += " ";
+
+	if (comma)
+	{
+		if (!(*str == ""))
+			*str += " ";
 		*str += temp + ".";
 	}
-	if(comma2) {
-		if(!(*str == "")) *str += " ";
+
+	if (comma2)
+	{
+		if (!(*str == ""))
+			*str += " ";
 		*str += temp2 + " via magic.";
 	}
 
 	// Buildings
 	comma = 0;
 	temp = "A unit with this skill may BUILD the following structures: ";
-	for(i = 0; i < NOBJECTS; i++) {
-		if(OBJECT_DISABLED(i)) continue;
-		if(ObjectDefs[i].skill == skill && ObjectDefs[i].level == level) {
-			if(comma) temp += ", ";
+	for (i = 0; i < NOBJECTS; ++i)
+	{
+		if (OBJECT_DISABLED(i))
+			continue;
+
+		if (ObjectDefs[i].skill == skill && ObjectDefs[i].level == level)
+		{
+			if (comma)
+				temp += ", ";
 			comma = 1;
 			temp += ObjectDefs[i].name;
-			if(f) {
+			if (f)
 				f->objectshows.Add(ObjectDescription(i));
-			}
 		}
 	}
-	if(comma) {
-		if(!(*str == "")) *str += " ";
+
+	if (comma)
+	{
+		if (!(*str == ""))
+			*str += " ";
 		*str += temp + ".";
 	}
 
 	// Required skills
 	last = -1;
-	if(level == 1) {
+	if (level == 1)
+	{
 		comma = 0;
 		int found = 0;
 		temp = "This skill requires ";
-		for(c=0; c<sizeof(SkillDefs[skill].depends)/sizeof(SkillDepend); c++) {
-			if(SkillDefs[skill].depends[c].skill == -1) continue;
-			if(SKILL_DISABLED(SkillDefs[skill].depends[c].skill)) continue;
+		for (c = 0; c < sizeof(SkillDefs[skill].depends) / sizeof(SkillDepend); ++c)
+		{
+			if (SkillDefs[skill].depends[c].skill == -1)
+				continue;
+
+			if (SKILL_DISABLED(SkillDefs[skill].depends[c].skill))
+				continue;
+
 			found = 1;
-			if(last == -1) {
+			if (last == -1)
+			{
 				last = c;
 				continue;
 			}
-			temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
-				SkillDefs[skill].depends[last].level + ", ";
-			last = c;
-			comma++;
-		}
-		if(comma) {
-			temp += "and ";
-		}
-		temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
-				SkillDefs[skill].depends[last].level;
 
-		if(found) {
-			if(!(*str == "")) *str += " ";
+			temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+			   SkillDefs[skill].depends[last].level + ", ";
+			last = c;
+			++comma;
+		}
+
+		if (comma)
+			temp += "and ";
+
+		temp += SkillStrs(SkillDefs[skill].depends[last].skill) + " " +
+		      SkillDefs[skill].depends[last].level;
+
+		if (found)
+		{
+			if (!(*str == ""))
+				*str += " ";
 			*str += temp + " to begin to study.";
 		}
 	}
 
-	if(level == 1) {
-		if(SkillDefs[skill].cost) {
-			if(!(*str == "")) *str += " ";
+	if (level == 1)
+	{
+		if (SkillDefs[skill].cost)
+		{
+			if (!(*str == ""))
+				*str += " ";
 			*str += AString("This skill costs ") + SkillDefs[skill].cost +
-				" silver per month of study.";
+			   " silver per month of study.";
 		}
-		if(SkillDefs[skill].flags & SkillType::SLOWSTUDY) {
-			if(!(*str == "")) *str += " ";
+
+		if (SkillDefs[skill].flags & SkillType::SLOWSTUDY)
+		{
+			if (!(*str == ""))
+				*str += " ";
 			*str += "This skill is studied at one half the normal speed.";
 		}
 	}
 
 	temp1 = SkillStrs(skill) + " " + level + ": ";
-	if(*str == "") {
+	if (*str == "")
+	{
 		*str = temp1 + "No skill report.";
-	} else {
+	}
+	else
+	{
 		*str = temp1 + *str;
 	}
 

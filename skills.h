@@ -1,3 +1,5 @@
+#ifndef SKILLS_H
+#define SKILLS_H
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,25 +24,15 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comment
-// ----        ------          -------
-// 2001/Feb/18 Joseph Traub    Added apprentice support from Lacandon Conquest
-// 2001/Feb/18 Joseph Traub    Added support for conquest
-//
-#ifndef SKILL_CLASS
-#define SKILL_CLASS
-
-class Faction;
-class Skill;
-class SkillList;
-
-#include "fileio.h"
-#include "astring.h"
-#include "gamedefs.h"
 #include "alist.h"
 
-/* For dependencies:
+class Ainfile;
+class Aoutfile;
+class AString;
+class Faction;
+
+//----------------------------------------------------------------------------
+/* Dependencies:
   A value of depend == -1 indicates no more dependencies.
   If depend is set to a skill, to study this skill, you must know
   the depended skill at level equal to (at least) the level in the
@@ -56,201 +48,115 @@ class SkillList;
   SANDLE 4    SHOE 4
   SANDLE 5    SHOE 5
 */
-
 struct SkillDepend
 {
-	int skill;
-	int level;
+	int skill; ///< index of the skill depended on
+	int level; ///< level required in prerequisite skill
 };
 
+//----------------------------------------------------------------------------
+/// Global definition of a skill
 class SkillType
 {
-	public:
-		const char * name;
-		const char * abbr;
-		int cost;
+public:
+	const char *name; ///< long name
+	const char *abbr; ///< short name
+	int cost; ///< in silver, per man-month
 
-		enum {
-			MAGIC = 0x1,
-			COMBAT = 0x2,
-			CAST = 0x4,
-			FOUNDATION = 0x8,
-			APPRENTICE = 0x10,
-			DISABLED = 0x20,
-			SLOWSTUDY = 0x40,
-		};
-		int flags;
+	enum
+	{
+		MAGIC      = 0x01, ///< related to magic
+		COMBAT     = 0x02, ///< can help cause damage
+		CAST       = 0x04, ///< must be cast
+		FOUNDATION = 0x08, ///< a foundation of magic
+		APPRENTICE = 0x10, ///< helps users of magic items
+		DISABLED   = 0x20, ///< disabled in this game
+		SLOWSTUDY  = 0x40  ///< study rate halved outside buildings
+	};
+	int flags; ///< combination of above
 
-		//
-		// special for combat spells only
-		//
-		int special;
+	int special; ///< (for combat spells only)
 
-		// range class for ranged skills (-1 for all others)
-		int rangeIndex;
+	int rangeIndex; ///< range class for ranged skills (-1 for all others)
 
-		SkillDepend depends[3];
+	SkillDepend depends[3]; ///< prerequisites
 };
-extern SkillType * SkillDefs;
+extern SkillType *SkillDefs; ///< global table of skill definitions
 
-int ParseSkill(AString *);
-AString SkillStrs(int);
+///@return index for skill named by 'token' (-1 if not found)
+int ParseSkill(const AString *token);
 
-class ShowType {
-	public:
-		int skill;
-		int level;
-		char * desc;
-};
-extern ShowType * ShowDefs;
+///@return long name and short name together ("Long Name [LNNM]")
+AString SkillStrs(int skill);
 
-int SkillCost(int);
-int SkillMax(int,int); /* skill, race */
-int GetLevelByDays(int);
-int GetDaysByLevel(int);
+///@return cost (in silver) to study 'skill' for one man for one month
+int SkillCost(int skill);
 
-class ShowSkill : public AListElem {
-	public:
-		ShowSkill(int,int);
+///@return the maximum level that can be studied in 'skill' for a man of type 'race'
+int SkillMax(int skill, int race);
 
-		AString * Report(Faction *);
+///@return level corresponding to study of 'days per man'
+int GetLevelByDays(int days_per_man);
 
-		int skill;
-		int level;
-};
+///@return number of days of study corresponding to 'level'
+int GetDaysByLevel(int level);
 
-class Skill : public AListElem {
-	public:
-		void Readin(Ainfile *);
-		void Writeout(Aoutfile *);
+//----------------------------------------------------------------------------
+/// Description of a skill (for player reports)
+class ShowSkill : public AListElem
+{
+public:
+	ShowSkill(int s, int l);
 
-		Skill * Split(int,int); /* total num, num leaving */
+	///@return new string with description of this (NULL if disabled)
+	AString* Report(Faction *f);
 
-		int type;
-		unsigned int days;
+	int skill; ///< index into global table
+	int level; ///< level achieved
 };
 
-class SkillList : public AList {
-	public:
-		int GetDays(int); /* Skill */
-		void SetDays(int,int); /* Skill, days */
-		void Combine(SkillList *);
-		SkillList * Split(int,int); /* total men, num to split */
-		AString Report(int); /* Number of men */
-		void Readin(Ainfile *);
-		void Writeout(Aoutfile *);
+//----------------------------------------------------------------------------
+/// One skill known by a unit of men
+class Skill : public AListElem
+{
+public:
+	Skill(int t = 0, unsigned d = 0);
+
+	void Readin(Ainfile *f);
+	void Writeout(Aoutfile *f) const;
+
+	/// adjust this 'days' where some men leave (out of the total)
+	///@return new Skill of men leaving
+	Skill* Split(int total, int num_leaving);
+
+	int      type; ///< index into global table
+	unsigned days; ///< total number of man-days studied
 };
 
-class HealType {
-	public:
-		int num;
-		int rate;
+//----------------------------------------------------------------------------
+/// All the skills known by a unit of men
+class SkillList : public AList
+{
+public:
+	void Readin(Ainfile *f);
+	void Writeout(Aoutfile *f);
+
+	///@return string detailing this
+	AString Report(int num_men);
+
+	/// foreach skill in this, add corresponding days from 'b'
+	///@NOTE: skills in 'b' not in this are not added
+	void Combine(SkillList *b);
+
+	///@return new list corresponding to the new unit, adjust this
+	SkillList* Split(int total_men, int num_leaving);
+
+	///@return number of days of study for 'skill'
+	int GetDays(int skill);
+
+	/// set days of study for 'skill' to 'new_days' (0 to remove)
+	void SetDays(int skill, int new_days);
 };
-extern HealType * HealDefs;
-
-class DamageType {
-	public:
-		int type;
-		int minnum;
-		int value;
-		int flags;
-		int dclass;
-		int effect;
-};
-
-class ShieldType {
-	public:
-		int type;
-		int value;
-}
-;
-class DefenseMod {
-	public:
-		int type;
-		int val;
-};
-
-class SpecialType {
-	public:
-		const char *specialname;
-
-		enum {
-			HIT_BUILDINGIF		= 0x001,	/* mutually exclusive (1) */
-			HIT_BUILDINGEXCEPT	= 0x002,	/* mutually exclusive (1) */
-			HIT_SOLDIERIF		= 0x004,	/* mutually exclusive (2) */
-			HIT_SOLDIEREXCEPT	= 0x008,	/* mutually exclusive (2) */
-			HIT_MOUNTIF			= 0x010,	/* mutually exclusive (2) */
-			HIT_MOUNTEXCEPT		= 0x020,	/* mutually exclusive (2) */
-			HIT_EFFECTIF		= 0x040,	/* mutually exclusive (3) */
-			HIT_EFFECTEXCEPT	= 0x080,	/* mutually exclusive (3) */
-			HIT_ILLUSION		= 0x100,
-			HIT_NOMONSTER		= 0x200,
-		};
-		int targflags;
-
-		int buildings[3];
-		int targets[7];
-		int effects[3];
-
-		enum {
-			FX_SHIELD	=	0x01,
-			FX_DAMAGE	=	0x02,
-			FX_USE_LEV	=	0x04,
-			FX_DEFBONUS	=	0x08,
-			FX_NOBUILDING =	0x10,
-			FX_DONT_COMBINE=0x20,
-		};
-		int effectflags;
-
-		int shield[4];
-		DefenseMod defs[4];
-		const char *shielddesc;
-
-		DamageType damage[4];
-		const char *spelldesc;
-		const char *spelldesc2;
-		const char *spelltarget;
-};
-extern SpecialType *SpecialDefs;
-
-class EffectType {
-	public:
-		const char *name;
-		int attackVal;
-		DefenseMod defMods[4];
-		int cancelEffect;
-
-		enum {
-			EFF_ONESHOT	= 0x001,
-			EFF_NOSET = 0x002,
-		};
-		int flags;
-};
-extern EffectType *EffectDefs;
-
-class RangeType {
-	public:
-		enum {
-			RNG_NEXUS_TARGET = 0x0001,	// Can cast *to* Nexus
-			RNG_NEXUS_SOURCE = 0x0002,	// Can cast *from* Nexus
-			RNG_CROSS_LEVELS = 0x0004,	// Spell can cross levels
-			RNG_SURFACE_ONLY = 0x0008,	// Target region must be on surface
-		};
-		int flags;
-
-		enum {
-			RNG_ABSOLUTE = 0,	// Range is not based on skill
-			RNG_LEVEL,			// Range is based on skill
-			RNG_LEVEL2,			// Range is based on skill level squared
-			RNG_LEVEL3,			// Range is based on skill level cubed
-			NUMRANGECLASSES
-		};
-		int rangeClass;
-
-		int rangeMult;
-
-		int crossLevelPenalty;	// How much extra distance to cross levels?
-};
-extern RangeType *RangeDefs;
 
 #endif
+
