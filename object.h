@@ -1,3 +1,5 @@
+#ifndef OBJECT_CLASS
+#define OBJECT_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,103 +24,140 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/21	Azthar Septragen	Added roads.
-#ifndef OBJECT_CLASS
-#define OBJECT_CLASS
-
-class Object;
-
 #include "alist.h"
-#include "fileio.h"
-#include "gamedefs.h"
-#include "faction.h"
+#include "helper.h"
+class Ainfile;
+class Aoutfile;
+class ARegion;
+class Areport;
+class AString;
+class Faction;
+class Unit;
+class UnitId;
 
+//----------------------------------------------------------------------------
 #define I_WOOD_OR_STONE -2
 
-class ObjectType {
-	public:
-		const char *name;
-		enum {
-			DISABLED		= 0x001,
-			NOMONSTERGROWTH	= 0x002,
-			NEVERDECAY		= 0x004,
-			CANENTER		= 0x008,
-			CANMODIFY		= 0x020,
-		};
-		int flags;
+/// Global definition of an in-game object.
+/// Objects reside in regions
+class ObjectType
+{
+public:
+	const char *name; ///< name of the object
 
-		int protect;
-		int capacity;
-		int sailors;
-		int maxMages;
+	enum
+	{
+		DISABLED        = 0x01, ///< not available in this game
+		NOMONSTERGROWTH = 0x02,
+		NEVERDECAY      = 0x04, ///< not subject to decay
+		CANENTER        = 0x08,
+		CANMODIFY       = 0x20
+	};
+	int flags; ///< combination of above
 
-		int item;
-		int cost;
-		int skill;
-		int level;
+	int protect;  ///< adds to the defense of units inside it
+	int capacity; ///< denotes a ship, which has some carrying capacity
+	int sailors;  ///< amount of sailing skill required to run a ship
+	int maxMages; ///< maximum number of mages who can study in the structure
 
-		int maxMaintenance;
-		int maxMonthlyDecay;
-		int maintFactor;
+	int item;  ///< index of input item required for construction of this
+	int cost;  ///< number of the items required
+	int skill; ///< index of the skill required for construction of this
+	int level; ///< level of the skill required for construction of this
 
-		int monster;
+	int maxMaintenance; ///< max damage before decay sets in
+	int maxMonthlyDecay; ///< decay rate
+	int maintFactor; ///< number of input items required to repair
 
-		int productionAided;
+	int monster; ///< can monsters lair here (-1 for no)
+
+	int productionAided; ///< item index that receives a production boost from this
 };
+extern ObjectType *const ObjectDefs; ///< global table of object definitions
 
-extern ObjectType * ObjectDefs;
+///@return a new string with a description of the item type 'obj'
+AString* ObjectDescription(int obj);
 
-AString *ObjectDescription(int obj);
+///@return object index for 'token' (-1 if not found or disabled)
+int ParseObject(AString *token);
 
-int ParseObject(AString *);
-
+///@return 1 if object has capacity, else 0
 int ObjectIsShip(int);
 
+/// Instance of an object in a region
 class Object : public AListElem
 {
-	public:
-		Object( ARegion *region );
-		~Object();
+public:
+	/// constructor
+	Object(ARegion *region);
+	/// destructor
+	~Object();
 
-		void Readin( Ainfile *f, AList *, ATL_VER v );
-		void Writeout( Aoutfile *f );
-		void Report(Areport *,Faction *,int,int,int, int,int,int, int);
+	/// read from 'f'
+	void Readin(Ainfile *f, AList *factions, ATL_VER ver);
 
-		void SetName(AString *);
-		void SetDescribe(AString *);
+	/// write to 'f'
+	void Writeout(Aoutfile *f);
 
-		Unit *GetUnit(int);
-		Unit *GetUnitAlias(int,int); /* alias, faction number */
-		Unit *GetUnitId(UnitId *,int);
+	/// write report to 'f'
+	void Report(Areport *f, Faction *fac, int obs, int truesight, int detfac, int passobs, int passtrue, int passdetfac, int present);
 
-		// AS
-		int IsRoad();
+	/// change name to 's', takes ownership
+	void SetName(AString *s);
 
-		int IsBoat();
-		int IsBuilding();
-		int CanModify();
-		int CanEnter(ARegion *,Unit *);
-		Unit *ForbiddenBy(ARegion *, Unit *);
-		Unit *GetOwner();
+	/// change user description to 's', takes ownership
+	void SetDescribe(AString *s);
 
-		void SetPrevDir(int);
-		void MoveObject( ARegion *toreg );
+	///@return the unit matching 'num'
+	Unit* GetUnit(int num);
 
-		AString *name;
-		AString *describe;
-		ARegion *region;
-		int inner;
-		int num;
-		int type;
-		int incomplete;
-		int capacity;
-		int runes;
-		int prevdir;
-		int mages;
-		AList units;
+	///@return unit matching 'alias' with formfaction 'faction' (or faction)
+	Unit* GetUnitAlias(int alias, int faction);
+
+	///@return unit according to 'id'
+	Unit* GetUnitId(UnitId *id, int faction);
+
+	///@return 1 if this is a road, else 0
+	int IsRoad();
+
+	///@return 1 if this has some capacity
+	int IsBoat();
+
+	///@return 1 if this can protect units
+	int IsBuilding();
+
+	///@return 1 if the object can be modified (have its name and description changed)
+	int CanModify();
+
+	///@return 1 if 'u' can enter this
+	int CanEnter(ARegion *reg, Unit *u);
+
+	///@return the unit forbidding entry to 'u'
+	Unit* ForbiddenBy(ARegion *reg, Unit *u);
+
+	///@return the first populated unit in this
+	Unit* GetOwner();
+
+	/// set the previous direction
+	void SetPrevDir(int newdir);
+
+	/// move object to 'toreg'
+	void MoveObject(ARegion *toreg);
+
+public: // data
+	AString *name; ///< type name
+	AString *describe; ///< user description
+	ARegion *region; ///< region location
+	int inner; ///< contains inner location
+	int num; ///< quantity
+	int type; ///< index into global table
+	int incomplete; ///< still under construction
+	int capacity; ///< carrying capacity (on water)
+	int runes; ///< (bool?) has been protected with runes
+	int prevdir; ///< previous direction (trivial portage?)
+	int mages; ///< maximum number of mages that can be inside
+	AList units; ///< units inside
 };
 
 #endif
+
