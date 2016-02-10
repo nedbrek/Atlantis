@@ -3052,7 +3052,7 @@ static ObjectType ot[] =
 	 -1,-1},
 };
 
-ObjectType * ObjectDefs = ot;
+ObjectType *const ObjectDefs = ot;
 
 //
 // Table of terrain types.
