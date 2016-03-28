@@ -59,4 +59,8 @@ typedef unsigned int BITFIELD;
 //
 #define SAFE_DELETE( x ) delete ( x ); x = 0;
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 #endif

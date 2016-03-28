@@ -39,6 +39,7 @@ class Game;
 #include "faction.h"
 #include "production.h"
 #include "object.h"
+#include "orders.h"
 
 #define CURRENT_ATL_VER MAKE_ATL_VER( 4, 1, 0 )
 

@@ -34,6 +34,8 @@ class Army;
 #include "object.h"
 #include "shields.h"
 #include "helper.h"
+#include "astring.h"
+class Battle;
 
 #define SPECIAL_NONE 0
 

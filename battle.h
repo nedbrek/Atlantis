@@ -32,6 +32,7 @@ class Battle;
 #include "fileio.h"
 #include "army.h"
 #include "items.h"
+class ARegionList;
 
 enum {
 	ASS_NONE,

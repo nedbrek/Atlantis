@@ -24,6 +24,8 @@
 // END A3HEADER
 #include "battle.h"
 #include "gamedata.h"
+#include "gamedefs.h"
+#include "gameio.h"
 
 void Soldier::SetupHealing()
 {

@@ -26,7 +26,11 @@
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
+#include "faction.h"
 #include "unit.h"
+#include "gamedefs.h"
+#include "fileio.h"
+#include "astring.h"
 
 int ParseObject(AString *token)
 {
