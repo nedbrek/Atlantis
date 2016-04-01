@@ -1,3 +1,5 @@
+#ifndef MARKET_CLASS
+#define MARKET_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,48 +24,52 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef MARKET_CLASS
-#define MARKET_CLASS
-
 #include "alist.h"
-#include "fileio.h"
+class Ainfile;
+class Aoutfile;
+class AString;
 
-enum {
-  M_BUY,
-  M_SELL
+/// Types of market listings
+enum
+{
+	M_BUY,
+	M_SELL
 };
 
-class Market : public AListElem {
+/// One item in a market
+class Market : public AListElem
+{
 public:
-  Market();
+	Market();
 
-  /* type, item, price, amount, minpop, maxpop, minamt, maxamt */
-  Market(int,int,int,int,int,int,int,int);
+	Market(int type, int item, int price, int amount, int minpop, int maxpop, int minamt, int maxamt);
 
-  int type;
-  int item;
-  int price;
-  int amount;
-  
-  int minpop;
-  int maxpop;
-  int minamt;
-  int maxamt;
+	void PostTurn(int pop, int wages);
+	void Writeout(Aoutfile *f);
+	void Readin(Ainfile *f);
+	AString Report() const;
 
-  int baseprice;
-  int activity;
+	int type; ///< buy or sell
+	int item; ///< item index
+	int price; ///< in silver
+	int amount; ///< max number per turn
 
-  void PostTurn(int,int);
-  void Writeout(Aoutfile * f);
-  void Readin(Ainfile * f);
-  AString Report();
+	int minpop;
+	int maxpop;
+	int minamt;
+	int maxamt;
+
+	int baseprice;
+	int activity;
 };
 
-class MarketList : public AList {
+/// All items in a market
+class MarketList : public AList
+{
 public:
-  void PostTurn(int,int);
-  void Writeout(Aoutfile * f);
-  void Readin(Ainfile * f);
+	void PostTurn(int pop, int wages);
+	void Writeout(Aoutfile *f);
+	void Readin(Ainfile *f);
 };
 
 #endif
