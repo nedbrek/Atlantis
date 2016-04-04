@@ -23,6 +23,8 @@
 //
 // END A3HEADER
 #include "production.h"
+#include "fileio.h"
+#include "gamedefs.h"
 #include "gameio.h"
 #include "items.h"
 #include "gamedata.h"
@@ -30,94 +32,98 @@
 
 Production::Production()
 {
-    itemtype = -1;
-    amount = 0;
-    baseamount = 0;
-    level = 0;
-    productivity = 0;
-    skill = -1;
+	itemtype = -1;
+	amount = 0;
+	baseamount = 0;
+	level = 0;
+	productivity = 0;
+	skill = -1;
 }
 
-Production::Production(int it,int maxamt)
+Production::Production(int it, int maxamt)
 {
-    itemtype = it;
-    amount = maxamt;
-    if( Globals->RANDOM_ECONOMY )
-    {
-        amount += getrandom(maxamt);
-    }
-    baseamount = amount;
-    level = 1;
-    productivity = 1;
-    skill = ItemDefs[it].pSkill;
+	itemtype = it;
+	amount = maxamt;
+	if (Globals->RANDOM_ECONOMY)
+	{
+		amount += getrandom(maxamt);
+	}
+	baseamount = amount;
+	level = 1;
+	productivity = 1;
+	skill = ItemDefs[it].pSkill;
 }
 
-void Production::Writeout(Aoutfile * f)
+void Production::Writeout(Aoutfile *f)
 {
-    f->PutInt(itemtype);
-    f->PutInt(amount);
-    f->PutInt(baseamount);
-    f->PutInt(skill);
-    f->PutInt(level);
-    f->PutInt(productivity);
+	f->PutInt(itemtype);
+	f->PutInt(amount);
+	f->PutInt(baseamount);
+	f->PutInt(skill);
+	f->PutInt(level);
+	f->PutInt(productivity);
 }
 
-void Production::Readin(Ainfile * f)
+void Production::Readin(Ainfile *f)
 {
-    itemtype = f->GetInt();
-    amount = f->GetInt();
-    baseamount = f->GetInt();
-    skill = f->GetInt();
-    level = f->GetInt();
-    productivity = f->GetInt();
-    if (itemtype != I_SILVER)
-    {
-        skill = ItemDefs[itemtype].pSkill;
-    }
+	itemtype = f->GetInt();
+	amount = f->GetInt();
+	baseamount = f->GetInt();
+	skill = f->GetInt();
+	level = f->GetInt();
+	productivity = f->GetInt();
+	if (itemtype != I_SILVER)
+	{
+		skill = ItemDefs[itemtype].pSkill;
+	}
 }
 
 AString Production::WriteReport()
 {
-    AString temp = ItemString(itemtype,amount);
-    return temp;
+	return ItemString(itemtype, amount);
 }
 
-void ProductionList::Writeout(Aoutfile * f)
+//----------------------------------------------------------------------------
+void ProductionList::Writeout(Aoutfile *f)
 {
-    f->PutInt(Num());
-    forlist(this) {
-        ((Production *) elem)->Writeout(f);
-    }
+	f->PutInt(Num());
+	forlist(this)
+	{
+		((Production*)elem)->Writeout(f);
+	}
 }
 
-void ProductionList::Readin(Ainfile * f)
+void ProductionList::Readin(Ainfile *f)
 {
-    int n = f->GetInt();
-    for (int i=0; i<n; i++)
-    {
-        Production * p = new Production;
-        p->Readin(f);
-        Add(p);
-    }
-}
-	
-Production * ProductionList::GetProd(int t,int s)
-{
-    forlist(this) {
-        Production * p = (Production *) elem;
-        if (p->itemtype == t && p->skill == s) return p;
-    }
-    return 0;
+	const int n = f->GetInt();
+	for (int i = 0; i < n; ++i)
+	{
+		Production *p = new Production;
+		p->Readin(f);
+		Add(p);
+	}
 }
 
-void ProductionList::AddProd(Production * p)
+Production* ProductionList::GetProd(int t, int s)
 {
-    Production * p2 = GetProd(p->itemtype,p->skill);
-    if (p2)
-    {
-        Remove(p2);
-        delete p2;
-    }
-	
-    Add(p);
+	forlist(this)
+	{
+		Production *p = (Production*)elem;
+		if (p->itemtype == t && p->skill == s)
+			return p;
+	}
+	return NULL;
 }
+
+void ProductionList::AddProd(Production *p)
+{
+	Production *p2 = GetProd(p->itemtype, p->skill);
+	if (p2)
+	{
+		Remove(p2);
+		delete p2;
+	}
+
+	Add(p);
+}
+

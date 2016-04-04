@@ -1,3 +1,5 @@
+#ifndef PRODUCTION_CLASS
+#define PRODUCTION_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,41 +24,45 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef PRODUCTION_CLASS
-#define PRODUCTION_CLASS
-
-#include "gamedefs.h"
 #include "alist.h"
-#include "fileio.h"
+class Ainfile;
+class Aoutfile;
+class AString;
 
-#define P_BIG 40
-#define P_SMALL 20
-
-class Production : public AListElem {
+/// One unit of production
+class Production : public AListElem
+{
 public:
-  Production(int,int); /* item type, amt max */
-  Production();
-  
-  void Writeout(Aoutfile *);
-  void Readin(Ainfile *);
-  AString WriteReport();
-  
-  int itemtype;
-  int baseamount;
-  int amount;
-  int skill;
-  int level;
-  int productivity;
-  int activity;
+	Production(int item_type, int max_amt);
+	Production();
+
+	void Writeout(Aoutfile *f);
+	void Readin(Ainfile *f);
+
+	///@NOTE does not write anywhere, @return description
+	AString WriteReport();
+
+	int itemtype;
+	int baseamount;
+	int amount;
+	int skill;
+	int level;
+	int productivity;
+	int activity;
 };
 
-class ProductionList : public AList {
+/// A list of production items
+class ProductionList : public AList
+{
 public:
-  Production * GetProd(int,int); /* item type, skill */
-  void AddProd(Production *);
-  
-  void Writeout(Aoutfile *);
-  void Readin(Ainfile *);
+	Production* GetProd(int item_type, int skill);
+
+	/// add 'p' to this, removes any pre-existing production that matches
+	void AddProd(Production *p);
+
+	void Writeout(Aoutfile *f);
+	void Readin(Ainfile *f);
 };
 
 #endif
+
