@@ -23,8 +23,11 @@
 //
 // END A3HEADER
 #include "orders.h"
+#include "unit.h"
+#include "astring.h"
 
-const char *od[] = {
+const char *const od[] =
+{
 	"#atlantis",
 	"#end",
 	"unit",
@@ -87,37 +90,41 @@ const char *od[] = {
 	"work",
 };
 
-const char* *OrderStrs = od;
+const char* const *OrderStrs = od;
 
-int Parse1Order(AString * token)
+int Parse1Order(AString *token)
 {
-	for (int i=0; i<NORDERS; i++)
-		if (*token == OrderStrs[i]) return i;
+	for (int i = 0; i < NORDERS; ++i)
+		if (*token == OrderStrs[i])
+			return i;
+
 	return -1;
 }
 
-Order::Order()
+Order::Order(int o)
+: type(o)
 {
-	type = NORDERS;
 }
 
-Order::~Order() {
+Order::~Order()
+{
 }
 
 ExchangeOrder::ExchangeOrder()
+: Order(O_EXCHANGE)
 {
-	type = O_EXCHANGE;
 	exchangeStatus = -1;
+	target = NULL;
 }
 
 ExchangeOrder::~ExchangeOrder()
 {
-	if(target) delete target;
+	delete target;
 }
 
 TurnOrder::TurnOrder()
+: Order(O_TURN)
 {
-	type = O_TURN;
 	repeating = 0;
 }
 
@@ -125,9 +132,9 @@ TurnOrder::~TurnOrder()
 {
 }
 
-MoveOrder::MoveOrder()
+MoveOrder::MoveOrder(int t)
+: Order(t)
 {
-	type = O_MOVE;
 }
 
 MoveOrder::~MoveOrder()
@@ -135,8 +142,8 @@ MoveOrder::~MoveOrder()
 }
 
 ForgetOrder::ForgetOrder()
+: Order(O_FORGET)
 {
-	type = O_FORGET;
 }
 
 ForgetOrder::~ForgetOrder()
@@ -144,8 +151,8 @@ ForgetOrder::~ForgetOrder()
 }
 
 WithdrawOrder::WithdrawOrder()
+: Order(O_WITHDRAW)
 {
-	type = O_WITHDRAW;
 }
 
 WithdrawOrder::~WithdrawOrder()
@@ -153,18 +160,19 @@ WithdrawOrder::~WithdrawOrder()
 }
 
 GiveOrder::GiveOrder()
+: Order(O_GIVE)
 {
-	type = O_GIVE;
+	target = NULL;
 }
 
 GiveOrder::~GiveOrder()
 {
-	if(target) delete target;
+	delete target;
 }
 
 StudyOrder::StudyOrder()
+: Order(O_STUDY)
 {
-	type = O_STUDY;
 }
 
 StudyOrder::~StudyOrder()
@@ -172,8 +180,8 @@ StudyOrder::~StudyOrder()
 }
 
 TeachOrder::TeachOrder()
+: Order(O_TEACH)
 {
-	type = O_TEACH;
 }
 
 TeachOrder::~TeachOrder()
@@ -181,8 +189,8 @@ TeachOrder::~TeachOrder()
 }
 
 ProduceOrder::ProduceOrder()
+: Order(O_PRODUCE)
 {
-	type = O_PRODUCE;
 }
 
 ProduceOrder::~ProduceOrder()
@@ -190,8 +198,8 @@ ProduceOrder::~ProduceOrder()
 }
 
 BuyOrder::BuyOrder()
+: Order(O_BUY)
 {
-	type = O_BUY;
 }
 
 BuyOrder::~BuyOrder()
@@ -199,8 +207,8 @@ BuyOrder::~BuyOrder()
 }
 
 SellOrder::SellOrder()
+: Order(O_SELL)
 {
-	type = O_SELL;
 }
 
 SellOrder::~SellOrder()
@@ -208,8 +216,8 @@ SellOrder::~SellOrder()
 }
 
 AttackOrder::AttackOrder()
+: Order(O_ATTACK)
 {
-	type = O_ATTACK;
 }
 
 AttackOrder::~AttackOrder()
@@ -217,18 +225,19 @@ AttackOrder::~AttackOrder()
 }
 
 BuildOrder::BuildOrder()
+: Order(O_BUILD)
 {
-	type = O_BUILD;
+	target = NULL;
 }
 
 BuildOrder::~BuildOrder()
 {
-	if(target) delete target;
+	delete target;
 }
 
 SailOrder::SailOrder()
+: Order(O_SAIL)
 {
-	type = O_SAIL;
 }
 
 SailOrder::~SailOrder()
@@ -236,8 +245,8 @@ SailOrder::~SailOrder()
 }
 
 FindOrder::FindOrder()
+: Order(O_FIND)
 {
-	type = O_FIND;
 }
 
 FindOrder::~FindOrder()
@@ -245,28 +254,30 @@ FindOrder::~FindOrder()
 }
 
 StealOrder::StealOrder()
+: Order(O_STEAL)
 {
-	type = O_STEAL;
+	target = NULL;
 }
 
 StealOrder::~StealOrder()
 {
-	if (target) delete target;
+	delete target;
 }
 
 AssassinateOrder::AssassinateOrder()
+: Order(O_ASSASSINATE)
 {
-	type = O_ASSASSINATE;
+	target = NULL;
 }
 
 AssassinateOrder::~AssassinateOrder()
 {
-	if (target) delete target;
+	delete target;
 }
 
 CastOrder::CastOrder()
+: Order(O_CAST)
 {
-	type = O_CAST;
 }
 
 CastOrder::~CastOrder()
@@ -275,7 +286,7 @@ CastOrder::~CastOrder()
 
 CastMindOrder::CastMindOrder()
 {
-	id = 0;
+	id = NULL;
 }
 
 CastMindOrder::~CastMindOrder()
@@ -316,8 +327,8 @@ CastUnitsOrder::~CastUnitsOrder()
 }
 
 EvictOrder::EvictOrder()
+: Order(O_EVICT)
 {
-	type = O_EVICT;
 }
 
 EvictOrder::~EvictOrder()

@@ -1,3 +1,5 @@
+#ifndef ORDERS_CLASS
+#define ORDERS_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,37 +24,13 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ORDERS_CLASS
-#define ORDERS_CLASS
-
-class Order;
-class AttackOrder;
-class MoveOrder;
-class WithdrawOrder;
-class GiveOrder;
-class StudyOrder;
-class TeachOrder;
-class SellOrder;
-class BuyOrder;
-class ProduceOrder;
-class BuildOrder;
-class SailOrder;
-class FindOrder;
-class StealOrder;
-class AssassinateOrder;
-class CastOrder;
-class CastMindOrder;
-class CastRegionOrder;
-class TeleportOrder;
-class ForgetOrder;
-class EvictOrder;
-
-#include "unit.h"
-#include "gamedefs.h"
-#include "astring.h"
 #include "alist.h"
+class AString;
+class UnitId;
 
-enum {
+//----------------------------------------------------------------------------
+enum
+{
 	O_ATLANTIS,
 	O_END,
 	O_UNIT,
@@ -116,7 +94,9 @@ enum {
 	NORDERS
 };
 
-enum {
+//----------------------------------------------------------------------------
+enum
+{
 	M_NONE,
 	M_WALK,
 	M_RIDE,
@@ -124,242 +104,298 @@ enum {
 	M_SAIL
 };
 
-#define MOVE_IN 98
+//----------------------------------------------------------------------------
+#define MOVE_IN  98
 #define MOVE_OUT 99
-/* Enter is MOVE_ENTER + num of object */
+// Enter is MOVE_ENTER + num of object
 #define MOVE_ENTER 100
 
-extern const char* *OrderStrs;
+//----------------------------------------------------------------------------
+extern const char* const *OrderStrs;
 
+//----------------------------------------------------------------------------
 int Parse1Order(AString *);
 
-class Order : public AListElem {
-	public:
-		Order();
-		virtual ~Order();
-
-		int type;
+//----------------------------------------------------------------------------
+/// One segment of movement
+class MoveDir : public AListElem
+{
+public:
+	int dir;
 };
 
-class MoveDir : public AListElem {
-	public:
-		int dir;
+//----------------------------------------------------------------------------
+/// Base class for all orders
+class Order : public AListElem
+{
+public:
+	explicit Order(int t);
+	virtual ~Order();
+
+	const int type;
 };
 
-class MoveOrder : public Order {
-	public:
-		MoveOrder();
-		~MoveOrder();
+/// Move to adjacent hex or enter/leave an object
+class MoveOrder : public Order
+{
+public:
+	MoveOrder(int t = O_MOVE);
+	~MoveOrder();
 
-		int advancing;
-		AList dirs;
+	int advancing;
+	AList dirs;
 };
 
-class WithdrawOrder : public Order {
-	public:
-		WithdrawOrder();
-		~WithdrawOrder();
+/// Take funds or items from the faction bank
+class WithdrawOrder : public Order
+{
+public:
+	WithdrawOrder();
+	~WithdrawOrder();
 
-		int item;
-		int amount;
+	int item;
+	int amount;
 };
 
-class GiveOrder : public Order {
-	public:
-		GiveOrder();
-		~GiveOrder();
+/// Transfer items to another unit
+class GiveOrder : public Order
+{
+public:
+	GiveOrder();
+	~GiveOrder();
 
-		int item;
-		/* if amount == -1, transfer whole unit, -2 means all of item */
-		int amount;
-		int except;
+	int item;
+	int amount; ///< if amount == -1, transfer whole unit, -2 means all of item
+	int except;
 
-		UnitId *target;
+	UnitId *target;
 };
 
-class StudyOrder : public Order {
-	public:
-		StudyOrder();
-		~StudyOrder();
+/// Increase skill
+class StudyOrder : public Order
+{
+public:
+	StudyOrder();
+	~StudyOrder();
 
-		int skill;
-		int days;
+	int skill;
+	int days;
 };
 
-class TeachOrder : public Order {
-	public:
-		TeachOrder();
-		~TeachOrder();
+/// Help another unit to study
+class TeachOrder : public Order
+{
+public:
+	TeachOrder();
+	~TeachOrder();
 
-		AList targets;
+	AList targets;
 };
 
-class ProduceOrder : public Order {
-	public:
-		ProduceOrder();
-		~ProduceOrder();
+/// Create items
+class ProduceOrder : public Order
+{
+public:
+	ProduceOrder();
+	~ProduceOrder();
 
-		int item;
-		int skill; /* -1 for none */
-		int productivity;
+	int item;
+	int skill; ///< -1 for none
+	int productivity;
 };
 
-class BuyOrder : public Order {
-	public:
-		BuyOrder();
-		~BuyOrder();
+/// Buy an item from a market
+class BuyOrder : public Order
+{
+public:
+	BuyOrder();
+	~BuyOrder();
 
-		int item;
-		int num;
+	int item;
+	int num;
 };
 
-class SellOrder : public Order {
-	public:
-		SellOrder();
-		~SellOrder();
+/// Sell an item in market
+class SellOrder : public Order
+{
+public:
+	SellOrder();
+	~SellOrder();
 
-		int item;
-		int num;
+	int item;
+	int num;
 };
 
-class AttackOrder : public Order {
-	public:
-		AttackOrder();
-		~AttackOrder();
+/// Attack a unit
+class AttackOrder : public Order
+{
+public:
+	AttackOrder();
+	~AttackOrder();
 
-		AList targets;
+	AList targets;
 };
 
-class BuildOrder : public Order {
-	public:
-		BuildOrder();
-		~BuildOrder();
+/// Construct an object
+class BuildOrder : public Order
+{
+public:
+	BuildOrder();
+	~BuildOrder();
 
-		UnitId * target;
+	UnitId *target;
 };
 
-class SailOrder : public Order {
-	public:
-		SailOrder();
-		~SailOrder();
+/// Operate a ship
+class SailOrder : public Order
+{
+public:
+	SailOrder();
+	~SailOrder();
 
-		AList dirs;
+	AList dirs;
 };
 
-class FindOrder : public Order {
-	public:
-		FindOrder();
-		~FindOrder();
+/// Look for a player
+class FindOrder : public Order
+{
+public:
+	FindOrder();
+	~FindOrder();
 
-		int find;
+	int find;
 };
 
-class StealOrder : public Order {
-	public:
-		StealOrder();
-		~StealOrder();
+/// Steal an item
+class StealOrder : public Order
+{
+public:
+	StealOrder();
+	~StealOrder();
 
-		UnitId *target;
-		int item;
+	UnitId *target;
+	int item;
 };
 
-class AssassinateOrder : public Order {
-	public:
-		AssassinateOrder();
-		~AssassinateOrder();
+/// Try to secretly attack a unit
+class AssassinateOrder : public Order
+{
+public:
+	AssassinateOrder();
+	~AssassinateOrder();
 
-		UnitId *target;
+	UnitId *target;
 };
 
-class ForgetOrder : public Order {
-	public:
-		ForgetOrder();
-		~ForgetOrder();
+/// Lose a skill
+class ForgetOrder : public Order
+{
+public:
+	ForgetOrder();
+	~ForgetOrder();
 
-		int skill;
+	int skill;
 };
 
-// Add class for exchange
-class ExchangeOrder : public Order {
-	public:
-		ExchangeOrder();
-		~ExchangeOrder();
+/// Atomically swap items
+class ExchangeOrder : public Order
+{
+public:
+	ExchangeOrder();
+	~ExchangeOrder();
 
-		int giveItem;
-		int giveAmount;
-		int expectItem;
-		int expectAmount;
+	int giveItem;
+	int giveAmount;
+	int expectItem;
+	int expectAmount;
 
-		int exchangeStatus;
+	int exchangeStatus;
 
-		UnitId *target;
+	UnitId *target;
 };
 
-class TurnOrder : public Order {
-	public:
-		TurnOrder();
-		~TurnOrder();
-		int repeating;
-		AList turnOrders;
+/// Delay orders for 1 turn
+class TurnOrder : public Order
+{
+public:
+	TurnOrder();
+	~TurnOrder();
+
+	int repeating;
+	AList turnOrders;
 };
 
-class CastOrder : public Order {
-	public:
-		CastOrder();
-		~CastOrder();
+/// Cast a spell
+class CastOrder : public Order
+{
+public:
+	CastOrder();
+	~CastOrder();
 
-		int spell;
-		int level;
+	int spell;
+	int level;
 };
 
-class CastMindOrder : public CastOrder {
-	public:
-		CastMindOrder();
-		~CastMindOrder();
+/// Cast mind reading
+class CastMindOrder : public CastOrder
+{
+public:
+	CastMindOrder();
+	~CastMindOrder();
 
-		UnitId *id;
+	UnitId *id;
 };
 
-class CastRegionOrder : public CastOrder {
-	public:
-		CastRegionOrder();
-		~CastRegionOrder();
+/// Cast a spell targeting a region
+class CastRegionOrder : public CastOrder
+{
+public:
+	CastRegionOrder();
+	~CastRegionOrder();
 
-		int xloc, yloc, zloc;
+	int xloc, yloc, zloc;
 };
 
-class TeleportOrder : public CastRegionOrder {
-	public:
-		TeleportOrder();
-		~TeleportOrder();
+/// Cast teleport
+class TeleportOrder : public CastRegionOrder
+{
+public:
+	TeleportOrder();
+	~TeleportOrder();
 
-		int gate;
-		AList units;
+	int gate;
+	AList units;
 };
 
-class CastIntOrder : public CastOrder {
-	public:
-		CastIntOrder();
-		~CastIntOrder();
+/// Cast helper
+class CastIntOrder : public CastOrder
+{
+public:
+	CastIntOrder();
+	~CastIntOrder();
 
-		int target;
+	int target;
 };
 
-class CastUnitsOrder : public CastOrder {
-	public:
-		CastUnitsOrder();
-		~CastUnitsOrder();
+/// Cast helper
+class CastUnitsOrder : public CastOrder
+{
+public:
+	CastUnitsOrder();
+	~CastUnitsOrder();
 
-		AList units;
+	AList units;
 };
 
-class EvictOrder : public Order {
-	public:
-		EvictOrder();
-		~EvictOrder();
+/// Force units to leave an object
+class EvictOrder : public Order
+{
+public:
+	EvictOrder();
+	~EvictOrder();
 
-		AList targets;
+	AList targets;
 };
-
 
 #endif
+

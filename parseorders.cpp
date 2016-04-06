@@ -37,6 +37,7 @@
 #include "gamedata.h"
 
 OrdersCheck::OrdersCheck()
+: dummyOrder(NORDERS)
 {
 	pCheckFile = 0;
 	numshows = 0;
@@ -2610,8 +2611,7 @@ void Game::ProcessAdvanceOrder(Unit * u,AString * o, OrdersCheck *pCheck)
 	}
 	if(Globals->TAX_PILLAGE_MONTH_LONG) u->taxing = TAX_NONE;
 	if (!u->monthorders) {
-		u->monthorders = new MoveOrder;
-		u->monthorders->type = O_ADVANCE;
+		u->monthorders = new MoveOrder(O_ADVANCE);
 	}
 	m = (MoveOrder *) u->monthorders;
 	m->advancing = 1;

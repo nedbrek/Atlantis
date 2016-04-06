@@ -2078,7 +2078,6 @@ void Game::DoGiveOrders()
 									go.except = 0;
 									go.item = item->type;
 									go.target = o->target;
-									go.type = o->type;
 									DoGiveOrder(r, u, &go);
 									go.target = NULL;
 								}
