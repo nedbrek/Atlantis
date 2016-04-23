@@ -25,14 +25,14 @@
 #ifndef BATTLE_CLASS
 #define BATTLE_CLASS
 
-class Battle;
-
 #include "astring.h"
 #include "alist.h"
 #include "fileio.h"
 #include "army.h"
 #include "items.h"
+class ARegion;
 class ARegionList;
+class Faction;
 
 enum {
 	ASS_NONE,
@@ -45,12 +45,6 @@ enum {
 	BATTLE_LOST,
 	BATTLE_WON,
 	BATTLE_DRAW
-};
-
-class BattlePtr : public AListElem
-{
-	public:
-		Battle * ptr;
 };
 
 class Battle : public AListElem
@@ -85,6 +79,12 @@ class Battle : public AListElem
 		Faction * attacker; /* Only matters in the case of an assassination */
 		AString * asstext;
 		AList text;
+};
+
+class BattlePtr : public AListElem
+{
+public:
+	Battle *ptr;
 };
 
 #endif

@@ -1,3 +1,5 @@
+#ifndef ARMY_CLASS
+#define ARMY_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,134 +24,189 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef ARMY_CLASS
-#define ARMY_CLASS
-
-class Soldier;
-class Army;
-
-#include "unit.h"
-#include "alist.h"
-#include "items.h"
-#include "object.h"
+#include "items.h" // NUM_ATTACK_TYPES
 #include "shields.h"
-#include "helper.h"
+#include "helper.h" // BITFIELD
 #include "astring.h"
 class Battle;
+class ItemList;
+class Object;
+class Unit;
 
-#define SPECIAL_NONE 0
+//----------------------------------------------------------------------------
+/// One soldier in an army (wraps individual in unit)
+class Soldier
+{
+public:
+	/// construct one man of 'race' from 'unit', in 'object'
+	/// 'regType' is used for riding
+	Soldier(Unit *unit, Object *object, int regType, int race, int ass=0);
 
-class Soldier {
-	public:
-		Soldier(Unit *unit, Object *object, int regType, int race, int ass=0);
+	/// check assigned spell
+	void SetupSpell();
 
-		void SetupSpell();
-		void SetupCombatItems();
+	/// get weapon and armor
+	void SetupCombatItems();
 
-		//
-		// SetupHealing is actually game-specific, and appears in specials.cpp
-		//
-		void SetupHealing();
+	/// game-specific, and appears in specials.cpp
+	void SetupHealing();
 
-		int HasEffect(int);
-		void SetEffect(int);
-		void ClearEffect(int);
-		void ClearOneTimeEffects(void);
-		int ArmorProtect(int weaponClass );
+	//---effects
+	/// check if bit 'eff' is set in effects
+	int HasEffect(int eff) const;
 
-		void RestoreItems();
-		void Alive(int);
-		void Dead();
+	/// set effect (with side-effects)
+	void SetEffect(int eff);
 
-		/* Unit info */
-		AString name;
-		Unit * unit;
-		int race;
-		int riding;
-		int building;
+	/// clear effect (with side-effects)
+	void ClearEffect(int eff);
 
-		/* Healing information */
-		int healing;
-		int healtype;
-		int healitem;
-		int canbehealed;
-		int regen;
+	/// walk through all effects and clear those marked "one shot"
+	void ClearOneTimeEffects();
 
-		/* Attack info */
-		int weapon;
-		int attacktype;
-		int askill;
-		int attacks;
-		int special;
-		int slevel;
+	///@return 1 if armor is (randomly) successful
+	int ArmorProtect(int weaponClass) const;
 
-		/* Defense info */
-		int dskill[NUM_ATTACK_TYPES];
-		int armor;
-		int hits;
-		int maxhits;
-		int damage;
+	/// give items back to original unit
+	void RestoreItems();
 
-		BITFIELD battleItems;
-		int amuletofi;
+	/// handle case where we survive (win or lose)
+	void Alive(int win_state);
 
-		/* Effects */
-		int effects;
+	/// handle case where we die
+	void Dead();
+
+public: // data
+	AString name;
+	Unit *unit;
+	int race;
+	int riding;
+	int building;
+
+	// Healing information
+	int healing;
+	int healtype;
+	int healitem;
+	int canbehealed;
+	int regen;
+
+	// Attack info
+	int weapon;
+	int attacktype;
+	int askill;
+	int attacks;
+	int special;
+	int slevel;
+
+	// Defense info
+	int dskill[NUM_ATTACK_TYPES];
+	int armor;
+	int hits;
+	int maxhits;
+	int damage;
+
+	BITFIELD battleItems;
+	int amuletofi;
+
+	int effects;
 };
 
-typedef Soldier * SoldierPtr;
+typedef Soldier *SoldierPtr;
 
+//----------------------------------------------------------------------------
+/// All of the soldiers on one side
 class Army
 {
-	public:
-		Army(Unit *,AList *,int,int = 0);
-		~Army();
+public:
+	/// construct
+	Army(Unit *ldr, AList *locs, int reg_type, int ass = 0);
+	~Army();
 
-		void WriteLosses(Battle *);
-		void Lose(Battle *,ItemList *);
-		void Win(Battle *,ItemList *);
-		void Tie(Battle *);
-		int CanBeHealed();
-		void DoHeal(Battle *);
-		void DoHealLevel(Battle *,int,int useItems );
-		void Regenerate(Battle *);
+	/// ?shuffles front and behind?
+	void Reset();
 
-		void GetMonSpoils(ItemList *,int, int);
+	/// deallocate soldiers, append spoils from monsters
+	void Lose(Battle *b, ItemList *spoils);
 
-		int Broken();
-		int NumAlive();
-		int NumSpoilers();
-		int CanAttack();
-		int NumFront();
-		Soldier *GetAttacker( int, int & );
-		int GetEffectNum(int effect);
-		int GetTargetNum( int = SPECIAL_NONE );
-		Soldier *GetTarget( int );
-		int RemoveEffects(int num, int effect);
-		int DoAnAttack( int special, int numAttacks, int attackType,
-				int attackLevel, int flags, int weaponClass, int effect,
-				int mountBonus);
-		void Kill(int);
-		void Reset();
+	/// deallocate soldiers, distribute spoils
+	void Win(Battle *b, ItemList *spoils);
 
-		//
-		// These funcs are in specials.cpp
-		//
-		int CheckSpecialTarget(int,int);
+	/// deallocate - no spoil
+	void Tie(Battle *b);
 
-		SoldierPtr * soldiers;
-		Unit * leader;
-		ShieldList shields;
-		int round;
-		int tac;
-		int canfront;
-		int canbehind;
-		int notfront;
-		int notbehind;
-		int count;
+	///@return 1 if anyone can be healed
+	int CanBeHealed();
 
-		int hitsalive; // current number of "living hits"
-		int hitstotal; // Number of hits at start of battle.
+	/// do normal, then magical healing
+	void DoHeal(Battle *b);
+
+	/// apply hits (and regeneration if available)
+	void Regenerate(Battle *b);
+
+	/// generate spoils from wandering monsters
+	void GetMonSpoils(ItemList *spoils, int mon_item, int free);
+
+	///@return 1 if army is routed
+	int Broken() const;
+
+	///@return number of soldiers alive
+	int NumAlive() const;
+
+	///@return number of men willing to carry spoils
+	int NumSpoilers() const;
+
+	///@return number of men in front ranks? or able to advance to front?
+	int CanAttack() const;
+
+	///@return number of men in front ranks?
+	int NumFront() const;
+
+	/// shuffles attackers forward?
+	Soldier* GetAttacker(int i, int &behind);
+
+	///@return index of soldier with 'effect'
+	int GetEffectNum(int effect);
+
+	///@return index of soldier affected by 'special'
+	int GetTargetNum(int special = 0);
+
+	///@return soldier 'i'
+	Soldier* GetTarget(int i);
+
+	/// try to remove 'effect' from 'num' soldiers, @return actual number removed
+	int RemoveEffects(int num, int effect);
+
+	/// evaluate one attack on us
+	int DoAnAttack( int special, int numAttacks, int attackType,
+	      int attackLevel, int flags, int weaponClass, int effect,
+	      int mountBonus);
+
+	/// kill soldier 'i'
+	void Kill(int i);
+
+	// in specials.cpp
+	int CheckSpecialTarget(int, int);
+
+public: // data
+	SoldierPtr *soldiers;
+	Unit *leader;
+	ShieldList shields;
+	int round;
+	int tac;
+	int canfront;
+	int canbehind;
+	int notfront;
+	int notbehind;
+	int count;
+
+	int hitsalive; ///< Current number of "living hits"
+	int hitstotal; ///< Number of hits at start of battle
+
+private:
+	void DoHealLevel(Battle *b, int type, int useItems);
+
+	void WriteLosses(Battle *b);
 };
 
 #endif
+
