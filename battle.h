@@ -1,3 +1,5 @@
+#ifndef BATTLE_CLASS
+#define BATTLE_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,63 +24,69 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-#ifndef BATTLE_CLASS
-#define BATTLE_CLASS
-
-#include "astring.h"
 #include "alist.h"
-#include "fileio.h"
-#include "army.h"
-#include "items.h"
 class ARegion;
 class ARegionList;
+class Areport;
+class Army;
+class AString;
 class Faction;
+class ItemList;
+class Soldier;
+class Unit;
 
-enum {
+//----------------------------------------------------------------------------
+/// Result of assassination attempt
+enum
+{
 	ASS_NONE,
 	ASS_SUCC,
 	ASS_FAIL
 };
 
-enum {
+/// Result of battle
+enum
+{
 	BATTLE_IMPOSSIBLE,
 	BATTLE_LOST,
 	BATTLE_WON,
 	BATTLE_DRAW
 };
 
+//----------------------------------------------------------------------------
+/// Handles battle mechanics and reporting
 class Battle : public AListElem
 {
-	public:
-		Battle();
-		~Battle();
+public:
+	Battle();
+	~Battle();
 
-		void Report(Areport *,Faction *);
-		void AddLine(const AString &);
+	/// Send this battle report to 'f' for 'fac'
+	void Report(Areport *f, Faction *fac);
 
-		int Run(ARegion *, Unit *, AList *, Unit *, AList *, int ass,
-				ARegionList *pRegs);
-		void FreeRound(Army *,Army *, int ass = 0);
-		void NormalRound(int,Army *,Army *);
-		void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-				int behind, int ass = 0);
+	/// Add 's' to this battle report
+	void AddLine(const AString &s);
 
-		void GetSpoils(AList *,ItemList *, int);
+	int Run(ARegion *region, Unit *att, AList *atts, Unit *tar, AList *defs, int ass, ARegionList *pRegs);
 
-		//
-		// These functions should be implemented in specials.cpp
-		//
-		void UpdateShields(Army *);
-		void DoSpecialAttack( int round, Soldier *a, Army *attackers,
-				Army *def, int behind );
+	void WriteSides(ARegion *r, Unit *att, Unit *tar, AList *atts, AList *defs, int ass, ARegionList *pRegs);
 
-		void WriteSides(ARegion *,Unit *,Unit *,AList *,AList *,int,
-				ARegionList *pRegs );
+private: // methods
+	void FreeRound(Army *att, Army *def, int ass = 0);
+	void NormalRound(int round, Army *a, Army *b);
+	void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
+	         int behind, bool ass = false);
+	void GetSpoils(AList *losers, ItemList *spoils, int ass);
 
-		int assassination;
-		Faction * attacker; /* Only matters in the case of an assassination */
-		AString * asstext;
-		AList text;
+	// These functions should be implemented in specials.cpp
+	void UpdateShields(Army *);
+	void DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def, int behind);
+
+public: // data
+	int assassination;
+	Faction *attacker; ///< Only matters in the case of an assassination
+	AString *asstext;
+	AList text;
 };
 
 class BattlePtr : public AListElem
@@ -88,3 +96,4 @@ public:
 };
 
 #endif
+

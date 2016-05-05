@@ -27,6 +27,7 @@
 #include "gamedefs.h"
 #include "gameio.h"
 #include "unit.h"
+#include "army.h"
 
 void Soldier::SetupHealing()
 {
