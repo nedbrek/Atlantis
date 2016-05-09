@@ -1634,6 +1634,16 @@ void ARegion::Readin(Ainfile * f,AList * facs, ATL_VER v)
 
 int ARegion::CanMakeAdv(Faction * fac,int item)
 {
+	// 2 means "reveal to everyone always"
+	if (Globals->FACTION_SKILLS_REVEAL_RESOURCES == 2)
+		return 1;
+
+	const int skill_id = ItemDefs[item].pSkill;
+	const int skill_level = ItemDefs[item].pLevel;
+
+	if (Globals->FACTION_SKILLS_REVEAL_RESOURCES &&
+	    fac->skills.GetDays(skill_id) >= skill_level)
+		return 1;
 
 	if(Globals->IMPROVED_FARSIGHT) {
 		forlist(&farsees) {

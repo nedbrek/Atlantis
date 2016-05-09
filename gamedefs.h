@@ -296,6 +296,8 @@ public:
 	};
 	int TRANSIT_REPORT; ///< information shown to a unit just passing through a hex
 
+	int FACTION_SKILLS_REVEAL_RESOURCES;
+
 	int MARKETS_SHOW_ADVANCED_ITEMS; ///< show advanced items in markets at all times
 
 	enum
