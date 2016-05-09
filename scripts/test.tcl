@@ -13,6 +13,7 @@ proc testGame {dir} {
 		exec diff . ../../$otherDir/turn$t
 		cd ..
 	}
+	cd ..
 }
 
 if {$argc == 0} {
