@@ -1929,8 +1929,62 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	ProduceOrder *p = new ProduceOrder;
 	p->item = it;
 	p->skill = ItemDefs[it].pSkill;
+	p->limit = -1; // no limit
+
+	// check for LIMIT
+	token = o->gettoken();
+	if (token)
+	{
+		if (*token == "LIMIT")
+		{
+			delete token;
+			token = o->gettoken();
+			p->limit = 0; // check for valid limit
+		}
+
+		if (token)
+		{
+			p->limit = token->value();
+			delete token;
+		}
+
+		if (p->limit == 0)
+		{
+			ParseError(pCheck, u, 0, "PRODUCE: Should be PRODUCE <item> LIMIT <count>.");
+			p->limit = -1;
+		}
+	}
 
 	// if unit already has monthly order
+	if (u->monthorders && u->monthorders->type == O_PRODUCE)
+	{
+		// push into produce queue
+
+		// check for existing queue
+		ProduceQueue *pq = dynamic_cast<ProduceQueue*>(u->monthorders);
+		if (!pq)
+		{
+			// just an order, promote it
+			pq = new ProduceQueue;
+
+			pq->orders_.push_back(*static_cast<ProduceOrder*>(u->monthorders));
+
+			// replace the pointer
+			delete u->monthorders;
+			u->monthorders = pq;
+		}
+
+		// add the new order
+		pq->orders_.push_back(*p);
+
+		delete p;
+
+		if (Globals->TAX_PILLAGE_MONTH_LONG)
+			u->taxing = TAX_NONE;
+
+		return;
+	}
+
 	if (u->monthorders ||
 	    (Globals->TAX_PILLAGE_MONTH_LONG &&
 	     (u->taxing == TAX_TAX || u->taxing == TAX_PILLAGE)))

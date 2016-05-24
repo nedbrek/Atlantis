@@ -24,6 +24,7 @@
 // END A3HEADER
 #include "game.h"
 #include "gamedata.h"
+#include <map>
 
 //----------------------------------------------------------------------------
 void Game::RunSailOrders()
@@ -744,17 +745,27 @@ void Game::RunMonthOrders()
 	}
 }
 
-/// process PRODUCE order for 'u' in 'r'
-void Game::RunUnitProduce(ARegion *r, Unit *u)
+/// Intermediate results of production processing
+struct ProduceIntermediates
 {
-	ProduceOrder *o = (ProduceOrder*)u->monthorders;
+	int menUsed_;
+	std::map<int, int> manMonthsAvail_; // skill -> man months
+	std::map<int, int> bonusItemsUsed_; // item idx -> count
 
+	ProduceIntermediates()
+	: menUsed_(0)
+	{
+	}
+};
+
+/// process PRODUCE order for 'u' in 'r'
+///@return true if order is finished
+bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermediates *pi)
+{
 	if (o->item == I_SILVER)
 	{
 		u->Error("Can't do that in this region.");
-		delete u->monthorders;
-		u->monthorders = NULL;
-		return;
+		return true;
 	}
 
 	const int input = ItemDefs[o->item].pInput[0].item;
@@ -762,9 +773,7 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	{
 		u->Error("PRODUCE: Can't produce that.");
 
-		delete u->monthorders;
-		u->monthorders = NULL;
-		return;
+		return true;
 	}
 
 	const int level = u->GetSkill(o->skill);
@@ -772,22 +781,25 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	{
 		u->Error("PRODUCE: Can't produce that.");
 
-		delete u->monthorders;
-		u->monthorders = NULL;
-		return;
+		return true;
 	}
 
 	if (!TradeCheck(r, u->faction))
 	{
 		u->Error("PRODUCE: Faction can't produce in that many regions.");
 
-		delete u->monthorders;
-		u->monthorders = NULL;
-		return;
+		return true;
 	}
 
 	// find the max we can possibly produce based on man-months of labor
-	const int num_men = u->GetMen();
+	const int num_men = u->GetMen() - pi->menUsed_;
+	const int bonus_item_idx = ItemDefs[o->item].mult_item;
+	int num_bonus_items = num_men; // assume item -1 (no item for bonus)
+	std::map<int, int>::iterator labor_remainder = pi->manMonthsAvail_.find(o->skill);
+	if (labor_remainder == pi->manMonthsAvail_.end())
+	{
+		labor_remainder = pi->manMonthsAvail_.insert(std::make_pair(o->skill, 0)).first;
+	}
 
 	int maxproduced;
 	// if production is based on inputs * skill
@@ -798,10 +810,43 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	else
 	{
 		// (number of men * skill level + bonus) / man months per item
+
+		// start with bonus items
+		if (bonus_item_idx != -1)
+		{
+			// start with total items
+			int num_items_avail = u->items.GetNum(bonus_item_idx);
+
+			// check for items used
+			std::map<int, int>::iterator i = pi->bonusItemsUsed_.find(bonus_item_idx);
+			if (i != pi->bonusItemsUsed_.end())
+			{
+				// pull them out
+				num_items_avail -= i->second;
+			}
+			else
+				i = pi->bonusItemsUsed_.insert(std::make_pair(bonus_item_idx, 0)).first;
+
+			// no point using more than 1 per man
+			if (num_items_avail > num_men)
+				num_bonus_items = num_men;
+			else
+				num_bonus_items = num_items_avail;
+
+			i->second += num_bonus_items;
+		}
+
 		const int number = num_men * level +
-			 u->GetProductionBonus(o->item);
+		    num_bonus_items * ItemDefs[o->item].mult_val +
+		    labor_remainder->second;
 
 		maxproduced = number / ItemDefs[o->item].pMonths;
+	}
+
+	// apply production limit
+	if (o->limit != -1 && maxproduced > o->limit)
+	{
+		maxproduced = o->limit;
 	}
 
 	// if item only requires one of its inputs
@@ -879,6 +924,21 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 		}
 	}
 
+	// back calculate number of men working
+	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
+	{
+		pi->menUsed_ = maxproduced;
+	}
+	else
+	{
+		const int req_labor = maxproduced * ItemDefs[o->item].pMonths;
+		const int bonus_labor = num_bonus_items * ItemDefs[bonus_item_idx].mult_val;
+		const int men_req = (req_labor - bonus_labor + level - 1) / level;
+
+		pi->menUsed_ += men_req;
+		labor_remainder->second = men_req * level - (req_labor - bonus_labor);
+	}
+
 	// now give the items produced
 	int output = maxproduced * ItemDefs[o->item].pOut;
 	if (ItemDefs[o->item].flags & ItemType::SKILLOUT)
@@ -889,8 +949,12 @@ void Game::RunUnitProduce(ARegion *r, Unit *u)
 	u->Event(AString("Produces ") + ItemString(o->item, output) + " in " + r->ShortPrint(&regions) + ".");
 	u->Practise(o->skill);
 
-	delete u->monthorders;
-	u->monthorders = NULL;
+	if (o->limit == -1)
+		return true; // one turn of production
+
+	o->limit -= output;
+
+	return o->limit == 0;
 }
 
 void Game::RunProduceOrders(ARegion *r)
@@ -917,7 +981,48 @@ void Game::RunProduceOrders(ARegion *r)
 
 				if (u->monthorders->type == O_PRODUCE)
 				{
-					RunUnitProduce(r, u);
+					ProduceQueue *q = dynamic_cast<ProduceQueue*>(u->monthorders);
+					ProduceIntermediates pi;
+					if (!q)
+					{
+						// normal PRODUCE order
+						ProduceOrder *o = (ProduceOrder*)u->monthorders;
+						const bool ret = RunUnitProduce(r, u, o, &pi);
+						if (ret)
+						{
+							delete u->monthorders;
+							u->monthorders = NULL;
+						}
+					}
+					else // produce queue
+					{
+						bool done = false;
+						do
+						{
+							// peek at first order
+							ProduceOrder *o = &q->orders_[0];
+
+							// run it
+							const bool ret = RunUnitProduce(r, u, o, &pi);
+
+							// if finished this one
+							if (ret)
+							{
+								q->orders_.pop_front();
+
+								// if all done
+								if (q->orders_.empty())
+								{
+									delete u->monthorders;
+									u->monthorders = NULL;
+									done = true;
+								}
+							}
+							else // could not finish current
+								done = true;
+
+						} while (!done);
+					}
 				}
 				else if (u->monthorders->type == O_BUILD)
 				{
@@ -931,6 +1036,10 @@ void Game::RunProduceOrders(ARegion *r)
 int Game::ValidProd(Unit *u, ARegion *r, Production *p)
 {
 	if (u->monthorders->type != O_PRODUCE)
+		return 0;
+
+	// cannot queue raw materials
+	if (dynamic_cast<ProduceQueue*>(u->monthorders))
 		return 0;
 
 	ProduceOrder *po = (ProduceOrder*)u->monthorders;
@@ -1018,6 +1127,10 @@ void Game::RunAProduction(ARegion *r, Production *p)
 			Unit *u = (Unit*)elem;
 
 			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
+				continue;
+
+			// can't queue raw materials
+			if (dynamic_cast<ProduceQueue*>(u->monthorders))
 				continue;
 
 			ProduceOrder *po = (ProduceOrder*)u->monthorders;

@@ -197,6 +197,15 @@ ProduceOrder::~ProduceOrder()
 {
 }
 
+ProduceQueue::ProduceQueue()
+: Order(O_PRODUCE)
+{
+}
+
+ProduceQueue::~ProduceQueue()
+{
+}
+
 BuyOrder::BuyOrder()
 : Order(O_BUY)
 {

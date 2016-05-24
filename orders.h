@@ -25,6 +25,7 @@
 //
 // END A3HEADER
 #include "alist.h"
+#include <deque>
 class AString;
 class UnitId;
 
@@ -202,6 +203,17 @@ public:
 	int item;
 	int skill; ///< -1 for none
 	int productivity;
+	int limit;
+};
+
+/// Produce multiple items
+class ProduceQueue : public Order
+{
+public:
+	ProduceQueue();
+	~ProduceQueue();
+
+	std::deque<ProduceOrder> orders_;
 };
 
 /// Buy an item from a market
