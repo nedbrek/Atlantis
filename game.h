@@ -357,7 +357,7 @@ private:
 	void ProcessNocrossOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessNospoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
 	void ProcessSpoilsOrder(Unit *, AString *, OrdersCheck *pCheck);
-    void ProcessAutoTaxOrder(Unit *,AString *, OrdersCheck *pCheck );
+    void ProcessFlagOrder(unsigned flag, Unit *,AString *, OrdersCheck *pCheck );
     void ProcessOptionOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessPasswordOrder(Unit *, AString *, OrdersCheck *pCheck );
 	void ProcessExchangeOrder(Unit *, AString *, OrdersCheck *pCheck);

@@ -96,7 +96,8 @@ enum
 	FLAG_NOSPOILS          = 0x0100, ///< do not take spoils
 	FLAG_FLYSPOILS         = 0x0200, ///< do not take spoils that would prevent flying
 	FLAG_WALKSPOILS        = 0x0400, ///< do not take spoils that would prevent walking
-	FLAG_RIDESPOILS        = 0x0800  ///< do not take spoils that would prevent riding
+	FLAG_RIDESPOILS        = 0x0800, ///< do not take spoils that would prevent riding
+	FLAG_SHARE             = 0x1000  ///< share with friendly units
 };
 
 //----------------------------------------------------------------------------

@@ -491,6 +491,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 		if (GetFlag(FLAG_CONSUMING_FACTION))
 			temp += ", consuming faction's food";
 		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
+		if (GetFlag(FLAG_SHARE)) temp += ", sharing";
 		temp += SpoilsReport();
 	}
 

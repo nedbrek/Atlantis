@@ -550,7 +550,7 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			ProcessAttackOrder(unit, o, pCheck);
 			break;
 		case O_AUTOTAX:
-			ProcessAutoTaxOrder(unit, o, pCheck);
+			ProcessFlagOrder(FLAG_AUTOTAX, unit, o, pCheck);
 			break;
 		case O_AVOID:
 			ProcessAvoidOrder(unit, o, pCheck);
@@ -647,6 +647,9 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 		case O_PREPARE:
 			ProcessPrepareOrder(unit, o, pCheck);
+			break;
+		case O_SHARE:
+			ProcessFlagOrder(FLAG_SHARE, unit, o, pCheck);
 			break;
 		case O_WEAPON:
 			ProcessWeaponOrder(unit, o, pCheck);
@@ -3053,13 +3056,13 @@ void Game::ProcessHoldOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessAutoTaxOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+void Game::ProcessFlagOrder(unsigned flag, Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	// instant order
 	AString *token = o->gettoken();
 	if (!token)
 	{
-		ParseError(pCheck, u, 0, "AUTOTAX: Invalid value.");
+		ParseError(pCheck, u, 0, "FLAG: Invalid value.");
 		return;
 	}
 
@@ -3068,13 +3071,13 @@ void Game::ProcessAutoTaxOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if (val == -1)
 	{
-		ParseError(pCheck, u, 0, "AUTOTAX: Invalid value.");
+		ParseError(pCheck, u, 0, "FLAG: Invalid value.");
 		return;
 	}
 
 	if (!pCheck)
 	{
-		u->SetFlag(FLAG_AUTOTAX, val);
+		u->SetFlag(flag, val);
 	}
 }
 
