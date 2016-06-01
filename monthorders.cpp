@@ -549,11 +549,11 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	int itn;
 	if (it == I_WOOD_OR_STONE)
 	{
-		itn = u->items.GetNum(I_WOOD) + u->items.GetNum(I_STONE);
+		itn = u->canConsume(I_WOOD, needed) + u->canConsume(I_STONE, needed);
 	}
 	else
 	{
-		itn = u->items.GetNum(it);
+		itn = u->canConsume(it, needed);
 	}
 
 	if (itn == 0)
@@ -639,20 +639,22 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	if (it == I_WOOD_OR_STONE)
 	{
 		// use stone first
-		if (num > u->items.GetNum(I_STONE))
+		const int amt_stone = u->canConsume(I_STONE, num);
+		if (num > amt_stone)
 		{
-			num -= u->items.GetNum(I_STONE);
-			u->items.SetNum(I_STONE, 0);
-			u->items.SetNum(I_WOOD, u->items.GetNum(I_WOOD) - num);
+			// use all the stone we have
+			num -= amt_stone;
+			u->consume(I_STONE, amt_stone);
+			u->consume(I_WOOD, num);
 		}
 		else
 		{
-			u->items.SetNum(I_STONE, u->items.GetNum(I_STONE) - num);
+			u->consume(I_STONE, num);
 		}
 	}
 	else
 	{
-		u->items.SetNum(it, itn - num);
+		u->consume(it, num);
 	}
 
 	u->Event(AString("Performs") + job + "on " + *(obj->name) + ".");
@@ -860,7 +862,8 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 			if (i == -1)
 				continue;
 
-			count += u->items.GetNum(i) / ItemDefs[o->item].pInput[c].amt;
+			const int amt_req = ItemDefs[o->item].pInput[c].amt;
+			count += u->canConsume(i, amt_req * (maxproduced - count)) / amt_req;
 		}
 
 		if (maxproduced > count)
@@ -878,18 +881,18 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 			const int a = ItemDefs[o->item].pInput[c].amt;
 
 			// how much can we get
-			const int amt = u->items.GetNum(i);
+			const int amt = u->canConsume(i, count * a);
 
 			const int consumed = amt / a;
 			if (count > consumed)
 			{
 				// not enough
 				count -= consumed;
-				u->items.SetNum(i, amt - consumed * a);
+				u->consume(i, consumed * a);
 			}
 			else // enough
 			{
-				u->items.SetNum(i, amt - count * a);
+				u->consume(i, count * a);
 				count = 0;
 			}
 		}
@@ -904,7 +907,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 				continue;
 
 			const int a = ItemDefs[o->item].pInput[c].amt;
-			const int amt = u->items.GetNum(i);
+			const int amt = u->canConsume(i, a * maxproduced);
 			if (amt / a < maxproduced)
 			{
 				maxproduced = amt / a;
@@ -919,8 +922,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 				continue;
 
 			const int a = ItemDefs[o->item].pInput[c].amt;
-			const int amt = u->items.GetNum(i);
-			u->items.SetNum(i, amt - (maxproduced * a));
+			u->consume(i, maxproduced * a);
 		}
 	}
 
@@ -1218,7 +1220,7 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 	const int sk = o->skill;
 
 	const int cost = SkillCost(sk) * u->GetMen();
-	if (cost > u->GetMoney())
+	if (cost > u->canConsume(I_SILVER, cost))
 	{
 		u->Error("STUDY: Not enough funds.");
 		return;
@@ -1329,7 +1331,7 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 
 	if (u->Study(sk, days))
 	{
-		u->SetMoney(u->GetMoney() - cost);
+		u->consume(I_SILVER, cost);
 		u->Event(AString("Studies ") + SkillDefs[sk].name + ".");
 	}
 	else

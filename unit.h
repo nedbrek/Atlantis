@@ -356,6 +356,11 @@ public:
 	/// prepend unit name and forward to Faction::Error
 	void Error(const AString &);
 
+	///@return number of items of type 'itemId' this unit can consume
+	/// stop after you reach 'hint' items, -1 -> no limit
+	int canConsume(int itemId, int hint = -1);
+	void consume(int itemId, int num);
+
 public: // data
 	Faction *faction;
 	Faction *formfaction;

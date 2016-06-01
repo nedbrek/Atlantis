@@ -878,6 +878,28 @@ int Unit::GetMoney()
 	return items.GetNum(I_SILVER);
 }
 
+int Unit::canConsume(int itemId, int hint)
+{
+	return items.GetNum(itemId);
+}
+
+void Unit::consume(int itemId, int num)
+{
+	const int num_items = items.GetNum(itemId);
+	if (num > num_items)
+	{
+		std::cerr << "Error in logic, tried to consume more than available" << std::endl;
+		num = num_items;
+	}
+	else if (num < 0)
+	{
+		std::cerr << "Error in logic, tried to consume negative quantity" << std::endl;
+		num = 0;
+	}
+
+	items.SetNum(itemId, num_items - num);
+}
+
 int Unit::GetTactics()
 {
 	int retval = GetRealSkill(S_TACTICS);
