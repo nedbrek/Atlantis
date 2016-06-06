@@ -1479,13 +1479,18 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 							o->num = 0;
 						}
 					}
+
+					const int max_money = (o->num == -1) ? -1 : o->num * m->price;
+					const int unit_money = u->canConsume(I_SILVER, max_money);
+
+					// if buy max
 					if (o->num == -1) {
-						o->num = u->GetMoney()/m->price;
+						o->num = unit_money / m->price;
 					}
-					if (o->num * m->price > u->GetMoney()) {
-						o->num = u->GetMoney() / m->price;
-						u->Error( "BUY: Unit attempted to buy more than it "
-								"could afford.");
+
+					if (o->num * m->price > unit_money) {
+						o->num = unit_money / m->price;
+						u->Error("BUY: Unit attempted to buy more than it could afford.");
 					}
 					num += o->num;
 				}
@@ -1538,7 +1543,7 @@ void Game::DoBuy(ARegion * r,Market * m)
 					}
 					u->items.SetNum(o->item,u->items.GetNum(o->item) + temp);
 					u->faction->DiscoverItem(o->item, 0, 1);
-					u->SetMoney(u->GetMoney() - temp * m->price);
+					u->consume(I_SILVER, temp * m->price);
 					u->buyorders.Remove(o);
 					u->Event(AString("Buys ") + ItemString(o->item,temp)
 							+ " at $" + m->price + " each.");

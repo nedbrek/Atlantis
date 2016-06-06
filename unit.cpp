@@ -881,24 +881,79 @@ int Unit::GetMoney()
 
 int Unit::canConsume(int itemId, int hint)
 {
-	return items.GetNum(itemId);
+	int num_items = 0;
+	//foreach object in parent region
+	//(units in buildings can borrow from those in the field)
+	forlist(&object->region->objects)
+	{
+		Object *o = (Object*)elem;
+		//foreach unit in the object
+		forlist(&o->units)
+		{
+			Unit *u = (Unit*)elem;
+			if (u != this && !u->GetFlag(FLAG_SHARE))
+				continue;
+
+			num_items += u->items.GetNum(itemId);
+
+			// early out
+			if (num_items >= hint)
+				return num_items;
+		}
+	}
+
+	return num_items;;
 }
 
 void Unit::consume(int itemId, int num)
 {
-	const int num_items = items.GetNum(itemId);
-	if (num > num_items)
-	{
-		std::cerr << "Error in logic, tried to consume more than available" << std::endl;
-		num = num_items;
-	}
-	else if (num < 0)
+	if (num < 0)
 	{
 		std::cerr << "Error in logic, tried to consume negative quantity" << std::endl;
-		num = 0;
+		return;
 	}
 
-	items.SetNum(itemId, num_items - num);
+	// see how many we have
+	const int num_items = items.GetNum(itemId);
+
+	// if we have enough
+	if (num_items >= num)
+	{
+		items.SetNum(itemId, num_items - num);
+		return; // done
+	}
+	//else use all we have
+	items.SetNum(itemId, 0);
+	num -= num_items;
+
+	//foreach object in parent region
+	//(units in buildings can borrow from those in the field)
+	forlist(&object->region->objects)
+	{
+		Object *o = (Object*)elem;
+		//foreach unit in the object
+		forlist(&o->units)
+		{
+			Unit *u = (Unit*)elem;
+			// TODO faction check
+			if (u == this || !u->GetFlag(FLAG_SHARE))
+				continue;
+
+			const int num_items = u->items.GetNum(itemId);
+			if (num_items >= num)
+			{
+				u->items.SetNum(itemId, num_items - num);
+				return;
+			}
+
+			u->items.SetNum(itemId, 0);
+			num -= num_items;
+		}
+	}
+	if (num > 0)
+	{
+		std::cerr << "Error in logic: consumed more than was available" << std::endl;
+	}
 }
 
 int Unit::GetTactics()
