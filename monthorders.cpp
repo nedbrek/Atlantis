@@ -751,11 +751,13 @@ void Game::RunMonthOrders()
 struct ProduceIntermediates
 {
 	int menUsed_;
+	int totalItemsUsed_;
 	std::map<int, int> manMonthsAvail_; // skill -> man months
 	std::map<int, int> bonusItemsUsed_; // item idx -> count
 
 	ProduceIntermediates()
 	: menUsed_(0)
+	, totalItemsUsed_(0)
 	{
 	}
 };
@@ -794,10 +796,14 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	}
 
 	// find the max we can possibly produce based on man-months of labor
-	const int num_men = u->GetMen() - pi->menUsed_;
+	const int base_men = u->GetMen();
+	const int num_men = base_men - pi->menUsed_;
 	const int bonus_item_idx = ItemDefs[o->item].mult_item;
+	const int bonus_item_boost = ItemDefs[o->item].mult_val;
+
 	int num_bonus_items = num_men; // assume item -1 (no item for bonus)
 	std::map<int, int>::iterator labor_remainder = pi->manMonthsAvail_.find(o->skill);
+	std::map<int, int>::iterator bonus_item_iter = pi->bonusItemsUsed_.end();
 	if (labor_remainder == pi->manMonthsAvail_.end())
 	{
 		labor_remainder = pi->manMonthsAvail_.insert(std::make_pair(o->skill, 0)).first;
@@ -820,26 +826,21 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 			int num_items_avail = u->items.GetNum(bonus_item_idx);
 
 			// check for items used
-			std::map<int, int>::iterator i = pi->bonusItemsUsed_.find(bonus_item_idx);
-			if (i != pi->bonusItemsUsed_.end())
+			bonus_item_iter = pi->bonusItemsUsed_.find(bonus_item_idx);
+			if (bonus_item_iter != pi->bonusItemsUsed_.end())
 			{
 				// pull them out
-				num_items_avail -= i->second;
+				num_items_avail -= bonus_item_iter->second;
 			}
 			else
-				i = pi->bonusItemsUsed_.insert(std::make_pair(bonus_item_idx, 0)).first;
+				bonus_item_iter = pi->bonusItemsUsed_.insert(std::make_pair(bonus_item_idx, 0)).first;
 
 			// no point using more than 1 per man
-			if (num_items_avail > num_men)
-				num_bonus_items = num_men;
-			else
-				num_bonus_items = num_items_avail;
-
-			i->second += num_bonus_items;
+			num_bonus_items = std::min(num_items_avail, base_men - pi->totalItemsUsed_);
 		}
 
 		const int number = num_men * level +
-		    num_bonus_items * ItemDefs[o->item].mult_val +
+		    num_bonus_items * bonus_item_boost +
 		    labor_remainder->second;
 
 		maxproduced = number / ItemDefs[o->item].pMonths;
@@ -931,14 +932,63 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	{
 		pi->menUsed_ = maxproduced;
 	}
-	else
+	else // man months with item boost
 	{
-		const int req_labor = maxproduced * ItemDefs[o->item].pMonths;
-		const int bonus_labor = num_bonus_items * ItemDefs[bonus_item_idx].mult_val;
-		const int men_req = (req_labor - bonus_labor + level - 1) / level;
+		int req_labor = maxproduced * ItemDefs[o->item].pMonths;
 
-		pi->menUsed_ += men_req;
-		labor_remainder->second = men_req * level - (req_labor - bonus_labor);
+		// check for labor remainder
+		if (labor_remainder->second >= req_labor)
+		{
+			labor_remainder->second -= req_labor;
+			req_labor = 0;
+			// done
+		}
+		else
+		{
+			req_labor -= labor_remainder->second;
+			labor_remainder->second = 0;
+
+			int men_req = 0;
+			int bonus_items_used = 0;
+
+			// use items, and men for items
+			while (bonus_items_used < num_bonus_items)
+			{
+				// use item
+				++bonus_items_used;
+
+				// if labor is less than item boost
+				if (bonus_item_boost >= req_labor)
+				{
+					req_labor = 0;
+					break;
+				}
+				req_labor -= bonus_item_boost;
+
+				// man to use the item
+				++men_req;
+				if (level >= req_labor)
+				{
+					labor_remainder->second = level - req_labor;
+					req_labor = 0;
+					break;
+				}
+				req_labor -= level;
+			}
+
+			if (req_labor)
+			{
+				// calculate men without items
+				const int men_no_items = (req_labor + level - 1) / level;
+				men_req += men_no_items;
+				labor_remainder->second = men_no_items * level - req_labor;
+			}
+
+			pi->menUsed_ += men_req;
+
+			bonus_item_iter->second += bonus_items_used;
+			pi->totalItemsUsed_ += bonus_items_used;
+		}
 	}
 
 	// now give the items produced
