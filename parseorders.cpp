@@ -2578,7 +2578,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			else if (item == -1)
 			{
-				ParseError(pCheck, unit, 0, "GIVE: Invalid item.");
+				ParseError(pCheck, unit, 0, AString("GIVE: Invalid item: ") + *token);
 				return;
 			}
 		}
