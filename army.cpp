@@ -25,6 +25,7 @@
 #include "army.h"
 #include "aregion.h"
 #include "battle.h"
+#include "faction.h"
 #include "gameio.h"
 #include "gamedata.h"
 #include "gamedefs.h"

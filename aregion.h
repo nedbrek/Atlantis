@@ -1,3 +1,5 @@
+#ifndef REGION_CLASS
+#define REGION_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,36 +24,37 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date		Person			Comments
-// ----		------			--------
-// 2000/MAR/16 Davis Kulis	   Added a new reporting Template.
-// 2000/MAR/21 Azthar Septragen  Added roads.
-#ifndef REGION_CLASS
-#define REGION_CLASS
+#include "production.h"
+#include "market.h"
+#include "gamedefs.h"
+#include "alist.h"
+class Areport;
+class Faction;
+class Object;
+class Unit;
+class UnitId;
 
+// defined locally
 class ARegion;
 class ARegionList;
 class ARegionArray;
 
-#include "gamedefs.h"
-#include "gameio.h"
-#include "faction.h"
-#include "alist.h"
-#include "unit.h"
-#include "fileio.h"
-#include "production.h"
-#include "market.h"
-#include "object.h"
-
-/* Weather Types */
-enum {
+//----------------------------------------------------------------------------
+/// Weather Types
+enum
+{
 	W_NORMAL,
 	W_WINTER,
 	W_MONSOON,
-	W_BLIZZARD
+	W_BLIZZARD,
+	W_MAX
 };
 
+///@return text representation of weather
+const char* weatherString(int w);
+
+//----------------------------------------------------------------------------
+/// Raw materials produced in a region
 struct Product
 {
 	int product;
@@ -59,74 +62,89 @@ struct Product
 	int amount;
 };
 
+//----------------------------------------------------------------------------
+/// Terrain in a region
 class TerrainType
 {
-	public:
-		const char * name;
-		int similar_type;
+public:
+	const char *name;
+	int similar_type;
 
-		enum {
-			RIDINGMOUNTS = 0x1,
-			FLYINGMOUNTS = 0x2,
-		};
-		int flags;
+	enum
+	{
+		RIDINGMOUNTS = 0x1,
+		FLYINGMOUNTS = 0x2,
+	};
+	int flags;
 
-		int pop;
-		int wages;
-		int economy;
-		int movepoints;
-		Product prods[7];
-		// Race information
-		// A hex near water will have either one of the normal races or one
-		// of the coastal races in it.   Non-coastal hexes will only have one
-		// of the normal races.
-		int races[4];
-		int coastal_races[3];
-		int wmonfreq;
-		int smallmon;
-		int bigmon;
-		int humanoid;
-		int lairChance;
-		int lairs[6];
+	int pop;
+	int wages;
+	int economy;
+	int movepoints;
+	Product prods[7];
+
+	// Race information
+	// A hex near water will have either one of the normal races or one
+	// of the coastal races in it.   Non-coastal hexes will only have one
+	// of the normal races.
+	int races[4];
+	int coastal_races[3];
+
+	int wmonfreq;
+	int smallmon;
+	int bigmon;
+	int humanoid;
+	int lairChance;
+	int lairs[6];
 };
 
 extern TerrainType *TerrainDefs;
 
+//----------------------------------------------------------------------------
 class Location : public AListElem
 {
-	public:
-		Unit * unit;
-		Object * obj;
-		ARegion * region;
+public:
+	Unit *unit;
+	Object *obj;
+	ARegion *region;
 };
 
-Location *GetUnit(AList *,int);
+///@return the location in 'location_list' containing 'unit_num' or NULL
+Location* GetUnit(AList *location_list, int unit_num);
 
-int AGetName(int town);
-const char* AGetNameString(int name);
-
+//----------------------------------------------------------------------------
 class ARegionPtr : public AListElem
 {
-	public:
-		ARegion * ptr;
+public:
+	ARegionPtr(ARegion *p = NULL)
+	: ptr(p)
+	{
+	}
+
+	ARegion *ptr;
 };
 
-ARegionPtr *GetRegion(AList *,int);
+///@return region_num in region_list, or NULL
+ARegionPtr* GetRegion(AList *region_list, int region_num);
 
+//----------------------------------------------------------------------------
 class Farsight : public AListElem
 {
-	public:
-		Farsight();
+public:
+	Farsight();
 
-		Faction *faction;
-		Unit *unit;
-		int level;
-		int exits_used[NDIRS];
+	Faction *faction;
+	Unit *unit;
+	int level;
+	int exits_used[NDIRS];
 };
 
-Farsight *GetFarsight(AList *,Faction *);
+///@return the farsight report for 'fac', or NULL
+Farsight* GetFarsight(AList *farsight_list, Faction *fac);
 
-enum {
+//----------------------------------------------------------------------------
+enum
+{
 	TOWN_VILLAGE,
 	TOWN_TOWN,
 	TOWN_CITY,
@@ -135,277 +153,330 @@ enum {
 
 class TownInfo
 {
-	public:
-		TownInfo();
-		~TownInfo();
+public:
+	TownInfo();
+	~TownInfo();
 
-		void Readin(Ainfile *, ATL_VER &);
-		void Writeout(Aoutfile *);
-		int TownType();
+	void Readin(Ainfile *f, ATL_VER &v);
+	void Writeout(Aoutfile *f) const;
 
-		AString * name;
-		int pop;
-		int basepop;
-		int activity;
+	int TownType() const;
+
+	AString *name;
+	int pop;
+	int basepop;
+	int activity;
 };
 
+//----------------------------------------------------------------------------
 class ARegion : public AListElem
 {
-	friend class Game;
-	friend class ARegionArray;
+friend class Game;
+friend class ARegionArray;
 
-	public:
-		ARegion();
-		ARegion(int,int);
-		~ARegion();
-		void Setup();
+public:
+	/// constructor
+	ARegion();
 
-		void ZeroNeighbors();
-		void SetName(const char *);
+	/// destructor
+	~ARegion();
 
-		void Writeout(Aoutfile *);
-		void Readin(Ainfile *,AList *, ATL_VER v);
+	void Setup();
 
-		int CanMakeAdv(Faction *,int);
-		int HasItem(Faction *,int);
-		void WriteProducts(Areport *, Faction *, int);
-		void WriteMarkets(Areport *, Faction *, int);
-		void WriteEconomy(Areport *,Faction *, int);
-		void WriteExits(Areport *, ARegionList *pRegs, int *exits_seen);
-		void WriteReport(Areport *f, Faction *fac, int month,
-				ARegionList *pRegions);
-		// DK
-		void WriteTemplate(Areport *,Faction *, ARegionList *, int);
-		void WriteTemplateHeader(Areport *, Faction *, ARegionList *, int);
-		void GetMapLine(char *, int, ARegionList *);
+	void Writeout(Aoutfile *f);
+	void Readin(Ainfile *f, AList *facs, ATL_VER v);
 
-		AString ShortPrint(ARegionList *pRegs);
-		AString Print(ARegionList *pRegs);
+	void WriteReport(Areport *f, Faction *fac, int month, ARegionList *pRegions);
+	void WriteTemplate(Areport *f, Faction *fac, ARegionList *pRegs, int month);
 
-		void Kill(Unit *);
-		void ClearHell();
+	// defined in template.cpp
+	void WriteTemplateHeader(Areport *f, Faction *fac, ARegionList *pRegs, int month);
+	void GetMapLine(char *buffer, int line, ARegionList *pRegs);
 
-		Unit * GetUnit(int);
-		Unit * GetUnitAlias(int,int); /* alias, faction number */
-		Unit * GetUnitId(UnitId *,int);
-		Location * GetLocation(UnitId *,int);
+	AString ShortPrint(ARegionList *pRegs);
+	AString Print(ARegionList *pRegs);
 
-		void SetLoc(int,int,int);
-		int Present(Faction *);
-		AList * PresentFactions();
-		int GetObservation(Faction *, int);
-		int GetTrueSight(Faction *, int);
+	/// change the name of the region
+	void SetName(const char *new_name);
 
-		Object * GetObject(int);
-		Object * GetDummy();
+	///@return 1 if 'fac' can make 'item'
+	int CanMakeAdv(Faction *fac, int item);
 
-		int MoveCost(int, ARegion *, int, AString *);
-		Unit * Forbidden(Unit *); /* Returns unit that is forbidding */
-		Unit * ForbiddenByAlly(Unit *); /* Returns unit that is forbidding */
-		int CanTax(Unit *);
-		int CanPillage(Unit *);
-		int ForbiddenShip(Object *);
-		int HasCityGuard();
-		void NotifySpell(Unit *,int, ARegionList *pRegs);
-		void NotifyCity(Unit *, AString& oldname, AString& newname);
+	///@return 1 if a unit from 'fac' has 'item' in this
+	int HasItem(Faction *fac, int item);
 
-		void DefaultOrders();
-		void UpdateTown();
-		void PostTurn(ARegionList *pRegs);
-		void UpdateProducts();
-		void SetWeather(int newWeather);
-		int IsCoastal();
-		int IsCoastalOrLakeside();
-		void MakeStartingCity();
-		int IsStartingCity();
-		int IsSafeRegion();
-		int CanBeStartingCity(ARegionArray *pRA);
-		int HasShaft();
+	/// take the items from 'u' and give them to a friend, then move 'u' to "Hell"
+	void Kill(Unit *u);
 
-		// AS
-		int HasRoad();
-		int HasExitRoad(int realDirection);
-		int CountConnectingRoads();
-		int HasConnectingRoad(int realDirection);
-		int GetRoadDirection(int realDirection);
-		int GetRealDirComp(int realDirection);
-		void DoDecayCheck(ARegionList *pRegs);
-		void DoDecayClicks(Object *o, ARegionList *pRegs);
-		void RunDecayEvent(Object *o, ARegionList *pRegs);
-		AString GetDecayFlavor();
-		int GetMaxClicks();
-		int PillageCheck();
+	/// delete all the units that have died
+	void ClearHell();
 
-		// JR
-		int GetPoleDistance(int dir);
+	///@return unit matching 'num', or NULL
+	Unit* GetUnit(int num);
 
-		int CountWMons();
-		int IsGuarded();
+	///@return unit matching 'alias' for 'faction', or NULL
+	Unit* GetUnitAlias(int alias, int faction);
 
-		int Wages();
-		AString WagesForReport();
-		int Population();
+	///@return unit matching 'id' for 'faction'
+	Unit* GetUnitId(UnitId *id, int faction);
 
-		AString * name;
-		int num;
-		int type;
-		int buildingseq;
-		int weather;
-		int gate;
+	///@return new Location wrapping id, faction, this
+	Location* GetLocation(UnitId *id, int faction);
 
-		TownInfo * town;
-		int race;
-		int population;
-		int basepopulation;
-		int wages;
-		int maxwages;
-		int money;
+	///@return 1 if a unit from 'f' is in this, else 0
+	int Present(Faction *f);
 
-		/* Potential bonuses to economy */
-		int clearskies;
-		int earthlore;
+	///@return new list of FactionPtr containing all the factions represented here
+	AList* PresentFactions();
 
-		ARegion * neighbors[NDIRS];
-		AList objects;
-		AList hell; /* Where dead units go */
-		AList farsees;
-		// List of units which passed through the region
-		AList passers;
-		ProductionList products;
-		MarketList markets;
-		int xloc,yloc,zloc;
+	int GetObservation(Faction *f, int use_passers);
+	int GetTrueSight(Faction *f, int use_passers);
 
-	private:
-		/* Private Setup Functions */
-		void SetupPop();
-		void SetupProds();
-		int GetNearestProd(int);
-		void SetupCityMarket();
-		void AddTown();
-		void MakeLair(int);
-		void LairCheck();
+	///@return object 'num', or NULL
+	Object* GetObject(int num);
+
+	///@return the object representing open space
+	Object* GetDummy();
+
+	///@param[out] road message which is updated for road usage
+	///@return the cost to move into this region 'from_region' along 'dir' via 'movetype'
+	int MoveCost(int movetype, ARegion *from_region, int dir, AString *road);
+
+	///@return unit that is forbidding 'u' from entering this
+	Unit* Forbidden(Unit *u);
+
+	///@return allied unit that is forbidding 'u' from entering this
+	Unit* ForbiddenByAlly(Unit *u);
+
+	///@return 1 if 'u' can tax here
+	int CanTax(Unit *u);
+
+	///@return 1 if 'u' can pillage here
+	int CanPillage(Unit *u);
+
+	///@return 1 if any unit in 'ship' is forbidden from entering here
+	int ForbiddenShip(Object *ship);
+
+	///@return 1 if city guard present here
+	int HasCityGuard();
+
+	/// post a report to all the units here
+	void NotifySpell(Unit *caster, int spell, ARegionList *pRegs);
+
+	/// notify all units in city about city name change
+	void NotifyCity(Unit *namer, const AString &oldname, const AString &newname);
+
+	/// reset orders for all units here
+	void DefaultOrders();
+
+	void PostTurn(ARegionList *pRegs);
+	void UpdateProducts();
+	void SetWeather(int newWeather);
+
+	///@return 1 for ocean-like (not lake) or number of adjacent ocean-like
+	int IsCoastal();
+
+	int IsCoastalOrLakeside();
+	void MakeStartingCity();
+	int IsStartingCity();
+	int IsSafeRegion();
+	int CanBeStartingCity(ARegionArray *pRA);
+	int HasShaft();
+
+	///@return 1 if this region has a road in any direction, else 0
+	///@NOTE: the destination region must have a corresponding road to be useful
+	int HasRoad();
+
+	///@return 1 if this region has a road in the specified direction
+	int HasExitRoad(int realDirection);
+
+	int CountConnectingRoads();
+	int HasConnectingRoad(int realDirection);
+
+	///@return the road direction corresponding to 'realDirection'
+	int GetRoadDirection(int realDirection);
+
+	int GetRealDirComp(int realDirection) const;
+	void DoDecayCheck(ARegionList *pRegs);
+	void DoDecayClicks(Object *o, ARegionList *pRegs);
+	void RunDecayEvent(Object *o, ARegionList *pRegs);
+	int PillageCheck() const;
+
+	int GetPoleDistance(int dir);
+
+	int CountWMons();
+	int IsGuarded();
+
+	int Wages();
+	AString WagesForReport();
+	int Population() const;
+
+	// used by ARegionArray
+	void ZeroNeighbors();
+	void SetLoc(int x, int y, int z);
+
+private: // methods
+	void SetupPop();
+	void SetupProds();
+	int GetNearestProd(int item);
+	void SetupCityMarket();
+	void AddTown();
+	void MakeLair(int lair_type);
+	void LairCheck();
+
+	void WriteProducts(Areport *f, Faction *fac, int present);
+	void WriteMarkets(Areport *f, Faction *fac, int present);
+	void WriteEconomy(Areport *f, Faction *fac, int present);
+	void WriteExits(Areport *f, ARegionList *pRegs, bool *exits_seen) const;
+
+	int GetMaxClicks() const;
+	AString GetDecayFlavor() const;
+
+	/// apply variable economy effects
+	void UpdateTown();
+
+public: // data
+	AString *name;
+	int num;
+	int type;
+	int buildingseq;
+	int weather;
+	int gate;
+
+	TownInfo *town;
+	int race;
+	int population;
+	int basepopulation;
+	int wages;
+	int maxwages;
+	int money;
+
+	// Potential bonuses to economy
+	int clearskies;
+	int earthlore;
+
+	ARegion *neighbors[NDIRS];
+	AList objects;
+	AList hell; // Where dead units go
+	AList farsees;
+
+	// List of units which passed through the region
+	AList passers;
+
+	ProductionList products;
+	MarketList markets;
+	int xloc, yloc, zloc;
 };
 
+//----------------------------------------------------------------------------
 class ARegionArray
 {
-	public:
-		ARegionArray(int,int);
-		~ARegionArray();
+public:
+	ARegionArray(int x, int y);
+	~ARegionArray();
 
-		void SetRegion(int,int,ARegion *);
-		ARegion * GetRegion(int,int);
-		void SetName(const char *name);
+	void SetRegion(int x, int y, ARegion *r);
+	ARegion* GetRegion(int x, int y);
+	void SetName(const char *name);
 
-		int x;
-		int y;
-		ARegion ** regions;
-		AString *strName;
+public: // data
+	int x;
+	int y;
+	ARegion **regions;
+	AString *strName;
 
-		enum {
-			LEVEL_NEXUS,
-			LEVEL_SURFACE,
-			LEVEL_UNDERWORLD,
-			LEVEL_UNDERDEEP,
-		};
-		int levelType;
+	enum
+	{
+		LEVEL_NEXUS,
+		LEVEL_SURFACE,
+		LEVEL_UNDERWORLD,
+		LEVEL_UNDERDEEP,
+	};
+	int levelType;
 };
 
-class ARegionFlatArray
-{
-	public:
-		ARegionFlatArray(int);
-		~ARegionFlatArray();
-
-		void SetRegion(int,ARegion *);
-		ARegion * GetRegion(int);
-
-		int size;
-		ARegion ** regions;
-};
-
+//----------------------------------------------------------------------------
 class ARegionList : public AList
 {
-	public:
-		ARegionList();
-		~ARegionList();
+public:
+	ARegionList();
+	~ARegionList();
 
-		ARegion * GetRegion(int);
-		ARegion * GetRegion(int,int,int);
-		int ReadRegions(Ainfile *f, AList *, ATL_VER v);
-		void WriteRegions(Aoutfile *f);
-		Location * FindUnit(int);
+	void WriteRegions(Aoutfile *f);
+	int ReadRegions(Ainfile *f, AList *factions, ATL_VER v);
 
-		void ChangeStartingCity(ARegion *,int);
-		ARegion *GetStartingCity(ARegion *AC, int num, int level, int maxX,
-				int maxY);
+	ARegion* GetRegion(int region_num);
+	ARegion* GetRegion(int x, int y, int z);
+	Location* FindUnit(int unit_num);
 
-		ARegion *FindGate(int);
-		int GetDistance(ARegion *,ARegion *);
-		int GetPlanarDistance(ARegion *,ARegion *, int penalty);
-		int GetWeather(ARegion *pReg, int month);
+	void ChangeStartingCity(ARegion *, int);
+	ARegion* GetStartingCity(ARegion *AC, int num, int level, int maxX, int maxY);
 
-		ARegionArray *GetRegionArray(int level);
+	ARegion* FindGate(int gate_id);
+	int GetDistance(ARegion *one, ARegion *two);
+	int GetPlanarDistance(ARegion *one, ARegion *two, int penalty);
+	int GetWeather(ARegion *pReg, int month);
 
-		int numberofgates;
-		int numLevels;
-		ARegionArray **pRegionArrays;
+	ARegionArray* GetRegionArray(int level);
 
-	public:
-		//
-		// Public world creation stuff
-		//
-		void CreateLevels(int numLevels);
-		void CreateAbyssLevel(int level, const char *name);
-		void CreateNexusLevel(int level, int xSize, int ySize, const char *name);
-		void CreateSurfaceLevel(int level, int xSize, int ySize,
-				int percentOcean, int continentSize, const char *name);
-		void CreateIslandLevel(int level, int nPlayers, const char *name);
-		void CreateUnderworldLevel(int level, int xSize, int ySize, const char *name);
-		void CreateUnderdeepLevel(int level, int xSize, int ySize, const char *name);
+public: // data
+	int numberofgates;
+	int numLevels;
+	ARegionArray **pRegionArrays;
 
-		void MakeShaftLinks(int levelFrom, int levelTo, int odds);
-		void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
-		void InitSetupGates(int level);
-		void FinalSetupGates();
+public: // Public world creation stuff
+	void CreateLevels(int numLevels);
+	void CreateAbyssLevel(int level, const char *name);
+	void CreateNexusLevel(int level, int xSize, int ySize, const char *name);
+	void CreateSurfaceLevel(int level, int xSize, int ySize,
+	    int percentOcean, int continentSize, const char *name);
+	void CreateIslandLevel(int level, int nPlayers, const char *name);
+	void CreateUnderworldLevel(int level, int xSize, int ySize, const char *name);
+	void CreateUnderdeepLevel(int level, int xSize, int ySize, const char *name);
 
-		// JR
-		void CleanUpWater(ARegionArray *pRegs);
-		void RemoveCoastalLakes(ARegionArray *pRegs);
-		void SeverLandBridges(ARegionArray *pRegs);
+	void MakeShaftLinks(int levelFrom, int levelTo, int odds);
+	void SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY);
+	void InitSetupGates(int level);
+	void FinalSetupGates();
 
-		void CalcDensities();
-		int GetLevelXScale(int level);
-		int GetLevelYScale(int level);
+	void CleanUpWater(ARegionArray *pRegs);
+	void RemoveCoastalLakes(ARegionArray *pRegs);
+	void SeverLandBridges(ARegionArray *pRegs);
 
-	private:
-		//
-		// Private world creation stuff
-		//
-		void MakeRegions(int level, int xSize, int ySize);
-		void SetupNeighbors(ARegionArray *pRegs);
-		void NeighSetup(ARegion *r, ARegionArray *ar);
+	void CalcDensities();
+	int GetLevelXScale(int level);
+	int GetLevelYScale(int level);
 
-		void SetRegTypes(ARegionArray *pRegs, int newType);
-		void MakeLand(ARegionArray *pRegs,int percentOcean,int continentSize);
-		void MakeCentralLand(ARegionArray *pRegs);
+private: // Private world creation stuff
+	void MakeRegions(int level, int xSize, int ySize);
+	void SetupNeighbors(ARegionArray *pRegs);
+	void NeighSetup(ARegion *r, ARegionArray *ar);
 
-		void SetupAnchors(ARegionArray *pArr);
-		void GrowTerrain(ARegionArray *pArr, int growOcean);
-		void RandomTerrain(ARegionArray *pArr);
-		void MakeUWMaze(ARegionArray *pArr);
-		void MakeIslands(ARegionArray *pArr, int nPlayers);
-		void MakeOneIsland(ARegionArray *pRegs, int xx, int yy);
+	void SetRegTypes(ARegionArray *pRegs, int newType);
+	void MakeLand(ARegionArray *pRegs, int percentOcean, int continentSize);
+	void MakeCentralLand(ARegionArray *pRegs);
 
-		void AssignTypes(ARegionArray *pArr);
-		void FinalSetup(ARegionArray *);
+	void SetupAnchors(ARegionArray *pArr);
+	void GrowTerrain(ARegionArray *pArr, int growOcean);
+	void RandomTerrain(ARegionArray *pArr);
+	void MakeUWMaze(ARegionArray *pArr);
+	void MakeIslands(ARegionArray *pArr, int nPlayers);
+	void MakeOneIsland(ARegionArray *pRegs, int xx, int yy);
 
-		void MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo);
+	void AssignTypes(ARegionArray *pArr);
+	void FinalSetup(ARegionArray *pArr);
 
-		//
-		// Game-specific world stuff (see world.cpp)
-		//
-		int GetRegType(ARegion *pReg);
-		int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
+	void MakeShaft(ARegion *reg, ARegionArray *pFrom, ARegionArray *pTo);
 
+	// Game-specific world stuff (see world.cpp)
+	int GetRegType(ARegion *pReg);
+	int CheckRegionExit(ARegion *pFrom, ARegion *pTo);
 };
+
+//----------------------------------------------------------------------------
+///@return a random name (defined in specific world.cpp)
+int AGetName(int town);
+const char* AGetNameString(int name);
+
 #endif
+
