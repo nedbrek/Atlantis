@@ -178,7 +178,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_LIZARDMAN);
 	EnableItem(I_URUK);
 	EnableItem(I_GOBLINMAN);
-	EnableItem(I_HOBBIT);
+	EnableItem(I_HALFLING);
 	EnableItem(I_GNOLL);
 	EnableItem(I_DROWMAN);
 	EnableItem(I_MERC);
@@ -186,7 +186,7 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_AMAZON);
 	EnableItem(I_OGREMAN);
 	EnableItem(I_GNOME);
-	EnableItem(I_HIGHLANDER);
+	EnableItem(I_MOUNTAINMAN);
 	EnableItem(I_MINOTAUR);
 	EnableItem(I_GREYELF);
 
