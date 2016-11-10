@@ -79,7 +79,7 @@ AString::AString(char c)
 
 AString::~AString()
 {
-	delete str_;
+	delete[] str_;
 }
 
 AString::AString(const AString &s)
@@ -91,7 +91,7 @@ AString::AString(const AString &s)
 
 AString& AString::operator=(const AString &s)
 {
-	delete str_;
+	delete[] str_;
 	len_ = s.len_;
 	str_ = new char[len_ + 1];
 	strcpy(str_, s.str_);
@@ -100,7 +100,7 @@ AString& AString::operator=(const AString &s)
 
 AString& AString::operator=(const char *c)
 {
-	delete str_;
+	delete[] str_;
 	len_ = strlen(c);
 	str_ = new char[len_ + 1];
 	strcpy(str_, c);
@@ -158,7 +158,7 @@ AString AString::operator+(const AString &s) const
 	}
 
 	AString temp2 = AString(temp);
-	delete temp;
+	delete[] temp;
 	return temp2;
 }
 
@@ -177,7 +177,7 @@ AString& AString::operator+=(const AString &s)
 		temp[i++] = s.str_[j];
 	}
 
-	delete str_;
+	delete[] str_;
 	str_ = temp;
 	len_ += s.len_;
 
