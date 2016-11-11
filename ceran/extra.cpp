@@ -76,18 +76,32 @@ int Game::SetupFaction( Faction *pFac )
 		temp2->Study(S_TACTICS, 90);
 		temp2->Study(S_COMBAT, 60);
 	}
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
 		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
+		{
 			temp2->items.SetNum(I_FOOD, 6);
+			pFac->DiscoverItem(I_FOOD, 0, 1);
+		}
 		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
+		{
 			temp2->items.SetNum(I_FISH, 6);
+			pFac->DiscoverItem(I_FISH, 0, 1);
+		}
 		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
+		{
 			temp2->items.SetNum(I_LIVESTOCK, 6);
+			pFac->DiscoverItem(I_LIVESTOCK, 0, 1);
+		}
 		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
+		{
 			temp2->items.SetNum(I_GRAIN, 2);
+			pFac->DiscoverItem(I_GRAIN, 0, 1);
+		}
 		temp2->items.SetNum(I_SILVER, 10);
+		pFac->DiscoverItem(I_SILVER, 0, 1);
 	}
 
 	temp2->MoveUnit( reg->GetDummy() );
