@@ -69,6 +69,9 @@ public:
 	///@return the integer representation of this
 	int value() const;
 
+	/// get strict integer representation of this. @return true on success
+	bool strict_value(int *v) const;
+
 	///@return a new string with only legal chars, or NULL if this is all blanks or illegal
 	AString* getlegal() const;
 

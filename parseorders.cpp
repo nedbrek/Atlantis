@@ -236,9 +236,39 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	AString *order = f->GetLine();
 	while (order)
 	{
-		AString saveorder = *order;
+		AString saveorder = *order; // save given order
+
+		// look for @<order>
 		int getatsign = order->getat();
+
+		// get first token
 		AString *token = order->gettoken();
+
+		// check for @<count> <order>
+		int at_value = 0;
+		if (token && token->strict_value(&at_value))
+		{
+			saveorder.getat(); // strip @
+			delete saveorder.gettoken(); // strip count
+
+			if (at_value < 2)
+			{
+				// count is done
+				getatsign = 0;
+			}
+			else if (at_value == 2)
+			{
+				// one more turn, use just the order
+			}
+			else
+			{
+				// re-insert count-1
+				saveorder = AString("@") + AString(at_value - 1) + AString(" ") + saveorder;
+			}
+
+			delete token;
+			token = order->gettoken();
+		}
 
 		if (token)
 		{

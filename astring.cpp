@@ -374,6 +374,26 @@ int AString::value() const
 	return ret;
 }
 
+bool AString::strict_value(int *v) const
+{
+	*v = 0;
+	if (len_ == 0)
+		return false; // empty string
+
+	int place = 0;
+	while (place < len_ && '0' <= str_[place] && str_[place] <= '9')
+	{
+		*v *= 10;
+		if (*v < 0)
+			return false;
+
+		*v += str_[place] - '0';
+
+		++place;
+	}
+	return place == len_;
+}
+
 std::ostream& operator<<(std::ostream &os, const AString &s)
 {
 	os << s.str_;
