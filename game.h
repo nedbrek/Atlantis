@@ -299,9 +299,7 @@ private:
     //
     void ParseError( OrdersCheck *pCheck, Unit *pUnit, Faction *pFac,
                      const AString &strError );
-    UnitId *ParseUnit(AString * s);
     int ParseDir(AString * token);
-
 
     void ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck );
     void ProcessOrder( int orderNum, Unit *unit, AString *order,

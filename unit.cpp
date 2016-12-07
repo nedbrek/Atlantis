@@ -56,6 +56,28 @@ AString UnitId::Print() const
 	return AString("new ") + AString(alias);
 }
 
+bool UnitId::find(AList &l, Unit **u) const
+{
+	if (unitnum > 0)
+	{
+		*u = Unit::findByNum(l, unitnum);
+		return true;
+	}
+
+	if (faction)
+	{
+		*u = Unit::findByFaction(l, alias, faction);
+		return true;
+	}
+
+	return false;
+}
+
+Unit* UnitId::findByFaction(AList &l, int f)
+{
+	return Unit::findByFaction(l, alias, f);
+}
+
 UnitPtr* GetUnitList(AList *list, Unit *u)
 {
 	forlist(list)
@@ -130,6 +152,38 @@ Unit::~Unit()
 	delete stealorders;
 	delete name;
 	delete describe;
+}
+
+Unit* Unit::findByNum(AList &l, int num)
+{
+	forlist((&l))
+		if (((Unit*)elem)->num == num)
+			return (Unit*)elem;
+
+	return NULL;
+}
+
+Unit* Unit::findByFaction(AList &l, int alias, int faction)
+{
+	// First search for units with the 'formfaction'
+	forlist((&l))
+	{
+		if (((Unit*)elem)->alias == alias &&
+		    ((Unit*)elem)->formfaction->num == faction)
+			return (Unit*)elem;
+	}
+
+	// Now search against their current faction
+	{
+		forlist((&l))
+		{
+			if (((Unit*)elem)->alias == alias &&
+			    ((Unit*)elem)->faction->num == faction)
+				return (Unit*)elem;
+		}
+	}
+
+	return NULL;
 }
 
 void Unit::SetMonFlags()

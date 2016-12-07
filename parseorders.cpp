@@ -79,7 +79,7 @@ int ParseTF(AString *token)
 }
 
 // figure out the target in an order with unit context
-UnitId* Game::ParseUnit(AString *s)
+UnitId* ParseUnit(AString *s)
 {
 	AString *token = s->gettoken();
 	if (!token) return NULL;
@@ -1370,7 +1370,7 @@ void Game::ProcessFactionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
-	if (!id || id->unitnum == -1)
+	if (!id || !id->valid())
 	{
 		ParseError(pCheck, u, 0, "ASSASSINATE: No target given.");
 		return;
@@ -1388,7 +1388,7 @@ void Game::ProcessAssassinateOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
-	if (!id || id->unitnum == -1)
+	if (!id || !id->valid())
 	{
 		ParseError(pCheck, u, 0, "STEAL: No target given.");
 		return;
@@ -1648,7 +1648,7 @@ void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck)
 void Game::ProcessPromoteOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
-	if (!id || id->unitnum == -1)
+	if (!id || !id->valid())
 	{
 		ParseError(pCheck, u, 0, "PROMOTE: No target given.");
 		return;
@@ -1707,7 +1707,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			if (!pCheck)
 			{
 				targ = ParseUnit(o);
-				if (!targ || targ->unitnum == -1)
+				if (!targ || !targ->valid())
 				{
 					unit->Error("BUILD: Non-existant unit to help.");
 					return;
@@ -1803,7 +1803,7 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
-	while (id && id->unitnum != -1)
+	while (id && id->valid())
 	{
 		if (!pCheck)
 		{
@@ -2075,7 +2075,7 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	int students = 0;
 	UnitId *id = ParseUnit(o);
-	while (id && id->unitnum != -1)
+	while (id && id->valid())
 	{
 		students++;
 		if (order)
@@ -2517,7 +2517,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		token = o->gettoken();
 		if (token)
 		{
-			if (t->unitnum == -1)
+			if (!t->valid())
 				item = ParseEnabledItem(token);
 			else
 				item = ParseGiveableItem(token);
@@ -3354,7 +3354,7 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessEvictOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
-	while (id && id->unitnum != -1)
+	while (id && id->valid())
 	{
 		if (!pCheck)
 		{

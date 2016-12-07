@@ -39,6 +39,8 @@ class Object;
 class Order;
 class TeleportOrder;
 
+class Unit; // defined locally
+
 //----------------------------------------------------------------------------
 /// Ways a unit can be on guard
 enum
@@ -104,12 +106,24 @@ enum
 /// Handle on a unit, including new units ('alias')
 class UnitId : public AListElem
 {
+	friend UnitId* ParseUnit(AString *s);
+
 public:
 	UnitId();
 	~UnitId();
 
 	AString Print() const;
 
+	///@return true if unitnum does not refer to "no one"
+	bool valid() const { return unitnum != -1; }
+
+	///@return true if unitnum or faction/alias was used to search
+	bool find(AList &l, Unit **u) const;
+
+	///@return Unit indicated by 'alias' and 'f'
+	Unit* findByFaction(AList &l, int f);
+
+private: // data
 	int unitnum; ///< 0 -> new unit
 	int alias;   ///< new unit id
 	int faction; ///< owner id
@@ -125,6 +139,12 @@ public:
 
 	/// destructor
 	~Unit();
+
+	static
+	Unit* findByFaction(AList &l, int alias, int faction);
+
+	static
+	Unit* findByNum(AList &l, int num);
 
 	/// set flags to make unit into monsters
 	void SetMonFlags();

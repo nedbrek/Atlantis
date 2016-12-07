@@ -25,6 +25,8 @@
 #include "game.h"
 #include "gamedata.h"
 
+UnitId* ParseUnit(AString *s);
+
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	int val;

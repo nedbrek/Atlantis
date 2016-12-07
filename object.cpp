@@ -206,34 +206,12 @@ int Object::CanModify()
 
 Unit* Object::GetUnit(int num)
 {
-	forlist((&units))
-		if (((Unit*)elem)->num == num)
-			return (Unit*)elem;
-
-	return NULL;
+	return Unit::findByNum(units, num);
 }
 
 Unit* Object::GetUnitAlias(int alias, int faction)
 {
-	// First search for units with the 'formfaction'
-	forlist((&units))
-	{
-		if (((Unit*)elem)->alias == alias &&
-		    ((Unit*)elem)->formfaction->num == faction)
-			return (Unit*)elem;
-	}
-
-	// Now search against their current faction
-	{
-		forlist((&units))
-		{
-			if (((Unit*)elem)->alias == alias &&
-			    ((Unit*)elem)->faction->num == faction)
-				return (Unit*)elem;
-		}
-	}
-
-	return NULL;
+	return Unit::findByFaction(units, alias, faction);
 }
 
 Unit* Object::GetUnitId(UnitId *id, int faction)
@@ -241,13 +219,11 @@ Unit* Object::GetUnitId(UnitId *id, int faction)
 	if (id == NULL)
 		return NULL;
 
-	if (id->unitnum)
-		return GetUnit(id->unitnum);
+	Unit *u = NULL;
+	if (id->find(units, &u))
+		return u;
 
-	if (id->faction)
-		return GetUnitAlias(id->alias, id->faction);
-
-	return GetUnitAlias(id->alias, faction);
+	return id->findByFaction(units, faction);
 }
 
 int Object::CanEnter(ARegion *reg, Unit *u)

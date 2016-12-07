@@ -2277,33 +2277,40 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		}
 	}
 
-	if (o->target->unitnum == -1) {
-		/* Give 0 */
-		if (amt == -1) {
+	if (!o->target->valid())
+	{
+		// Give 0
+		if (amt == -1)
+		{
 			u->Error("Can't discard a whole unit.");
 			return 0;
 		}
 
 		AString temp = "Discards ";
-		if (ItemDefs[o->item].type & IT_MAN) {
-			u->SetMen(o->item,u->GetMen(o->item) - amt);
+		if (ItemDefs[o->item].type & IT_MAN)
+		{
+			u->SetMen(o->item, u->GetMen(o->item) - amt);
 			temp = "Disbands ";
-		} else if(Globals->RELEASE_MONSTERS &&
-				(ItemDefs[o->item].type & IT_MONSTER)) {
+		}
+		else if (Globals->RELEASE_MONSTERS && (ItemDefs[o->item].type & IT_MONSTER))
+		{
 			temp = "Releases ";
 			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
-			if(Globals->WANDERING_MONSTERS_EXIST) {
+			if (Globals->WANDERING_MONSTERS_EXIST)
+			{
 				Faction *mfac = GetFaction(&factions, monfaction);
 				Unit *mon = GetNewUnit(mfac, 0);
-				int mondef = ItemDefs[o->item].index;
+				const int mondef = ItemDefs[o->item].index;
 				mon->MakeWMon(MonDefs[mondef].name, o->item, amt);
 				mon->MoveUnit(r->GetDummy());
+
 				// This will result in 0 unless MONSTER_NO_SPOILS or
 				// MONSTER_SPOILS_RECOVERY are set.
-				mon->free = Globals->MONSTER_NO_SPOILS +
-					Globals->MONSTER_SPOILS_RECOVERY;
+				mon->free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 			}
-		} else {
+		}
+		else
+		{
 			u->items.SetNum(o->item,u->items.GetNum(o->item) - amt);
 		}
 		u->Event(temp + ItemString(o->item, amt) + ".");
