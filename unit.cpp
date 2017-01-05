@@ -29,13 +29,36 @@
 #include "gameio.h"
 #include "object.h"
 #include "orders.h"
+#include <cstdlib>
 
 //----------------------------------------------------------------------------
-UnitId::UnitId()
-: unitnum(-1)
-, alias  (-1)
-, faction(-1)
+UnitId::UnitId(bool)
+: unitnum(-1) // nobody
+, alias  (0)
+, faction(0)
 {
+}
+
+UnitId::UnitId(int unit_num, int alias, int faction)
+: unitnum(unit_num)
+, alias  (alias)
+, faction(faction)
+{
+	if (unit_num < 0)
+	{
+		std::cerr << "UnitId: Unit num must greater than 0" << std::endl;
+		exit(1);
+	}
+	if (unit_num != 0 && alias != 0)
+	{
+		std::cerr << "UnitId: Unit num must be 0 for alias to work" << std::endl;
+		exit(1);
+	}
+	else if (unit_num == 0 && alias == 0)
+	{
+		std::cerr << "UnitId: Unit num must be non-zero when no alias given" << std::endl;
+		exit(1);
+	}
 }
 
 UnitId::~UnitId()
@@ -56,25 +79,21 @@ AString UnitId::Print() const
 	return AString("new ") + AString(alias);
 }
 
-bool UnitId::find(AList &l, Unit **u) const
+Unit* UnitId::find(AList &l, int f) const
 {
+	if (unitnum == -1)
+		return NULL;
+
 	if (unitnum > 0)
 	{
-		*u = Unit::findByNum(l, unitnum);
-		return true;
+		return Unit::findByNum(l, unitnum);
 	}
 
 	if (faction)
 	{
-		*u = Unit::findByFaction(l, alias, faction);
-		return true;
+		return Unit::findByFaction(l, alias, faction);
 	}
 
-	return false;
-}
-
-Unit* UnitId::findByFaction(AList &l, int f)
-{
 	return Unit::findByFaction(l, alias, f);
 }
 

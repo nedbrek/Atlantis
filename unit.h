@@ -106,10 +106,9 @@ enum
 /// Handle on a unit, including new units ('alias')
 class UnitId : public AListElem
 {
-	friend UnitId* ParseUnit(AString *s);
-
 public:
-	UnitId();
+	UnitId(bool nobody);
+	UnitId(int unit_num, int alias = 0, int faction = 0);
 	~UnitId();
 
 	AString Print() const;
@@ -117,16 +116,13 @@ public:
 	///@return true if unitnum does not refer to "no one"
 	bool valid() const { return unitnum != -1; }
 
-	///@return true if unitnum or faction/alias was used to search
-	bool find(AList &l, Unit **u) const;
-
 	///@return Unit indicated by 'alias' and 'f'
-	Unit* findByFaction(AList &l, int f);
+	Unit* find(AList &l, int f) const;
 
 private: // data
 	int unitnum; ///< 0 -> new unit
-	int alias;   ///< new unit id
-	int faction; ///< owner id
+	int alias;   ///< "new alias"
+	int faction; ///< "faction F new alias"
 };
 
 //----------------------------------------------------------------------------

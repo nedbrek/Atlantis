@@ -219,11 +219,7 @@ Unit* Object::GetUnitId(UnitId *id, int faction)
 	if (id == NULL)
 		return NULL;
 
-	Unit *u = NULL;
-	if (id->find(units, &u))
-		return u;
-
-	return id->findByFaction(units, faction);
+	return id->find(units, faction);
 }
 
 int Object::CanEnter(ARegion *reg, Unit *u)

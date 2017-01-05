@@ -89,11 +89,7 @@ UnitId* ParseUnit(AString *s)
 	{
 		delete token;
 
-		UnitId *id = new UnitId;
-		id->unitnum = -1; // nobody marker
-		id->alias   = 0;
-		id->faction = 0;
-		return id;
+		return new UnitId(false);
 	}
 
 	// GIVE faction f new unitAlias
@@ -129,12 +125,7 @@ UnitId* ParseUnit(AString *s)
 		delete token;
 		if (!alias) return NULL;
 
-		// return UnitId
-		UnitId *id = new UnitId;
-		id->unitnum = 0;
-		id->alias   = alias;
-		id->faction = fn;
-		return id;
+		return new UnitId(0, alias, fn);
 	}
 
 	// GIVE new n
@@ -149,11 +140,7 @@ UnitId* ParseUnit(AString *s)
 		delete token;
 		if (!alias) return NULL;
 
-		UnitId *id = new UnitId;
-		id->unitnum = 0; // special: use alias marker
-		id->alias   = alias;
-		id->faction = 0;
-		return id;
+		return new UnitId(0, alias);
 	}
 
 	// GIVE unitId
@@ -161,11 +148,7 @@ UnitId* ParseUnit(AString *s)
 	delete token;
 	if (!un) return NULL; // should have been caught above...
 
-	UnitId *id = new UnitId;
-	id->unitnum = un;
-	id->alias   = 0;
-	id->faction = 0;
-	return id;
+	return new UnitId(un);
 }
 
 int ParseFactionType(AString *o, int *type)
