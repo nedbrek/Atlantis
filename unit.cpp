@@ -1427,6 +1427,8 @@ int Unit::Practise(int sk)
 	Study(sk, men * bonus);
 	practised = 1;
 
+	Event(AString("Gets practice in ") + SkillDefs[sk].name + " (+" + AString(bonus) + ").");
+
 	return bonus;
 }
 
