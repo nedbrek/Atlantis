@@ -964,7 +964,7 @@ int Unit::canConsume(int itemId, int hint)
 		forlist(&o->units)
 		{
 			Unit *u = (Unit*)elem;
-			if (u != this && !u->GetFlag(FLAG_SHARE))
+			if (u != this && (u->faction != faction || !u->GetFlag(FLAG_SHARE)))
 				continue;
 
 			num_items += u->items.GetNum(itemId);
@@ -1008,8 +1008,7 @@ void Unit::consume(int itemId, int num)
 		forlist(&o->units)
 		{
 			Unit *u = (Unit*)elem;
-			// TODO faction check
-			if (u == this || !u->GetFlag(FLAG_SHARE))
+			if (u == this || u->faction != faction || !u->GetFlag(FLAG_SHARE))
 				continue;
 
 			const int num_items = u->items.GetNum(itemId);
