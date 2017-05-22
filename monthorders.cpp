@@ -263,7 +263,7 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 
 			if (movepoints < cost)
 			{
-				cap->Error("SAIL: Can't sail that far; remaining moves queued.");
+				cap->Event("SAIL: Can't sail further; remaining moves queued.");
 
 				TurnOrder *tOrder = new TurnOrder;
 				tOrder->repeating = 0;
@@ -1639,7 +1639,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 			return loc;
 		}
 
-		unit->Error("MOVE: Unit has insufficient movement points; remaining moves queued.");
+		unit->Event("MOVE: Insufficient movement points; remaining moves queued.");
 
 		// create a new order to enqueue
 		AString order = (o->advancing) ? "ADVANCE " : "MOVE ";
