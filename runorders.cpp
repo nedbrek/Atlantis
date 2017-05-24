@@ -2319,8 +2319,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 
 	Unit * t = r->GetUnitId(o->target,u->faction->num);
 	if (!t) {
-		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
-				").");
+		u->Event(AString("GIVE: Nonexistant target (") + o->target->Print() + ").");
 		return 0;
 	}
 
