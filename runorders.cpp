@@ -2471,13 +2471,12 @@ void Game::DoGuard1Orders()
 				if (u->guard == GUARD_SET || u->guard == GUARD_GUARD) {
 					if (!u->Taxers()) {
 						u->guard = GUARD_NONE;
-						u->Error("Must be combat ready to be on guard.");
+						u->Event("Must be combat ready to be on guard.");
 						continue;
 					}
 					if (u->type != U_GUARD && r->HasCityGuard()) {
 						u->guard = GUARD_NONE;
-						u->Error("Is prevented from guarding by the "
-								"Guardsmen.");
+						u->Error("Is prevented from guarding by the Guardsmen.");
 						continue;
 					}
 					u->guard = GUARD_GUARD;
