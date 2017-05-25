@@ -2742,6 +2742,11 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		if (!pCheck)
 		{
 			// fix to prevent non-owner units from renaming objects
+			if (!unit->object || unit->object->type == O_DUMMY)
+			{
+				unit->Error("NAME: Unit is not in a structure.");
+				return;
+			}
 			if (unit != unit->object->GetOwner())
 			{
 				unit->Error("NAME: Unit is not owner.");
