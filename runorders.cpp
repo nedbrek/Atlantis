@@ -993,33 +993,46 @@ void Game::RunEnterOrders()
 
 void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 {
-	Object * to;
-	if (u->enter == -1) {
+	Object *to = NULL;
+	if (u->enter == -1)
+	{
 		to = r->GetDummy();
 		u->enter = 0;
-		if((TerrainDefs[r->type].similar_type == R_OCEAN) &&
-				(!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER))) {
+
+		if ((TerrainDefs[r->type].similar_type == R_OCEAN) &&
+		    (!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER)))
+		{
 			u->Error("LEAVE: Can't leave a ship in the ocean.");
 			return;
 		}
-		if (in->IsBoat() && u->CanSwim()) u->leftShip = 1;
-	} else {
+
+		if (in->IsBoat() && u->CanSwim())
+			u->leftShip = 1;
+
+		if (u->object && u->object->type != O_DUMMY)
+			u->Event(AString("Leaves ") + *u->object->name);
+	}
+	else
+	{
 		to = r->GetObject(u->enter);
 		u->enter = 0;
-		if (!to) {
+		if (!to || !to->CanEnter(r, u))
+		{
 			u->Error("ENTER: Can't enter that.");
 			return;
 		}
-		if (!to->CanEnter(r,u)) {
-			u->Error("ENTER: Can't enter that.");
-			return;
-		}
-		if (to->ForbiddenBy(r, u)) {
+
+		if (to->ForbiddenBy(r, u))
+		{
 			u->Error("ENTER: Is refused entry.");
 			return;
 		}
 	}
+
 	u->MoveUnit( to );
+
+	if (u->object && u->object->type != O_DUMMY)
+		u->Event(AString("Enters ") + *u->object->name);
 }
 
 void Game::RemoveEmptyObjects()
