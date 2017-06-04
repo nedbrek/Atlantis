@@ -2676,7 +2676,7 @@ void Game::ProcessDescribeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		if (!pCheck)
 		{
 			// fix to prevent non-owner units from describing objects
-			if (unit != unit->object->GetOwner())
+			if (!unit->object->GetOwner() || unit->faction != unit->object->GetOwner()->faction)
 			{
 				unit->Error("DESCRIBE: Unit is not owner.");
 				return;
@@ -2747,7 +2747,7 @@ void Game::ProcessNameOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 				unit->Error("NAME: Unit is not in a structure.");
 				return;
 			}
-			if (unit != unit->object->GetOwner())
+			if (!unit->object->GetOwner() || unit->faction != unit->object->GetOwner()->faction)
 			{
 				unit->Error("NAME: Unit is not owner.");
 				return;

@@ -593,28 +593,23 @@ void Game::Do1Quit(Faction * f)
 void Game::RunDestroyOrders()
 {
 	forlist(&regions) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion*)elem;
 		forlist(&r->objects) {
-			Object * o = (Object *) elem;
-			Unit * u = o->GetOwner();
-			if (u)
-			{
-				if (u->destroy)
-				{
-					Do1Destroy(r,o,u);
-					continue;
-				}
-				else
-				{
-					forlist(&o->units)
-						((Unit *) elem)->destroy = 0;
-				}
+			Object *o = (Object*)elem;
+			if (o->type == O_DUMMY)
+				continue;
+
+			forlist(&o->units) {
+				Unit *u = (Unit*)elem;
+				if (u && u->destroy && o->GetOwner() && u->faction == o->GetOwner()->faction)
+					Do1Destroy(r, o, u);
 			}
 		}
 	}
 }
 
-void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
+void Game::Do1Destroy(ARegion *r, Object *o, Unit *u)
+{
 	if (TerrainDefs[r->type].similar_type == R_OCEAN) {
 		u->Error("DESTROY: Can't destroy a ship while at sea.");
 		forlist(&o->units) {
@@ -626,27 +621,30 @@ void Game::Do1Destroy(ARegion * r,Object * o,Unit * u) {
 	if (!u->GetMen()) {
 		u->Error("DESTROY: Empty units cannot destroy structures.");
 		forlist(&o->units) {
-			((Unit *) elem)->destroy = 0;
+			((Unit*)elem)->destroy = 0;
 		}
 		return;
 	}
 
-	if (o->CanModify()) {
-		u->Event(AString("Destroys ") + *(o->name) + ".");
-		Object * dest = r->GetDummy();
-		forlist(&o->units) {
-			Unit * u = (Unit *) elem;
-			u->destroy = 0;
-			u->MoveUnit( dest );
-		}
-		r->objects.Remove(o);
-		delete o;
-	} else {
+	if (!o->CanModify())
+	{
 		u->Error("DESTROY: Can't destroy that.");
 		forlist(&o->units) {
-			((Unit *) elem)->destroy = 0;
+			((Unit*)elem)->destroy = 0;
 		}
+		return;
 	}
+
+	u->Event(AString("Destroys ") + *(o->name) + ".");
+
+	Object *dest = r->GetDummy();
+	forlist(&o->units) {
+		Unit *u = (Unit*)elem;
+		u->destroy = 0;
+		u->MoveUnit(dest);
+	}
+	r->objects.Remove(o);
+	delete o;
 }
 
 void Game::RunFindOrders()
@@ -856,7 +854,7 @@ void Game::RunPillageRegion(ARegion * reg)
 	}
 	delete facs;
 
-	/* Destroy economy */
+	// Destroy economy
 	reg->money = 0;
 	reg->wages -= 6;
 	if (reg->wages < 6) reg->wages = 6;
@@ -868,30 +866,38 @@ void Game::RunPromoteOrders()
 	Object *o;
 	Unit *u;
 
-	/* First, do any promote orders */
+	// First, do any promote orders
 	forlist(&regions) {
-		r = (ARegion *)elem;
+		r = (ARegion*)elem;
 		forlist(&r->objects) {
-			o = (Object *)elem;
-			if (o->type != O_DUMMY) {
-				u = o->GetOwner();
-				if(u && u->promote) {
-					Do1PromoteOrder(o,u);
+			o = (Object*)elem;
+			if (o->type == O_DUMMY)
+				continue;
+
+			forlist(&o->units) {
+				u = (Unit *) elem;
+				if (u && u->promote && o->GetOwner() && u->faction == o->GetOwner()->faction)
+				{
+					Do1PromoteOrder(o, u);
 					delete u->promote;
 					u->promote = 0;
 				}
 			}
 		}
 	}
-	/* Now do any evict orders */
+
+	// Now do any evict orders
 	{
 		forlist(&regions) {
 			r = (ARegion *)elem;
 			forlist(&r->objects) {
 				o = (Object *)elem;
-				if (o->type != O_DUMMY) {
-					u = o->GetOwner();
-					if (u && u->evictorders) {
+				if (o->type == O_DUMMY)
+					continue;
+
+				forlist(&o->units) {
+					u = (Unit *) elem;
+					if (u && u->evictorders && o->GetOwner() && u->faction == o->GetOwner()->faction) {
 						Do1EvictOrder(o, u);
 						delete u->evictorders;
 						u->evictorders = 0;
@@ -901,7 +907,7 @@ void Game::RunPromoteOrders()
 		}
 	}
 
-	/* Then, clear out other promote/evict orders */
+	// Then, clear out other promote/evict orders
 	{
 		forlist(&regions) {
 			r = (ARegion *) elem;
@@ -957,19 +963,24 @@ void Game::Do1EvictOrder(Object *obj, Unit *u)
 	EvictOrder *ord = u->evictorders;
 	Object *to = obj->region->GetDummy();
 
-	while (ord && ord->targets.Num()) {
-		UnitId *id = (UnitId *)ord->targets.First();
+	while (ord && ord->targets.Num())
+	{
+		UnitId *id = (UnitId*)ord->targets.First();
 		ord->targets.Remove(id);
+
 		Unit *tar = obj->GetUnitId(id, u->faction->num);
 		delete id;
-		if (!tar) continue;
+		if (!tar)
+			continue;
 
-		if(obj->IsBoat() &&
-				(TerrainDefs[obj->region->type].similar_type == R_OCEAN) &&
-				(!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER))) {
+		if (obj->IsBoat() &&
+		    TerrainDefs[obj->region->type].similar_type == R_OCEAN &&
+		    (!tar->CanReallySwim() || tar->GetFlag(FLAG_NOCROSS_WATER)))
+		{
 			u->Error("EVICT: Cannot forcibly evict units over ocean.");
 			continue;
 		}
+
 		tar->MoveUnit(to);
 		tar->Event(AString("Evicted from ") + *obj->name + " by " + *u->name);
 		u->Event(AString("Evicted ") + *tar->name + " from " + *obj->name);
