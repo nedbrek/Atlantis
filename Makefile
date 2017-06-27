@@ -14,7 +14,7 @@ ALL_OBJ := $(OBJ) rand.o
 
 RULESET := extra.o monsters.o rules.o world.o
 
-GAMES := ceran conquest realms standard wyreth
+GAMES := ceran conquest realms standard wyreth py_atlantis
 
 GAME_OBJS := $(foreach dir,$(GAMES),$(addprefix $(dir)/obj/,$(RULESET)))
 

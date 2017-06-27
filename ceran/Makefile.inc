@@ -20,5 +20,5 @@ $(CERAN_OBJS): ceran/obj/%.o: ceran/%.cpp
 	@$(CXXBUILD)
 
 ceran/ceran.exe: $(ALL_OBJS) $(CERAN_OBJS)
-	@$(CXX) -o $@ $^
+	@$(CXX) -o $@ $^ $(LDFLAGS)
 
