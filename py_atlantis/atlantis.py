@@ -115,6 +115,9 @@ if __name__ == '__main__':
         if opt == "type":
             game_type = sys.argv[2]
             sys.argv = sys.argv[3:]
+        else:
+            print "Unknown option %s" % sys.argv[1]
+            sys.exit()
 
     setRules(game, game_type)
 
