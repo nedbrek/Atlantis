@@ -54,6 +54,27 @@ public:
 		return game_.GenRules("", "", "") == 0;
 	}
 
+	void enableItem(const std::string &item_name, bool enable)
+	{
+		AString tmp(item_name.c_str());
+		const int item = ParseAllItems(&tmp);
+		if (item == -1)
+		{
+			std::cout << "Enable bad item " << item_name << std::endl;
+			return;
+		}
+
+		if (enable)
+			game_.EnableItem(item);
+		else
+			game_.DisableItem(item);
+	}
+
+	void enableItem(const std::string &item_name)
+	{
+		enableItem(item_name, true);
+	}
+
 private:
 	Game game_;
 };
@@ -61,6 +82,9 @@ private:
 BOOST_PYTHON_MODULE(Atlantis)
 {
 	using namespace boost::python;
+	void (PyAtlantis::*enItem1)(const std::string &) = &PyAtlantis::enableItem;
+	void (PyAtlantis::*enItem2)(const std::string &, bool) = &PyAtlantis::enableItem;
+
 	def("usage", usage);
 	class_<PyAtlantis>("PyAtlantis")
 	    .def("new", &PyAtlantis::newGame)
@@ -70,6 +94,8 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("run", &PyAtlantis::run)
 	    .def("checkOrders", &PyAtlantis::checkOrders)
 	    .def("genRules", &PyAtlantis::genRules)
+		 .def("enableItem", enItem1)
+		 .def("enableItem", enItem2)
 	    ;
 
 	initIO();

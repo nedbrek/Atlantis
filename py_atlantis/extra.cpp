@@ -168,93 +168,6 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	EnableItem(I_PICK);
-	EnableItem(I_SPEAR);
-	EnableItem(I_AXE);
-	EnableItem(I_HAMMER);
-	EnableItem(I_MCROSSBOW);
-	EnableItem(I_MWAGON);
-	EnableItem(I_GLIDER);
-	EnableItem(I_NET);
-	EnableItem(I_LASSO);
-	EnableItem(I_BAG);
-	EnableItem(I_SPINNING);
-	EnableItem(I_LEATHERARMOR);
-	EnableItem(I_CLOTHARMOR);
-	EnableItem(I_BOOTS);
-
-	EnableItem(I_PIRATES);
-	EnableItem(I_KRAKEN);
-	EnableItem(I_MERFOLK);
-	EnableItem(I_ELEMENTAL);
-
-	EnableItem(I_FAIRY);
-	EnableItem(I_LIZARDMAN);
-	EnableItem(I_URUK);
-	EnableItem(I_GOBLINMAN);
-	EnableItem(I_HALFLING);
-	EnableItem(I_GNOLL);
-	EnableItem(I_DROWMAN);
-	EnableItem(I_MERC);
-	EnableItem(I_TITAN);
-	EnableItem(I_AMAZON);
-	EnableItem(I_OGREMAN);
-	EnableItem(I_GNOME);
-	EnableItem(I_MOUNTAINMAN);
-	EnableItem(I_MINOTAUR);
-	EnableItem(I_GREYELF);
-
-	EnableItem(I_LANCE);
-	EnableItem(I_MUSHROOM);
-
-	EnableItem(I_RRAT);
-	EnableItem(I_NOOGLE);
-	EnableItem(I_MUTANT);
-
-	EnableItem(I_BAXE);
-	EnableItem(I_MBAXE);
-	EnableItem(I_ADMANTIUM);
-	EnableItem(I_ADSWORD);
-	EnableItem(I_ADBAXE);
-	EnableItem(I_IMARM);
-	EnableItem(I_ADRING);
-	EnableItem(I_ADPLATE);
-	EnableItem(I_CAMEL);
-
-	EnableItem(I_DROW);
-	EnableItem(I_HYDRA);
-	EnableItem(I_STORMGIANT);
-	EnableItem(I_CLOUDGIANT);
-	EnableItem(I_ILLYRTHID);
-	EnableItem(I_SORCERERS);
-	EnableItem(I_MAGICIANS);
-	EnableItem(I_DARKMAGE);
-	EnableItem(I_WARRIORS);
-	EnableItem(I_ICEDRAGON);
-
-	EnableItem(I_HEALPOTION);
-	EnableItem(I_ROUGHGEM);
-	EnableItem(I_GEMS);
-	EnableItem(I_JAVELIN);
-	EnableItem(I_PIKE);
-	EnableItem(I_MWOLF);
-	EnableItem(I_MSPIDER);
-	EnableItem(I_MOLE);
-	EnableItem(I_BPLATE);
-	EnableItem(I_FSWORD);
-	EnableItem(I_MCHAIN);
-	EnableItem(I_QSTAFF);
-	EnableItem(I_SABRE);
-	EnableItem(I_MACE);
-	EnableItem(I_MSTAR);
-	EnableItem(I_DAGGER);
-	EnableItem(I_PDAGGER);
-	EnableItem(I_BHAMMER);
-	EnableItem(I_SHORTBOW);
-	EnableItem(I_BOW);
-	EnableItem(I_HEAVYCROSSBOW);
-	EnableItem(I_HARP);
-
 	EnableSkill(S_WEAPONCRAFT);
 	EnableSkill(S_ARMORCRAFT);
 	EnableSkill(S_GEMCUTTING);
@@ -575,10 +488,7 @@ void Game::ModifyTablesPerRuleset(void)
 			SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
 	ModifySkillFlags(S_PORTAL_LORE,
 			SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
-	DisableItem(I_TAROTCARDS);
 	// new weapontable
-	DisableItem(I_SUPERBOW);
-	DisableItem(I_DOUBLEBOW);
 	ModifyItemType(I_LONGBOW,IT_ADVANCED | IT_WEAPON);
 	ModifyItemBasePrice(I_LONGBOW,200);
 	ModifyItemBasePrice(I_BOW,120);

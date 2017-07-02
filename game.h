@@ -125,6 +125,10 @@ public:
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
 
+	//---modification
+	void EnableItem(int it); // Enables a disabled item
+	void DisableItem(int it); // Prevents item being generated/produced
+
 private:
     //
     // Game editing functions.
@@ -187,8 +191,6 @@ private:
 	void ModifySkillSpecial(int sk, int special);
 	void ModifySkillRange(int sk, int range);
 
-	void EnableItem(int it); // Enables a disabled item
-	void DisableItem(int it); // Prevents item being generated/produced
 	void ModifyItemFlags(int it, int flags);
 	void ModifyItemType(int it, int type);
 	void ModifyItemWeight(int it, int weight);
