@@ -1,0 +1,98 @@
+config:
+   items:
+      enable: [
+         "PICK",
+         "SPEAR",
+         "AXE",
+         "HAMMER",
+         "MXBO",
+         "MWAG",
+         "GLIDER",
+         "NET",
+         "LASSO",
+         "BAG",
+         "SPIN",
+         "LEATHER ARMOR",
+         "CLOTH ARMOR",
+         "BOOT",
+
+         "PIRATES",
+         "KRAKEN",
+         "MERFOLK",
+         "ELEMENTAL",
+
+         "FAIRY",
+         "LIZA",
+         "URUK",
+         "GBLN",
+         "HALFLING",
+         "GNOLL",
+         "DRLF",
+         "MERC",
+         "TITAN",
+         "AMAZON",
+         "OGER",
+         "GNOME",
+         "MOUNTAINMAN",
+         "MINOTAUR",
+         "GREY ELF",
+
+         "LANCE",
+         "MUSHROOM",
+
+         "RRAT",
+         "NOOGLE",
+         "MUTANT",
+
+         "BAXE",
+         "MBAX",
+         "ADMT",
+         "ASWR",
+         "ABAX",
+         "IMTH",
+         "ARNG",
+         "AARM",
+         "CAMEL",
+
+         "DROW",
+         "HYDR",
+         "STORM GIANT",
+         "CLOUD GIANT",
+         "ILLYRTHID",
+         "EVIL SORCERER",
+         "EVIL MAGICIAN",
+         "DARK MAGE",
+         "EVIL WARRIORS",
+         "ICE DRAGON",
+
+         "HEALING POTION",
+         "ROUGH GEM",
+         "GEMS",
+         "JAVELIN",
+         "PIKE",
+         "MWOL",
+         "MSPI",
+         "MOLE",
+         "BPLA",
+         "FSWO",
+         "MCAR",
+         "QUAR",
+         "SABRE",
+         "MACE",
+         "MSTA",
+         "DAGGER",
+         "PDAG",
+         "BHAM",
+         "SHORTBOW",
+         "BOW",
+         "HEAVY CROSSBOW",
+         "HARP"
+      ]
+
+      disable: [
+         "TAROT CARDS",
+         "SUPER BOW",
+         "DOUBLE BOW"
+      ]
+    # end items
+
