@@ -129,7 +129,7 @@ public:
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
 
-private:
+//private:
     //
     // Game editing functions.
     //

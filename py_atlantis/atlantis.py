@@ -62,6 +62,14 @@ if __name__ == '__main__':
         if game.open():
             sys.exit()
 
+        print "Setting Up Turn..."
+        if game.readPlayers():
+            sys.exit()
+
+        if game.isFinished():
+            print "This game is finished!"
+            sys.exit()
+
         if game.run():
             sys.exit()
 

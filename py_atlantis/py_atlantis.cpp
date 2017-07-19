@@ -34,9 +34,49 @@ public:
 		return game_.OpenGame() == 0;
 	}
 
+	bool readPlayers()
+	{
+		game_.PreProcessTurn();
+
+		Awrite("Reading the Gamemaster File...");
+		return game_.ReadPlayers() == 0;
+	}
+
+	bool isFinished()
+	{
+		return game_.gameStatus == Game::GAME_STATUS_FINISHED;
+	}
+
 	bool run()
 	{
-		return game_.RunGame() == 0;
+		game_.gameStatus = Game::GAME_STATUS_RUNNING;
+
+		Awrite("Reading the Orders File...");
+		game_.ReadOrders();
+
+		if (Globals->MAX_INACTIVE_TURNS != -1)
+		{
+			Awrite("QUITting Inactive Factions...");
+			game_.RemoveInactiveFactions();
+		}
+
+		Awrite("Running the Turn...");
+		game_.RunOrders();
+
+		Awrite("Writing the Report File...");
+		game_.WriteReport();
+		Awrite("");
+		game_.battles.DeleteAll();
+
+		Awrite("Writing Playerinfo File...");
+		game_.WritePlayers();
+		game_.EmptyHell(); 
+
+		Awrite("Removing Dead Factions...");
+		game_.DeleteDeadFactions();
+		Awrite("done");
+
+		return false;
 	}	
 
 	void dummy()
@@ -91,11 +131,13 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("save", &PyAtlantis::save)
 	    .def("open", &PyAtlantis::open)
 	    .def("dummy", &PyAtlantis::dummy)
+	    .def("readPlayers", &PyAtlantis::readPlayers)
+	    .def("isFinished", &PyAtlantis::isFinished)
 	    .def("run", &PyAtlantis::run)
 	    .def("checkOrders", &PyAtlantis::checkOrders)
 	    .def("genRules", &PyAtlantis::genRules)
-		 .def("enableItem", enItem1)
-		 .def("enableItem", enItem2)
+	    .def("enableItem", enItem1)
+	    .def("enableItem", enItem2)
 	    ;
 
 	initIO();
