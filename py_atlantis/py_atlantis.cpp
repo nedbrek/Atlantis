@@ -1,8 +1,43 @@
 #include "game.h"
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <vector>
 
 extern
 void usage();
+
+class PyFaction
+{
+public:
+	PyFaction()
+	: f_(NULL)
+	{
+	}
+
+	PyFaction(Faction *f)
+	: f_(f)
+	{
+	}
+
+	bool operator==(const PyFaction &rhs)
+	{
+		return f_ == rhs.f_;
+	}
+
+	int num() const { return f_->num; }
+
+	std::string name() const
+	{
+		if (!f_->name)
+			return "null";
+
+		return f_->name->str();
+	}
+
+private:
+	Faction *f_;
+};
+typedef std::vector<PyFaction> PyFactionList;
 
 class PyAtlantis
 {
@@ -115,6 +150,17 @@ public:
 		enableItem(item_name, true);
 	}
 
+	PyFactionList factions()
+	{
+		PyFactionList ret;
+		forlist(&game_.factions)
+		{
+			Faction *f = (Faction*)elem;
+			ret.push_back(f);
+		}
+		return ret;
+	}
+
 private:
 	Game game_;
 };
@@ -126,6 +172,15 @@ BOOST_PYTHON_MODULE(Atlantis)
 	void (PyAtlantis::*enItem2)(const std::string &, bool) = &PyAtlantis::enableItem;
 
 	def("usage", usage);
+
+	class_<PyFactionList>("FactionList")
+	    .def(vector_indexing_suite<PyFactionList>());
+
+	class_<PyFaction>("PyFaction")
+	    .def("num", &PyFaction::num)
+	    .def("name", &PyFaction::name)
+	    ;
+
 	class_<PyAtlantis>("PyAtlantis")
 	    .def("new", &PyAtlantis::newGame)
 	    .def("save", &PyAtlantis::save)
@@ -138,6 +193,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("genRules", &PyAtlantis::genRules)
 	    .def("enableItem", enItem1)
 	    .def("enableItem", enItem2)
+	    .def("factions", &PyAtlantis::factions)
 	    ;
 
 	initIO();
