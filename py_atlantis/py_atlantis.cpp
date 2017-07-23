@@ -54,11 +54,9 @@ public:
 		doneIO();
 	}
 
-	bool newGame(int seed)
+	void newGame(int seed)
 	{
-		if (game_.NewGame(seed) == 0)
-			return false;
-		return game_.WritePlayers() == 0;
+		game_.NewGame(seed);
 	}
 
 	bool save()
@@ -94,97 +92,48 @@ public:
 		file.Close();
 	}
 
-	bool run()
+	void defaultWorkOrder() { game_.DefaultWorkOrder(); }
+	void removeInactiveFactions() { game_.RemoveInactiveFactions(); }
+	void runFindOrders() { game_.RunFindOrders(); }
+	void runEnterOrders() { game_.RunEnterOrders(); }
+	void runPromoteOrders() { game_.RunPromoteOrders(); }
+	void doAttackOrders() { game_.DoAttackOrders(); }
+	void doAutoAttacks() { game_.DoAutoAttacks(); }
+	void runStealOrders() { game_.RunStealOrders(); }
+	void doGiveOrders() { game_.DoGiveOrders(); }
+	void doExchangeOrders() { game_.DoExchangeOrders(); }
+	void runDestroyOrders() { game_.RunDestroyOrders(); }
+	void runPillageOrders() { game_.RunPillageOrders(); }
+	void runTaxOrders() { game_.RunTaxOrders(); }
+	void doGuard1Orders() { game_.DoGuard1Orders(); }
+	void runCastOrders() { game_.RunCastOrders(); }
+	void runSellOrders() { game_.RunSellOrders(); }
+	void runBuyOrders() { game_.RunBuyOrders(); }
+	void runForgetOrders() { game_.RunForgetOrders(); }
+	void midProcessTurn() { game_.MidProcessTurn(); }
+	void runQuitOrders() { game_.RunQuitOrders(); }
+	void deleteEmptyUnits() { game_.DeleteEmptyUnits(); }
+	void sinkUncrewedShips() { game_.SinkUncrewedShips(); }
+	void drownUnits() { game_.DrownUnits(); }
+	void doWithdrawOrders() { game_.DoWithdrawOrders(); }
+	void runSailOrders() { game_.RunSailOrders(); }
+	void runMoveOrders() { game_.RunMoveOrders();}
+	void findDeadFactions() { game_.FindDeadFactions(); }
+	void runTeachOrders() { game_.RunTeachOrders(); }
+	void runMonthOrders() { game_.RunMonthOrders();}
+	void runTeleportOrders() { game_.RunTeleportOrders(); }
+	void assessMaintenance() { game_.AssessMaintenance(); }
+	void postProcessTurn() { game_.PostProcessTurn(); }
+
+	void writeReports() { game_.WriteReport(); }
+	void writePlayers() { game_.WritePlayers(); }
+
+	void cleanup()
 	{
-		Awrite("Running the Turn...");
-
-		game_.DefaultWorkOrder();
-		game_.RemoveInactiveFactions();
-
-		// Form and instant orders are handled during parsing
-		Awrite("Running FIND Orders...");
-		game_.RunFindOrders();
-
-		Awrite("Running ENTER/LEAVE Orders...");
-		game_.RunEnterOrders();
-		Awrite("Running PROMOTE/EVICT Orders...");
-		game_.RunPromoteOrders();
-		Awrite("Running Combat...");
-		game_.DoAttackOrders();
-		game_.DoAutoAttacks();
-		Awrite("Running STEAL/ASSASSINATE Orders...");
-		game_.RunStealOrders();
-		Awrite("Running GIVE/PAY/TRANSFER Orders...");
-		game_.DoGiveOrders();
-		Awrite("Running EXCHANGE Orders...");
-		game_.DoExchangeOrders();
-		Awrite("Running DESTROY Orders...");
-		game_.RunDestroyOrders();
-		Awrite("Running PILLAGE Orders...");
-		game_.RunPillageOrders();
-		Awrite("Running TAX Orders...");
-		game_.RunTaxOrders();
-		Awrite("Running GUARD 1 Orders...");
-		game_.DoGuard1Orders();
-		Awrite("Running Magic Orders...");
-		game_.ClearCastEffects();
-		game_.RunCastOrders();
-		Awrite("Running SELL Orders...");
-		game_.RunSellOrders();
-		Awrite("Running BUY Orders...");
-		game_.RunBuyOrders();
-		Awrite("Running FORGET Orders...");
-		game_.RunForgetOrders();
-		Awrite("Mid-Turn Processing...");
-		game_.MidProcessTurn();
-		Awrite("Running QUIT Orders...");
-		game_.RunQuitOrders();
-		Awrite("Removing Empty Units...");
-		game_.DeleteEmptyUnits();
-		game_.SinkUncrewedShips();
-		game_.DrownUnits();
-		if (Globals->ALLOW_WITHDRAW)
-		{
-			Awrite("Running WITHDRAW Orders...");
-			game_.DoWithdrawOrders();
-		}
-		Awrite("Running Sail Orders...");
-		game_.RunSailOrders();
-		Awrite("Running Move Orders...");
-		game_.RunMoveOrders();
-		game_.SinkUncrewedShips();
-		game_.DrownUnits();
-		game_.FindDeadFactions();
-		Awrite("Running Teach Orders...");
-		game_.RunTeachOrders();
-		Awrite("Running Month-long Orders...");
-		game_.RunMonthOrders();
-		game_.RunTeleportOrders();
-		Awrite("Assessing Maintenance costs...");
-		game_.AssessMaintenance();
-
-		Awrite("Post-Turn Processing...");
-		game_.gameStatus = Game::GAME_STATUS_RUNNING;
-		game_.PostProcessTurn(); // status can be END
-
-		game_.DeleteEmptyUnits();
-		game_.RemoveEmptyObjects();
-
-		Awrite("Writing the Report File...");
-		game_.WriteReport();
-		Awrite("");
 		game_.battles.DeleteAll();
-
-		Awrite("Writing Playerinfo File...");
-		game_.WritePlayers();
 		game_.EmptyHell(); 
-
-		Awrite("Removing Dead Factions...");
 		game_.DeleteDeadFactions();
-		Awrite("done");
-
-		return false;
-	}	
+	}
 
 	void dummy()
 	{
@@ -262,7 +211,41 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("readPlayers", &PyAtlantis::readPlayers)
 	    .def("isFinished", &PyAtlantis::isFinished)
 	    .def("parseOrders", &PyAtlantis::parseOrders)
-	    .def("run", &PyAtlantis::run)
+	    .def("defaultWorkOrder", &PyAtlantis::defaultWorkOrder)
+	    .def("removeInactiveFactions", &PyAtlantis::removeInactiveFactions)
+	    .def("runFindOrders", &PyAtlantis::runFindOrders)
+	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
+	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
+	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
+	    .def("doAutoAttacks", &PyAtlantis::doAutoAttacks)
+	    .def("runStealOrders", &PyAtlantis::runStealOrders)
+	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
+	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)
+	    .def("runDestroyOrders", &PyAtlantis::runDestroyOrders)
+	    .def("runPillageOrders", &PyAtlantis::runPillageOrders)
+	    .def("runTaxOrders", &PyAtlantis::runTaxOrders)
+	    .def("doGuard1Orders", &PyAtlantis::doGuard1Orders)
+	    .def("runCastOrders", &PyAtlantis::runCastOrders)
+	    .def("runSellOrders", &PyAtlantis::runSellOrders)
+	    .def("runBuyOrders", &PyAtlantis::runBuyOrders)
+	    .def("runForgetOrders", &PyAtlantis::runForgetOrders)
+	    .def("midProcessTurn", &PyAtlantis::midProcessTurn)
+	    .def("runQuitOrders", &PyAtlantis::runQuitOrders)
+	    .def("deleteEmptyUnits", &PyAtlantis::deleteEmptyUnits)
+	    .def("sinkUncrewedShips", &PyAtlantis::sinkUncrewedShips)
+	    .def("drownUnits", &PyAtlantis::drownUnits)
+	    .def("doWithdrawOrders", &PyAtlantis::doWithdrawOrders)
+	    .def("runSailOrders", &PyAtlantis::runSailOrders)
+	    .def("runMoveOrders", &PyAtlantis::runMoveOrders)
+	    .def("findDeadFactions", &PyAtlantis::findDeadFactions)
+	    .def("runTeachOrders", &PyAtlantis::runTeachOrders)
+	    .def("runMonthOrders", &PyAtlantis::runMonthOrders)
+	    .def("runTeleportOrders", &PyAtlantis::runTeleportOrders)
+	    .def("assessMaintenance", &PyAtlantis::assessMaintenance)
+	    .def("postProcessTurn", &PyAtlantis::postProcessTurn)
+	    .def("writeReports", &PyAtlantis::writeReports)
+	    .def("writePlayers", &PyAtlantis::writePlayers)
+	    .def("cleanup", &PyAtlantis::cleanup)
 	    .def("checkOrders", &PyAtlantis::checkOrders)
 	    .def("genRules", &PyAtlantis::genRules)
 	    .def("enableItem", enItem1)

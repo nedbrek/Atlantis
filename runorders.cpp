@@ -60,7 +60,6 @@ void Game::RunOrders()
 	Awrite("Running GUARD 1 Orders...");
 	DoGuard1Orders();
 	Awrite("Running Magic Orders...");
-	ClearCastEffects();
 	RunCastOrders();
 	Awrite("Running SELL Orders...");
 	RunSellOrders();
@@ -116,6 +115,7 @@ void Game::ClearCastEffects()
 
 void Game::RunCastOrders()
 {
+	ClearCastEffects();
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
 		forlist(&r->objects) {
@@ -1071,11 +1071,6 @@ void Game::EmptyHell()
 		((ARegion *) elem)->ClearHell();
 }
 
-void Game::MidProcessUnit(ARegion *r, Unit *u)
-{
-	MidProcessUnitExtra(r, u);
-}
-
 void Game::PostProcessUnit(ARegion *r,Unit *u)
 {
 	PostProcessUnitExtra(r, u);
@@ -1109,7 +1104,8 @@ void Game::MidProcessTurn()
 			Object *o = (Object *)elem;
 			forlist(&o->units) {
 				Unit *u = (Unit *)elem;
-				MidProcessUnit(r, u);
+				if(Globals->CHECK_MONSTER_CONTROL_MID_TURN)
+					MonsterCheck(r, u);
 			}
 		}
 	}
@@ -1117,6 +1113,7 @@ void Game::MidProcessTurn()
 
 void Game::PostProcessTurn()
 {
+	gameStatus = Game::GAME_STATUS_RUNNING;
 	forlist(&regions) {
 		ARegion * r = (ARegion *) elem;
 		r->PostTurn(&regions);
@@ -1160,6 +1157,9 @@ void Game::PostProcessTurn()
 		if(pVictor)
 			EndGame( pVictor );
 	}
+
+	DeleteEmptyUnits();
+	RemoveEmptyObjects();
 }
 
 void Game::DoAutoAttacks()
@@ -2045,6 +2045,10 @@ void Game::AssessMaintenance()
 
 void Game::DoWithdrawOrders()
 {
+	if (!Globals->ALLOW_WITHDRAW)
+		return;
+
+	Awrite("Running WITHDRAW Orders...");
 	forlist((&regions)) {
 		ARegion *r = (ARegion *)elem;
 		forlist((&r->objects)) {

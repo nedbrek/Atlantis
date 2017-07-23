@@ -60,6 +60,7 @@ if __name__ == '__main__':
             print "Seed is %d" % seed
 
         game.new(seed)
+        game.writePlayers()
         game.save()
     elif cmd == "run":
         if game.open():
@@ -79,8 +80,105 @@ if __name__ == '__main__':
             if not f.isNpc():
                 game.parseOrders(f.num(), "orders.%d" % f.num())
 
-        if game.run():
-            sys.exit()
+        print "Running the Turn..."
+        game.defaultWorkOrder()
+        game.removeInactiveFactions()
+
+        # Form and instant orders are handled during parsing
+        print "Running FIND Orders..."
+        game.runFindOrders()
+
+        print "Running ENTER/LEAVE Orders..."
+        game.runEnterOrders()
+
+        print "Running PROMOTE/EVICT Orders..."
+        game.runPromoteOrders()
+
+        print "Running Combat..."
+        game.doAttackOrders()
+        game.doAutoAttacks()
+
+        print "Running STEAL/ASSASSINATE Orders..."
+        game.runStealOrders()
+
+        print "Running GIVE/PAY/TRANSFER Orders..."
+        game.doGiveOrders()
+
+        print "Running EXCHANGE Orders..."
+        game.doExchangeOrders()
+
+        print "Running DESTROY Orders..."
+        game.runDestroyOrders()
+
+        print "Running PILLAGE Orders..."
+        game.runPillageOrders()
+
+        print "Running TAX Orders..."
+        game.runTaxOrders()
+
+        print "Running GUARD 1 Orders..."
+        game.doGuard1Orders()
+
+        print "Running Magic Orders..."
+        game.runCastOrders()
+
+        print "Running SELL Orders..."
+        game.runSellOrders()
+
+        print "Running BUY Orders..."
+        game.runBuyOrders()
+
+        print "Running FORGET Orders..."
+        game.runForgetOrders()
+
+        print "Mid-Turn Processing..."
+        game.midProcessTurn()
+
+        print "Running QUIT Orders..."
+        game.runQuitOrders()
+
+        print "Removing Empty Units..."
+        game.deleteEmptyUnits()
+        game.sinkUncrewedShips()
+        game.drownUnits()
+
+        game.doWithdrawOrders()
+
+        print "Running Sail Orders..."
+        game.runSailOrders()
+
+        print "Running Move Orders..."
+        game.runMoveOrders()
+        game.sinkUncrewedShips()
+        game.drownUnits()
+
+        game.findDeadFactions()
+
+        print "Running Teach Orders..."
+        game.runTeachOrders()
+
+        print "Running Month-long Orders..."
+        game.runMonthOrders()
+        game.runTeleportOrders()
+
+        print "Assessing Maintenance costs..."
+        game.assessMaintenance()
+
+        print "Post-Turn Processing..."
+        game.postProcessTurn()
+
+        print "Writing the Report File..."
+        game.writeReports()
+
+        print ""
+
+        print "Writing Playerinfo File..."
+        game.writePlayers()
+
+        print "Removing Dead Factions..."
+        game.cleanup()
+
+        print "done"
 
         game.save()
     elif cmd == "check":

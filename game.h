@@ -438,13 +438,11 @@ private:
     void GrowLMons(int);
 	void GrowVMons();
     void PostProcessUnit(ARegion *,Unit *);
-	void MidProcessUnit(ARegion *, Unit *);
 
     //
     // Mid and PostProcessUnitExtra can be used to provide game-specific
 	// unit processing at the approrpriate times.
     //
-	void MidProcessUnitExtra(ARegion *, Unit *);
 	void MidProcessTurn();
     void PostProcessUnitExtra(ARegion *,Unit *);
     void PostProcessTurn();
