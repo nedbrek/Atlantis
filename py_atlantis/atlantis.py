@@ -24,6 +24,9 @@ def setRules(game, game_name):
             for i in cfg["items"]["disable"]:
                 game.enableItem(i, False)
 
+#end setRules
+
+
 if __name__ == '__main__':
     # check arguments
     prog_name = sys.argv[0]
@@ -69,6 +72,12 @@ if __name__ == '__main__':
         if game.isFinished():
             print "This game is finished!"
             sys.exit()
+
+        print "Reading the Orders File..."
+        facs = game.factions()
+        for f in facs:
+            if not f.isNpc():
+                game.parseOrders(f.num(), "orders.%d" % f.num())
 
         if game.run():
             sys.exit()

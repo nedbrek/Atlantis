@@ -24,6 +24,8 @@ public:
 		return f_ == rhs.f_;
 	}
 
+	bool isNpc() const { return f_->IsNPC() != 0; }
+
 	int num() const { return f_->num; }
 
 	std::string name() const
@@ -82,12 +84,20 @@ public:
 		return game_.gameStatus == Game::GAME_STATUS_FINISHED;
 	}
 
+	void parseOrders(int fac_num, const std::string &fname)
+	{
+		Aorders file;
+
+		if (file.OpenByName(fname.c_str()) != -1)
+			game_.ParseOrders(fac_num, &file, NULL);
+
+		file.Close();
+	}
+
 	bool run()
 	{
 		game_.gameStatus = Game::GAME_STATUS_RUNNING;
-
-		Awrite("Reading the Orders File...");
-		game_.ReadOrders();
+		game_.DefaultWorkOrder();
 
 		if (Globals->MAX_INACTIVE_TURNS != -1)
 		{
@@ -177,6 +187,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def(vector_indexing_suite<PyFactionList>());
 
 	class_<PyFaction>("PyFaction")
+	    .def("isNpc", &PyFaction::isNpc)
 	    .def("num", &PyFaction::num)
 	    .def("name", &PyFaction::name)
 	    ;
@@ -188,6 +199,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("dummy", &PyAtlantis::dummy)
 	    .def("readPlayers", &PyAtlantis::readPlayers)
 	    .def("isFinished", &PyAtlantis::isFinished)
+	    .def("parseOrders", &PyAtlantis::parseOrders)
 	    .def("run", &PyAtlantis::run)
 	    .def("checkOrders", &PyAtlantis::checkOrders)
 	    .def("genRules", &PyAtlantis::genRules)
