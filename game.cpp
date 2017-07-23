@@ -1100,10 +1100,7 @@ int Game::RunGame()
     Awrite("Reading the Orders File...");
     ReadOrders();
 
-	if(Globals->MAX_INACTIVE_TURNS != -1) {
-		Awrite("QUITting Inactive Factions...");
-		RemoveInactiveFactions();
-	}
+	RemoveInactiveFactions();
 
     Awrite("Running the Turn...");
     RunOrders();
@@ -1795,6 +1792,8 @@ void Game::RemoveInactiveFactions()
 {
 	if(Globals->MAX_INACTIVE_TURNS == -1)
 		return;
+
+	Awrite("QUITting Inactive Factions...");
 
 	int cturn;
 	cturn = TurnNumber();

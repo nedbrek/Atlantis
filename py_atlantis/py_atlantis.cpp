@@ -96,17 +96,79 @@ public:
 
 	bool run()
 	{
-		game_.gameStatus = Game::GAME_STATUS_RUNNING;
-		game_.DefaultWorkOrder();
-
-		if (Globals->MAX_INACTIVE_TURNS != -1)
-		{
-			Awrite("QUITting Inactive Factions...");
-			game_.RemoveInactiveFactions();
-		}
-
 		Awrite("Running the Turn...");
-		game_.RunOrders();
+
+		game_.DefaultWorkOrder();
+		game_.RemoveInactiveFactions();
+
+		// Form and instant orders are handled during parsing
+		Awrite("Running FIND Orders...");
+		game_.RunFindOrders();
+
+		Awrite("Running ENTER/LEAVE Orders...");
+		game_.RunEnterOrders();
+		Awrite("Running PROMOTE/EVICT Orders...");
+		game_.RunPromoteOrders();
+		Awrite("Running Combat...");
+		game_.DoAttackOrders();
+		game_.DoAutoAttacks();
+		Awrite("Running STEAL/ASSASSINATE Orders...");
+		game_.RunStealOrders();
+		Awrite("Running GIVE/PAY/TRANSFER Orders...");
+		game_.DoGiveOrders();
+		Awrite("Running EXCHANGE Orders...");
+		game_.DoExchangeOrders();
+		Awrite("Running DESTROY Orders...");
+		game_.RunDestroyOrders();
+		Awrite("Running PILLAGE Orders...");
+		game_.RunPillageOrders();
+		Awrite("Running TAX Orders...");
+		game_.RunTaxOrders();
+		Awrite("Running GUARD 1 Orders...");
+		game_.DoGuard1Orders();
+		Awrite("Running Magic Orders...");
+		game_.ClearCastEffects();
+		game_.RunCastOrders();
+		Awrite("Running SELL Orders...");
+		game_.RunSellOrders();
+		Awrite("Running BUY Orders...");
+		game_.RunBuyOrders();
+		Awrite("Running FORGET Orders...");
+		game_.RunForgetOrders();
+		Awrite("Mid-Turn Processing...");
+		game_.MidProcessTurn();
+		Awrite("Running QUIT Orders...");
+		game_.RunQuitOrders();
+		Awrite("Removing Empty Units...");
+		game_.DeleteEmptyUnits();
+		game_.SinkUncrewedShips();
+		game_.DrownUnits();
+		if (Globals->ALLOW_WITHDRAW)
+		{
+			Awrite("Running WITHDRAW Orders...");
+			game_.DoWithdrawOrders();
+		}
+		Awrite("Running Sail Orders...");
+		game_.RunSailOrders();
+		Awrite("Running Move Orders...");
+		game_.RunMoveOrders();
+		game_.SinkUncrewedShips();
+		game_.DrownUnits();
+		game_.FindDeadFactions();
+		Awrite("Running Teach Orders...");
+		game_.RunTeachOrders();
+		Awrite("Running Month-long Orders...");
+		game_.RunMonthOrders();
+		game_.RunTeleportOrders();
+		Awrite("Assessing Maintenance costs...");
+		game_.AssessMaintenance();
+
+		Awrite("Post-Turn Processing...");
+		game_.gameStatus = Game::GAME_STATUS_RUNNING;
+		game_.PostProcessTurn(); // status can be END
+
+		game_.DeleteEmptyUnits();
+		game_.RemoveEmptyObjects();
 
 		Awrite("Writing the Report File...");
 		game_.WriteReport();
