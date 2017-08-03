@@ -173,17 +173,26 @@ public:
 
 	PyFactionList factions()
 	{
-		PyFactionList ret;
-		forlist(&game_.factions)
+		if (factionMap_.empty())
 		{
-			Faction *f = (Faction*)elem;
-			ret.push_back(f);
+			forlist(&game_.factions)
+			{
+				Faction *f = (Faction*)elem;
+				factionMap_.insert(std::make_pair(f, PyFaction(f)));
+			}
+		}
+
+		PyFactionList ret;
+		for(std::map<Faction*, PyFaction>::iterator i = factionMap_.begin(); i != factionMap_.end(); ++i)
+		{
+			ret.push_back(i->second);
 		}
 		return ret;
 	}
 
 private:
 	Game game_;
+	std::map<Faction*, PyFaction> factionMap_;
 };
 
 BOOST_PYTHON_MODULE(Atlantis)
@@ -197,7 +206,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	class_<PyFactionList>("FactionList")
 	    .def(vector_indexing_suite<PyFactionList>());
 
-	class_<PyFaction>("PyFaction")
+	class_<PyFaction>("Faction")
 	    .def("isNpc", &PyFaction::isNpc)
 	    .def("num", &PyFaction::num)
 	    .def("name", &PyFaction::name)

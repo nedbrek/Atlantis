@@ -3,6 +3,149 @@
 import Atlantis
 import sys
 
+class CAtlantis:
+    def __init__(self):
+        self.game = Atlantis.PyAtlantis()
+
+    def new(self, seed):
+        self.game.new(seed)
+
+    def save(self):
+        return self.game.save()
+
+    def open(self):
+        return self.game.open()
+
+    def readPlayers(self):
+        return self.game.readPlayers()
+
+    def isFinished(self):
+        return self.game.isFinished()
+
+    def parseOrders(self, fac_num, fname):
+        self.game.parseOrders(fac_num, fname)
+
+    def defaultWorkOrder(self):
+        self.game.defaultWorkOrder()
+
+    def removeInactiveFactions(self):
+        self.game.removeInactiveFactions()
+
+    def runFindOrders(self):
+        self.game.runFindOrders()
+
+    def runEnterOrders(self):
+        self.game.runEnterOrders()
+
+    def runPromoteOrders(self):
+        self.game.runPromoteOrders()
+
+    def doAttackOrders(self):
+        self.game.doAttackOrders()
+
+    def doAutoAttacks(self):
+        self.game.doAutoAttacks()
+
+    def runStealOrders(self):
+        self.game.runStealOrders()
+
+    def doGiveOrders(self):
+        self.game.doGiveOrders()
+
+    def doExchangeOrders(self):
+        self.game.doExchangeOrders()
+
+    def runDestroyOrders(self):
+        self.game.runDestroyOrders()
+
+    def runPillageOrders(self):
+        self.game.runPillageOrders()
+
+    def runTaxOrders(self):
+        self.game.runTaxOrders()
+
+    def doGuard1Orders(self):
+        self.game.doGuard1Orders()
+
+    def runCastOrders(self):
+        self.game.runCastOrders()
+
+    def runSellOrders(self):
+        self.game.runSellOrders()
+
+    def runBuyOrders(self):
+        self.game.runBuyOrders()
+
+    def runForgetOrders(self):
+        self.game.runForgetOrders()
+
+    def midProcessTurn(self):
+        self.game.midProcessTurn()
+
+    def runQuitOrders(self):
+        self.game.runQuitOrders()
+
+    def deleteEmptyUnits(self):
+        self.game.deleteEmptyUnits()
+
+    def sinkUncrewedShips(self):
+        self.game.sinkUncrewedShips()
+
+    def drownUnits(self):
+        self.game.drownUnits()
+
+    def doWithdrawOrders(self):
+        self.game.doWithdrawOrders()
+
+    def runSailOrders(self):
+        self.game.runSailOrders()
+
+    def runMoveOrders(self):
+        self.game.runMoveOrders()
+
+    def findDeadFactions(self):
+        self.game.findDeadFactions()
+
+    def runTeachOrders(self):
+        self.game.runTeachOrders()
+
+    def runMonthOrders(self):
+        self.game.runMonthOrders()
+
+    def runTeleportOrders(self):
+        self.game.runTeleportOrders()
+
+    def assessMaintenance(self):
+        self.game.assessMaintenance()
+
+    def postProcessTurn(self):
+        self.game.postProcessTurn()
+
+    def writeReports(self):
+        self.game.writeReports()
+
+    def writePlayers(self):
+        self.game.writePlayers()
+
+    def cleanup(self):
+        self.game.cleanup()
+
+    def dummy(self):
+        self.game.dummy()
+
+    def checkOrders(self):
+        return self.game.checkOrders()
+
+    def genRules(self):
+        return self.game.genRules()
+
+    def enableItem(self, item_name, val=True):
+        self.game.enableItem(item_name, val)
+
+    def factions(self):
+        return self.game.factions()
+#end
+
 def setRules(game, game_name):
     if game_name != "ceran":
         print "Only ceran supported right now"
@@ -34,7 +177,7 @@ if __name__ == '__main__':
         Atlantis.usage()
         sys.exit()
 
-    game = Atlantis.PyAtlantis()
+    game = CAtlantis()
 
     game_type = "ceran"
     if sys.argv[1][0] == '-':
