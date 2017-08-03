@@ -1914,12 +1914,6 @@ void Game::CreateOceanLairs()
 	}
 }
 
-void Game::PostProcessUnitExtra(ARegion *r, Unit *u)
-{
-	if(!Globals->CHECK_MONSTER_CONTROL_MID_TURN)
-		MonsterCheck(r, u);
-}
-
 void Game::MonsterCheck(ARegion *r, Unit *u)
 {
 	if (u->type != U_WMON) {

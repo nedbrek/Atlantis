@@ -1071,11 +1071,6 @@ void Game::EmptyHell()
 		((ARegion *) elem)->ClearHell();
 }
 
-void Game::PostProcessUnit(ARegion *r,Unit *u)
-{
-	PostProcessUnitExtra(r, u);
-}
-
 void Game::EndGame(Faction *pVictor)
 {
 	forlist( &factions ) {
@@ -1125,7 +1120,8 @@ void Game::PostProcessTurn()
 			Object *o = (Object *) elem;
 			forlist (&o->units) {
 				Unit *u = (Unit *) elem;
-				PostProcessUnit(r,u);
+				if (!Globals->CHECK_MONSTER_CONTROL_MID_TURN)
+					MonsterCheck(r, u);
 			}
 		}
 	}

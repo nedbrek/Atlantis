@@ -437,14 +437,12 @@ private:
     void GrowWMons(int);
     void GrowLMons(int);
 	void GrowVMons();
-    void PostProcessUnit(ARegion *,Unit *);
 
     //
     // Mid and PostProcessUnitExtra can be used to provide game-specific
 	// unit processing at the approrpriate times.
     //
 	void MidProcessTurn();
-    void PostProcessUnitExtra(ARegion *,Unit *);
     void PostProcessTurn();
 
 	// Handle escaped monster check
