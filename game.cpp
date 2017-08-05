@@ -1524,29 +1524,29 @@ void Game::MakeFactionReportLists()
 
 void Game::WriteReport()
 {
-    Areport f;
+	Areport f;
 
-    MakeFactionReportLists();
-    CountAllMages();
-	if(Globals->APPRENTICES_EXIST)
-		CountAllApprentices();
+	MakeFactionReportLists();
+	CountAllMages();
+	CountAllApprentices();
 
-    forlist(&factions) {
-        Faction * fac = (Faction *) elem;
-        AString str = "report.";
-        str = str + fac->num;
+	forlist(&factions) {
+		Faction *fac = (Faction*)elem;
+		AString str = AString("report.") + fac->num;
 
-		if(!fac->IsNPC() ||
-		   ((((month == 0) && (year == 1)) || Globals->GM_REPORT) &&
-			(fac->num == 1))) {
+		if (!fac->IsNPC() ||
+		    (((month == 0 && year == 1) || Globals->GM_REPORT) &&
+		     fac->num == 1))
+		{
 			int i = f.OpenByName( str );
-			if(i != -1) {
-				fac->WriteReport( &f, this );
+			if (i != -1)
+			{
+				fac->WriteReport(&f, this);
 				f.Close();
 			}
 		}
-        Adot();
-    }
+		Adot();
+	}
 }
 
 void Game::DeleteDeadFactions()
