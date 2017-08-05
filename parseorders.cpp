@@ -1467,13 +1467,14 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		if (u->faction->quit != QUIT_AND_RESTART)
 		{
 			u->faction->quit = QUIT_AND_RESTART;
+
 			Faction *pFac = AddFaction(1);
 			pFac->SetAddress(*(u->faction->address));
+
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;
-			AString *facstr = new AString(AString("Restarting ")
-			      + *(pFac->address) + ".");
-			newfactions.Add(facstr);
+
+			Awrite(AString("Restarting ") + *(pFac->address) + ".");
 		}
 	}
 }

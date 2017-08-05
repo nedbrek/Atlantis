@@ -188,7 +188,7 @@ public:
     //
     // Both are lists of AStrings
     //
-    AList extraPlayers;
+    AList extraPlayerStr; ///< extra player info
     AList errors;
     AList events;
     AList battles;

@@ -1098,12 +1098,12 @@ void Faction::WriteFacInfo( Aoutfile *file )
 	file->PutStr( AString( "LastOrders: " ) + lastorders );
 	file->PutStr( AString( "SendTimes: " ) + times );
 
-	forlist( &extraPlayers ) {
+	forlist( &extraPlayerStr ) {
 		AString *pStr = (AString *) elem;
 		file->PutStr( *pStr );
 	}
 
-	extraPlayers.DeleteAll();
+	extraPlayerStr.DeleteAll();
 }
 
 void Faction::CheckExist(ARegionList * regs)

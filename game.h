@@ -77,7 +77,6 @@ public:
     int ReadPlayers();
     int ReadPlayersLine( AString *pToken, AString *pLine, Faction *pFac,
                          int newPlayer );
-    void WriteNewFac( Faction *pFac );
 
     int ViewMap(const AString &,const AString &);
     // LLS
@@ -275,7 +274,6 @@ private:
 	void ModifyRangeLevelPenalty(int range, int pen);
 
     AList factions;
-    AList newfactions; /* List of strings */
     AList battles;
     ARegionList regions;
     int factionseq;

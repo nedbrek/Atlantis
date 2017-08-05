@@ -682,9 +682,6 @@ int Game::ReadPlayers()
 					}
 					lastWasNew = 1;
 				} else {
-					if( pFac && lastWasNew ) {
-						WriteNewFac( pFac );
-					}
 					int nFacNum = pToken->value();
 					pFac = GetFaction( &factions, nFacNum );
 					lastWasNew = 0;
@@ -699,9 +696,6 @@ int Game::ReadPlayers()
 			SAFE_DELETE( pToken );
 			SAFE_DELETE( pLine );
 			pLine = f.GetLine();
-		}
-		if( pFac && lastWasNew ) {
-			WriteNewFac( pFac );
 		}
 	} while( 0 );
 
@@ -1037,19 +1031,12 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 		}
 	} else {
 		pTemp = new AString( *pToken + *pLine );
-		pFac->extraPlayers.Add( pTemp );
-		pTemp = 0;
+		pFac->extraPlayerStr.Add( pTemp );
+		pTemp = NULL;
 	}
 
 	if(pTemp) delete pTemp;
 	return( 1 );
-}
-
-void Game::WriteNewFac( Faction *pFac )
-{
-    AString *strFac = new AString( AString( "Adding " ) +
-                                   *( pFac->address ) + "." );
-    newfactions.Add( strFac );
 }
 
 int Game::DoOrdersCheck( const AString &strOrders, const AString &strCheck )
