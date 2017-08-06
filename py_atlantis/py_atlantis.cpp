@@ -67,6 +67,58 @@ struct PyRegion
 };
 typedef std::vector<PyRegion> PyRegionList;
 
+struct PyStructure
+{
+	PyStructure()
+	: o_(NULL)
+	{
+	}
+
+	PyStructure(Object *o)
+	: o_(o)
+	{
+	}
+
+	bool operator==(const PyStructure &rhs)
+	{
+		return o_ == rhs.o_;
+	}
+
+	std::string name()
+	{
+		return o_->name->str();
+	}
+
+	Object *o_;
+};
+typedef std::vector<PyStructure> PyStructureList;
+
+struct PyUnit
+{
+	PyUnit()
+	: u_(NULL)
+	{
+	}
+
+	PyUnit(Unit *u)
+	: u_(u)
+	{
+	}
+
+	bool operator==(const PyUnit &rhs)
+	{
+		return u_ == rhs.u_;
+	}
+
+	std::string name()
+	{
+		return u_->name->str();
+	}
+
+	Unit *u_;
+};
+typedef std::vector<PyUnit> PyUnitList;
+
 class PyAtlantis
 {
 public:
@@ -235,6 +287,26 @@ public:
 		return ret;
 	}
 
+	PyStructureList structures(const PyRegion &r)
+	{
+		PyStructureList ret;
+		forlist(&r.r_->objects)
+		{
+			ret.push_back(PyStructure((Object*)elem));
+		}
+		return ret;
+	}
+
+	PyUnitList units(const PyStructure &o)
+	{
+		PyUnitList ret;
+		forlist(&o.o_->units)
+		{
+			ret.push_back(PyUnit((Unit*)elem));
+		}
+		return ret;
+	}
+
 private:
 	Game game_;
 	std::map<Faction*, PyFaction> factionMap_;
@@ -263,6 +335,20 @@ BOOST_PYTHON_MODULE(Atlantis)
 
 	class_<PyRegion>("Region")
 	    .def("name", &PyRegion::name)
+	    ;
+
+	class_<PyStructureList>("StructureList")
+	    .def(vector_indexing_suite<PyStructureList>());
+
+	class_<PyStructure>("Structure")
+	    .def("name", &PyStructure::name)
+	    ;
+
+	class_<PyUnitList>("UnitList")
+	    .def(vector_indexing_suite<PyUnitList>());
+
+	class_<PyUnit>("Unit")
+	    .def("name", &PyUnit::name)
 	    ;
 
 	class_<PyAtlantis>("PyAtlantis")
@@ -314,6 +400,8 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("enableItem", enItem2)
 	    .def("factions", &PyAtlantis::factions)
 	    .def("regions", &PyAtlantis::regions)
+	    .def("structures", &PyAtlantis::structures)
+	    .def("units", &PyAtlantis::units)
 	    ;
 
 	initIO();
