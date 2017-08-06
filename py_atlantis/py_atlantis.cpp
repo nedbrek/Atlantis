@@ -41,6 +41,32 @@ private:
 };
 typedef std::vector<PyFaction> PyFactionList;
 
+struct PyRegion
+{
+	PyRegion()
+	: r_(NULL)
+	{
+	}
+
+	PyRegion(ARegion *r)
+	: r_(r)
+	{
+	}
+
+	bool operator==(const PyRegion &rhs)
+	{
+		return r_ == rhs.r_;
+	}
+
+	std::string name()
+	{
+		return r_->name->str();
+	}
+
+	ARegion *r_;
+};
+typedef std::vector<PyRegion> PyRegionList;
+
 class PyAtlantis
 {
 public:
@@ -98,7 +124,7 @@ public:
 	void runEnterOrders() { game_.RunEnterOrders(); }
 	void runPromoteOrders() { game_.RunPromoteOrders(); }
 	void doAttackOrders() { game_.DoAttackOrders(); }
-	void doAutoAttacks() { game_.DoAutoAttacks(); }
+	void doAutoAttacksRegion(const PyRegion &r) { game_.DoAutoAttacksRegion(r.r_); }
 	void runStealOrders() { game_.RunStealOrders(); }
 	void doGiveOrders() { game_.DoGiveOrders(); }
 	void doExchangeOrders() { game_.DoExchangeOrders(); }
@@ -190,9 +216,29 @@ public:
 		return ret;
 	}
 
+	PyRegionList regions()
+	{
+		if (regionMap_.empty())
+		{
+			forlist(&game_.regions)
+			{
+				ARegion *r = (ARegion*)elem;
+				regionMap_.insert(std::make_pair(r, PyRegion(r)));
+			}
+		}
+
+		PyRegionList ret;
+		for(std::map<ARegion*, PyRegion>::iterator i = regionMap_.begin(); i != regionMap_.end(); ++i)
+		{
+			ret.push_back(i->second);
+		}
+		return ret;
+	}
+
 private:
 	Game game_;
 	std::map<Faction*, PyFaction> factionMap_;
+	std::map<ARegion*, PyRegion> regionMap_;
 };
 
 BOOST_PYTHON_MODULE(Atlantis)
@@ -212,6 +258,13 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("name", &PyFaction::name)
 	    ;
 
+	class_<PyRegionList>("RegionList")
+	    .def(vector_indexing_suite<PyRegionList>());
+
+	class_<PyRegion>("Region")
+	    .def("name", &PyRegion::name)
+	    ;
+
 	class_<PyAtlantis>("PyAtlantis")
 	    .def("new", &PyAtlantis::newGame)
 	    .def("save", &PyAtlantis::save)
@@ -226,7 +279,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
-	    .def("doAutoAttacks", &PyAtlantis::doAutoAttacks)
+	    .def("doAutoAttacksRegion", &PyAtlantis::doAutoAttacksRegion)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
 	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)
@@ -260,6 +313,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("enableItem", enItem1)
 	    .def("enableItem", enItem2)
 	    .def("factions", &PyAtlantis::factions)
+	    .def("regions", &PyAtlantis::regions)
 	    ;
 
 	initIO();

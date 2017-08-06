@@ -43,8 +43,8 @@ class CAtlantis:
     def doAttackOrders(self):
         self.game.doAttackOrders()
 
-    def doAutoAttacks(self):
-        self.game.doAutoAttacks()
+    def doAutoAttacksRegion(self, r):
+        self.game.doAutoAttacksRegion(r)
 
     def runStealOrders(self):
         self.game.runStealOrders()
@@ -144,6 +144,9 @@ class CAtlantis:
 
     def factions(self):
         return self.game.factions()
+
+    def regions(self):
+        return self.game.regions()
 #end
 
 def setRules(game, game_name):
@@ -239,7 +242,8 @@ if __name__ == '__main__':
 
         print "Running Combat..."
         game.doAttackOrders()
-        game.doAutoAttacks()
+        for r in game.regions():
+            game.doAutoAttacksRegion(r)
 
         print "Running STEAL/ASSASSINATE Orders..."
         game.runStealOrders()
