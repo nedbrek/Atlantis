@@ -75,10 +75,7 @@ void Game::RunOrders()
 	DeleteEmptyUnits();
 	SinkUncrewedShips();
 	DrownUnits();
-	if(Globals->ALLOW_WITHDRAW) {
-		Awrite("Running WITHDRAW Orders...");
-		DoWithdrawOrders();
-	}
+	DoWithdrawOrders();
 	Awrite("Running Sail Orders...");
 	RunSailOrders();
 	Awrite("Running Move Orders...");
