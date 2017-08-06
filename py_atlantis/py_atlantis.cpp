@@ -115,6 +115,9 @@ struct PyUnit
 		return u_->name->str();
 	}
 
+	bool isAlive() { return u_->IsAlive() != 0; }
+	bool canAttack() { return u_->canattack != 0; }
+
 	Unit *u_;
 };
 typedef std::vector<PyUnit> PyUnitList;
@@ -176,7 +179,7 @@ public:
 	void runEnterOrders() { game_.RunEnterOrders(); }
 	void runPromoteOrders() { game_.RunPromoteOrders(); }
 	void doAttackOrders() { game_.DoAttackOrders(); }
-	void doAutoAttacksRegion(const PyRegion &r) { game_.DoAutoAttacksRegion(r.r_); }
+	void doAutoAttack(const PyRegion &r, const PyUnit &u) { game_.DoAutoAttack(r.r_, u.u_); }
 	void runStealOrders() { game_.RunStealOrders(); }
 	void doGiveOrders() { game_.DoGiveOrders(); }
 	void doExchangeOrders() { game_.DoExchangeOrders(); }
@@ -349,6 +352,8 @@ BOOST_PYTHON_MODULE(Atlantis)
 
 	class_<PyUnit>("Unit")
 	    .def("name", &PyUnit::name)
+	    .def("isAlive", &PyUnit::isAlive)
+	    .def("canAttack", &PyUnit::canAttack)
 	    ;
 
 	class_<PyAtlantis>("PyAtlantis")
@@ -365,7 +370,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
-	    .def("doAutoAttacksRegion", &PyAtlantis::doAutoAttacksRegion)
+	    .def("doAutoAttack", &PyAtlantis::doAutoAttack)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
 	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)
