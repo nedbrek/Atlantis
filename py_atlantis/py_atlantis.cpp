@@ -115,9 +115,14 @@ struct PyUnit
 		return u_->name->str();
 	}
 
+	void addError(const std::string &msg) { u_->Error(msg.c_str()); }
+
 	bool isAlive() { return u_->IsAlive() != 0; }
 	bool canAttack() { return u_->canattack != 0; }
 	Guard guard() { return Guard(u_->guard); }
+	int canSee(const PyRegion &r, const PyUnit &u) { return u_->CanSee(r.r_, u.u_); }
+	bool canCatch(const PyRegion &r, const PyUnit &u) { return u_->CanCatch(r.r_, u.u_) != 0; }
+
 	EAttitude attitude(const PyRegion &r, const PyUnit &u)
 	{
 		return EAttitude(u_->GetAttitude(r.r_, u.u_));
@@ -185,9 +190,9 @@ public:
 	void runPromoteOrders() { game_.RunPromoteOrders(); }
 	void doAttackOrders() { game_.DoAttackOrders(); }
 
-	void attemptAttack(const PyRegion &r, const PyUnit &u, const PyUnit &t, int val)
+	void runBattle(const PyRegion &r, const PyUnit &u, const PyUnit &t, int val, int adv)
 	{
-		game_.AttemptAttack(r.r_, u.u_, t.u_, val);
+		game_.RunBattle(r.r_, u.u_, t.u_, val, adv);
 	}
 
 	void runStealOrders() { game_.RunStealOrders(); }
@@ -362,10 +367,13 @@ BOOST_PYTHON_MODULE(Atlantis)
 
 	class_<PyUnit>("Unit")
 	    .def("name", &PyUnit::name)
+	    .def("addError", &PyUnit::addError)
 	    .def("isAlive", &PyUnit::isAlive)
 	    .def("canAttack", &PyUnit::canAttack)
 	    .def("guard", &PyUnit::guard)
 	    .def("attitude", &PyUnit::attitude)
+	    .def("canSee", &PyUnit::canSee)
+	    .def("canCatch", &PyUnit::canCatch)
 	    ;
 
 	enum_<Guard>("Guard")
@@ -398,7 +406,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
-	    .def("attemptAttack", &PyAtlantis::attemptAttack)
+	    .def("runBattle", &PyAtlantis::runBattle)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
 	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)

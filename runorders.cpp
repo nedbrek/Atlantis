@@ -1326,11 +1326,6 @@ void Game::DoAttackOrders()
  * Presume that u is alive, can attack, and wants to attack t.
  * Check that t is alive, u can see t, and u has enough riding
  * skill to catch t.
- *
- * Return 0 if success.
- * 1 if t is already dead.
- * 2 if u can't see t
- * 3 if u lacks the riding to catch t
  */
 void Game::AttemptAttack(ARegion * r,Unit * u,Unit * t,int silent,int adv)
 {

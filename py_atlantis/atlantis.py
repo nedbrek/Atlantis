@@ -43,12 +43,29 @@ class CAtlantis:
     def doAttackOrders(self):
         self.game.doAttackOrders()
 
+    def attemptAttack(r, u, t, silent, advance):
+        if not t.isAlive(): return
+
+        if not u.canSee(r, t):
+            if not silent:
+                u.addError("ATTACK: Non-existent unit.")
+                return
+
+        if not u.canCatch(r, t):
+            if not silent:
+                u.addError("ATTACK: Can't catch that unit.");
+                return
+
+        self.game.runBattle(r, u, t, 0, advance)
+
+    #end attemptAttack
+
     def doAutoAttack(self, r, u):
         for o in self.game.structures(r):
             for t in self.game.units(o):
                 if (u.guard() != Atlantis.Guard.avoid and
                    u.attitude(r, t) == Atlantis.EAttitude.hostile):
-                    self.game.attemptAttack(r, u, t, 1)
+                    self.attemptAttack(r, u, t, 1, 0)
                 if not u.isAlive() or not u.canAttack():
                     return
 
