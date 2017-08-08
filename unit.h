@@ -43,7 +43,7 @@ class Unit; // defined locally
 
 //----------------------------------------------------------------------------
 /// Ways a unit can be on guard
-enum
+enum Guard
 {
 	GUARD_NONE,
 	GUARD_GUARD,

@@ -43,7 +43,8 @@ class Game;
 #include "alist.h"
 #include "astring.h"
 
-enum {
+enum EAttitude
+{
     A_HOSTILE,
     A_UNFRIENDLY,
     A_NEUTRAL,

@@ -117,6 +117,11 @@ struct PyUnit
 
 	bool isAlive() { return u_->IsAlive() != 0; }
 	bool canAttack() { return u_->canattack != 0; }
+	Guard guard() { return Guard(u_->guard); }
+	EAttitude attitude(const PyRegion &r, const PyUnit &u)
+	{
+		return EAttitude(u_->GetAttitude(r.r_, u.u_));
+	}
 
 	Unit *u_;
 };
@@ -179,7 +184,12 @@ public:
 	void runEnterOrders() { game_.RunEnterOrders(); }
 	void runPromoteOrders() { game_.RunPromoteOrders(); }
 	void doAttackOrders() { game_.DoAttackOrders(); }
-	void doAutoAttack(const PyRegion &r, const PyUnit &u) { game_.DoAutoAttack(r.r_, u.u_); }
+
+	void attemptAttack(const PyRegion &r, const PyUnit &u, const PyUnit &t, int val)
+	{
+		game_.AttemptAttack(r.r_, u.u_, t.u_, val);
+	}
+
 	void runStealOrders() { game_.RunStealOrders(); }
 	void doGiveOrders() { game_.DoGiveOrders(); }
 	void doExchangeOrders() { game_.DoExchangeOrders(); }
@@ -354,6 +364,24 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("name", &PyUnit::name)
 	    .def("isAlive", &PyUnit::isAlive)
 	    .def("canAttack", &PyUnit::canAttack)
+	    .def("guard", &PyUnit::guard)
+	    .def("attitude", &PyUnit::attitude)
+	    ;
+
+	enum_<Guard>("Guard")
+	    .value("none", GUARD_NONE)
+	    .value("guard", GUARD_GUARD)
+	    .value("avoid", GUARD_AVOID)
+	    .value("set", GUARD_SET)
+	    .value("advance", GUARD_ADVANCE)
+	    ;
+
+	 enum_<EAttitude>("EAttitude")
+	    .value("hostile", A_HOSTILE)
+	    .value("unfriendly", A_UNFRIENDLY)
+	    .value("neutral", A_NEUTRAL)
+	    .value("friendly", A_FRIENDLY)
+	    .value("ally", A_ALLY)
 	    ;
 
 	class_<PyAtlantis>("PyAtlantis")
@@ -370,7 +398,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
-	    .def("doAutoAttack", &PyAtlantis::doAutoAttack)
+	    .def("attemptAttack", &PyAtlantis::attemptAttack)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
 	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)

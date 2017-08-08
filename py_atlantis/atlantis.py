@@ -43,11 +43,20 @@ class CAtlantis:
     def doAttackOrders(self):
         self.game.doAttackOrders()
 
+    def doAutoAttack(self, r, u):
+        for o in self.game.structures(r):
+            for t in self.game.units(o):
+                if (u.guard() != Atlantis.Guard.avoid and
+                   u.attitude(r, t) == Atlantis.EAttitude.hostile):
+                    self.game.attemptAttack(r, u, t, 1)
+                if not u.isAlive() or not u.canAttack():
+                    return
+
     def doAutoAttacksRegion(self, r):
         for o in self.game.structures(r):
             for u in self.game.units(o):
                 if u.isAlive() and u.canAttack():
-                    self.game.doAutoAttack(r, u)
+                    self.doAutoAttack(r, u)
 
     def runStealOrders(self):
         self.game.runStealOrders()

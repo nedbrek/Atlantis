@@ -1222,18 +1222,20 @@ void Game::DoAdvanceAttack(ARegion * r,Unit * u) {
 	}
 }
 
-void Game::DoAutoAttack(ARegion * r,Unit * u) {
-  forlist(&r->objects) {
-	Object * o = (Object *) elem;
-	forlist(&o->units) {
-	  Unit * t = (Unit *) elem;
-	  if (u->guard != GUARD_AVOID && (u->GetAttitude(r,t) == A_HOSTILE)) {
-	AttemptAttack(r,u,t,1);
-	  }
-	  if (u->IsAlive() == 0 || u->canattack == 0)
-	return;
+void Game::DoAutoAttack(ARegion * r,Unit * u)
+{
+	forlist(&r->objects) {
+		Object *o = (Object*)elem;
+		forlist(&o->units) {
+			Unit *t = (Unit*)elem;
+			if (u->guard != GUARD_AVOID && u->GetAttitude(r, t) == A_HOSTILE)
+			{
+				AttemptAttack(r, u, t, 1);
+			}
+			if (u->IsAlive() == 0 || u->canattack == 0)
+				return;
+		}
 	}
-  }
 }
 
 int Game::CountWMonTars(ARegion * r,Unit * mon) {
