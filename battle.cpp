@@ -632,26 +632,8 @@ int Game::CanAttack(ARegion *r, AList *afacs, Unit *u)
 }
 
 void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
-      AList &defs, Unit *att, Unit *tar, int ass, int adv)
+      AList &defs, Unit *att, Unit *tar, int adv)
 {
-	if (ass)
-	{
-		// assassination attempt
-		Location *l = new Location;
-		l->unit = att;
-		l->obj = r->GetDummy();
-		l->region = r;
-		atts.Add(l);
-
-		l = new Location;
-		l->unit = tar;
-		l->obj = r->GetDummy();
-		l->region = r;
-		defs.Add(l);
-
-		return;
-	}
-
 	int noaida = 0, noaidd = 0; // loop-carry
 	// -1 is current region, then check neighboring regions for support
 	for (int i = -1; i < NDIRS; ++i)
@@ -877,7 +859,23 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, int ass, int adv)
 	}
 
 	AList defs;
-	GetSides(r, afacs, dfacs, atts, defs, attacker, target, ass, adv);
+	if (ass)
+	{
+		// assassination attempt
+		Location *l = new Location;
+		l->unit = attacker;
+		l->obj = r->GetDummy();
+		l->region = r;
+		atts.Add(l);
+
+		l = new Location;
+		l->unit = target;
+		l->obj = r->GetDummy();
+		l->region = r;
+		defs.Add(l);
+	}
+	else
+		GetSides(r, afacs, dfacs, atts, defs, attacker, target, adv);
 
 	if (atts.Num() <= 0)
 	{

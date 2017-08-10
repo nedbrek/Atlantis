@@ -536,8 +536,7 @@ private:
     //
     void KillDead(Location *);
     int RunBattle(ARegion *,Unit *,Unit *,int = 0,int = 0);
-    void GetSides(ARegion *,AList &,AList &,AList &,AList &,Unit *,Unit *,
-                  int = 0,int = 0);
+    void GetSides(ARegion *,AList &,AList &,AList &,AList &,Unit *,Unit *, int adv);
     int CanAttack(ARegion *,AList *,Unit *);
     void GetAFacs(ARegion *,Unit *,Unit *,AList &,AList &,AList &);
     void GetDFacs(ARegion *,Unit *,AList &);
