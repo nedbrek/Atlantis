@@ -3,6 +3,9 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <vector>
 
+class PyAtlantis;
+class PyStructure;
+
 extern
 void usage();
 
@@ -14,7 +17,7 @@ public:
 	{
 	}
 
-	PyFaction(Faction *f)
+	explicit PyFaction(Faction *f)
 	: f_(f)
 	{
 	}
@@ -41,32 +44,6 @@ private:
 };
 typedef std::vector<PyFaction> PyFactionList;
 
-struct PyRegion
-{
-	PyRegion()
-	: r_(NULL)
-	{
-	}
-
-	PyRegion(ARegion *r)
-	: r_(r)
-	{
-	}
-
-	bool operator==(const PyRegion &rhs)
-	{
-		return r_ == rhs.r_;
-	}
-
-	std::string name()
-	{
-		return r_->name->str();
-	}
-
-	ARegion *r_;
-};
-typedef std::vector<PyRegion> PyRegionList;
-
 struct PyStructure
 {
 	PyStructure()
@@ -74,7 +51,7 @@ struct PyStructure
 	{
 	}
 
-	PyStructure(Object *o)
+	explicit PyStructure(Object *o)
 	: o_(o)
 	{
 	}
@@ -93,6 +70,39 @@ struct PyStructure
 };
 typedef std::vector<PyStructure> PyStructureList;
 
+struct PyRegion
+{
+	PyRegion()
+	: r_(NULL)
+	{
+	}
+
+	explicit PyRegion(ARegion *r)
+	: r_(r)
+	{
+	}
+
+	bool operator==(const PyRegion &rhs)
+	{
+		return r_ == rhs.r_;
+	}
+
+	std::string name()
+	{
+		return r_->name->str();
+	}
+
+	bool isSafeRegion()
+	{
+		return r_->IsSafeRegion() != 0;
+	}
+
+	PyStructure getDummy() { return PyStructure(r_->GetDummy()); }
+
+	ARegion *r_;
+};
+typedef std::vector<PyRegion> PyRegionList;
+
 struct PyUnit
 {
 	PyUnit()
@@ -100,7 +110,7 @@ struct PyUnit
 	{
 	}
 
-	PyUnit(Unit *u)
+	explicit PyUnit(Unit *u)
 	: u_(u)
 	{
 	}
@@ -131,6 +141,51 @@ struct PyUnit
 	Unit *u_;
 };
 typedef std::vector<PyUnit> PyUnitList;
+
+struct PyLocation
+{
+	PyLocation(const PyUnit &u, const PyStructure &o, const PyRegion &r)
+	{
+		l_.unit = u.u_;
+		l_.obj = o.o_;
+		l_.region = r.r_;
+	}
+
+	bool operator==(const PyLocation &rhs)
+	{
+		return l_.unit == rhs.l_.unit &&
+		       l_.obj  == rhs.l_.obj  &&
+		       l_.region == rhs.l_.region;
+	}
+
+	Location* makeLocation() const
+	{
+		return new Location(l_);
+	}
+
+	//PyUnit unit() { return PyUnit(l_.unit); };
+	//PyStructure obj() { return PyStructure(l_.obj); }
+	//PyRegion region() { return PyRegion(l_.region); }
+
+	Location l_;
+};
+typedef std::vector<PyLocation> PyLocationList;
+
+struct PyBattle
+{
+	PyBattle()
+	: b_(new Battle)
+	{
+	}
+
+	void writeSides(PyAtlantis &game, const PyRegion &r, const PyUnit &att, const PyUnit &tar,
+	                const PyLocationList &att_list, const PyLocationList &def_list, bool asn);
+
+	int run(const PyRegion &r, const PyUnit &att, const PyLocationList &att_list,
+	        const PyUnit &tar, const PyLocationList &def_list, int asn, PyAtlantis &game);
+
+	Battle *b_;
+};
 
 class PyAtlantis
 {
@@ -190,9 +245,138 @@ public:
 	void runPromoteOrders() { game_.RunPromoteOrders(); }
 	void doAttackOrders() { game_.DoAttackOrders(); }
 
-	void runBattle(const PyRegion &r, const PyUnit &u, const PyUnit &t, int val, int adv)
+	PyFactionList getDefendingFactions(const PyRegion &r, const PyUnit &victim_unit)
 	{
-		game_.RunBattle(r.r_, u.u_, t.u_, val, adv);
+		AList defenders;
+		game_.GetDFacs(r.r_, victim_unit.u_, defenders);
+
+		PyFactionList ret;
+		forlist(&defenders)
+		{
+			FactionPtr *e = (FactionPtr*)elem;
+			ret.push_back(PyFaction(e->ptr));
+		}
+		return ret;
+	}
+
+	int runBattle(const PyRegion &battle_region, const PyUnit &att_unit, const PyUnit &t, int asn, int adv)
+	{
+		ARegion *r = battle_region.r_;
+		Unit *attacker = att_unit.u_;
+		Unit *target = t.u_;
+		AList afacs, dfacs;
+		AList atts;
+
+		if (asn)
+		{
+			// assassination attempt
+			if (attacker->GetAttitude(r, target) == A_ALLY)
+			{
+				attacker->Error("ASSASSINATE: Can't assassinate an ally.");
+				return BATTLE_IMPOSSIBLE;
+			}
+
+			FactionPtr *p = new FactionPtr;
+			p->ptr = attacker->faction;
+			afacs.Add(p);
+
+			p = new FactionPtr;
+			p->ptr = target->faction;
+			dfacs.Add(p);
+		}
+		else
+		{
+			if ( r->IsSafeRegion() )
+			{
+				attacker->Error("ATTACK: No battles allowed in safe regions.");
+				return BATTLE_IMPOSSIBLE;
+			}
+			if (attacker->GetAttitude(r, target) == A_ALLY)
+			{
+				attacker->Error("ATTACK: Can't attack an ally.");
+				return BATTLE_IMPOSSIBLE;
+			}
+
+			game_.GetDFacs(r, target, dfacs);
+
+			if (GetFaction2(&dfacs, attacker->faction->num))
+			{
+				attacker->Error("ATTACK: Can't attack an ally.");
+				return BATTLE_IMPOSSIBLE;
+			}
+
+			game_.GetAFacs(r, attacker, target, dfacs, afacs, atts);
+		}
+
+		AList defs;
+		if (asn)
+		{
+			// assassination attempt
+			Location *l = new Location;
+			l->unit = attacker;
+			l->obj = r->GetDummy();
+			l->region = r;
+			atts.Add(l);
+
+			l = new Location;
+			l->unit = target;
+			l->obj = r->GetDummy();
+			l->region = r;
+			defs.Add(l);
+		}
+		else
+			game_.GetSides(r, afacs, dfacs, atts, defs, attacker, target, adv);
+
+		if (atts.Num() <= 0)
+		{
+			// this shouldn't happen, but just in case
+			Awrite(AString("Cannot find any attackers!"));
+			return BATTLE_IMPOSSIBLE;
+		}
+
+		if (defs.Num() <= 0)
+		{
+			// this shouldn't happen, but just in case
+			Awrite(AString("Cannot find any defenders!"));
+			return BATTLE_IMPOSSIBLE;
+		}
+
+		Battle *b = new Battle;
+		b->WriteSides(r, attacker, target, &atts, &defs, asn, &game_.regions);
+
+		game_.battles.Add(b);
+
+		forlist(&game_.factions)
+		{
+			Faction *f = (Faction*)elem;
+
+			if (GetFaction2(&afacs, f->num) || GetFaction2(&dfacs, f->num) ||
+			    r->Present(f))
+			{
+				BattlePtr *p = new BattlePtr;
+				p->ptr = b;
+				f->battles.Add(p);
+			}
+		}
+
+		const int result = b->Run(r, attacker, &atts, target, &defs, asn, &game_.regions);
+
+		// remove all dead units
+		{
+			forlist(&atts)
+			{
+				game_.KillDead((Location*)elem);
+			}
+		}
+
+		{
+			forlist(&defs)
+			{
+				game_.KillDead((Location*)elem);
+			}
+		}
+
+		return result;
 	}
 
 	void runStealOrders() { game_.RunStealOrders(); }
@@ -325,12 +509,41 @@ public:
 		return ret;
 	}
 
+	ARegionList* region_list() { return &game_.regions; }
+
 private:
 	Game game_;
 	std::map<Faction*, PyFaction> factionMap_;
 	std::map<ARegion*, PyRegion> regionMap_;
 };
 
+void PyBattle::writeSides(PyAtlantis &game, const PyRegion &r, const PyUnit &att, const PyUnit &tar,
+                const PyLocationList &att_list, const PyLocationList &def_list, bool asn)
+{
+	// atts and defs are Location lists
+	AList atts, defs;
+	for (PyLocationList::const_iterator i = att_list.begin(); i != att_list.end(); ++i)
+		atts.Add(i->makeLocation());
+	for (PyLocationList::const_iterator i = def_list.begin(); i != def_list.end(); ++i)
+		defs.Add(i->makeLocation());
+
+	b_->WriteSides(r.r_, att.u_, tar.u_, &atts, &defs, asn, game.region_list());
+}
+
+int PyBattle::run(const PyRegion &r, const PyUnit &att, const PyLocationList &att_list,
+     const PyUnit &tar, const PyLocationList &def_list, int asn, PyAtlantis &game)
+{
+	AList atts, defs;
+	for (PyLocationList::const_iterator i = att_list.begin(); i != att_list.end(); ++i)
+		atts.Add(i->makeLocation());
+	for (PyLocationList::const_iterator i = def_list.begin(); i != def_list.end(); ++i)
+		defs.Add(i->makeLocation());
+
+	// int Run(ARegion *region, Unit *att, AList *atts, Unit *tar, AList *defs, int ass, ARegionList *pRegs)
+	return b_->Run(r.r_, att.u_, &atts, tar.u_, &defs, asn, game.region_list());
+}
+
+//----------------------------------------------------------------------------
 BOOST_PYTHON_MODULE(Atlantis)
 {
 	using namespace boost::python;
@@ -353,6 +566,8 @@ BOOST_PYTHON_MODULE(Atlantis)
 
 	class_<PyRegion>("Region")
 	    .def("name", &PyRegion::name)
+	    .def("isSafeRegion", &PyRegion::isSafeRegion)
+	    .def("getDummy", &PyRegion::getDummy)
 	    ;
 
 	class_<PyStructureList>("StructureList")
@@ -392,6 +607,17 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .value("ally", A_ALLY)
 	    ;
 
+	class_<PyLocationList>("LocationList")
+	    .def(vector_indexing_suite<PyLocationList>());
+
+	class_<PyLocation>("Location", init<const PyUnit&, const PyStructure&, const PyRegion&>())
+	    ;
+
+	class_<PyBattle>("Battle")
+	    .def("writeSides", &PyBattle::writeSides)
+	    .def("run", &PyBattle::run)
+	    ;
+
 	class_<PyAtlantis>("PyAtlantis")
 	    .def("new", &PyAtlantis::newGame)
 	    .def("save", &PyAtlantis::save)
@@ -406,6 +632,7 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runEnterOrders", &PyAtlantis::runEnterOrders)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
+	    .def("getDefendingFactions", &PyAtlantis::getDefendingFactions)
 	    .def("runBattle", &PyAtlantis::runBattle)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
