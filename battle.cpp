@@ -796,7 +796,7 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 	}
 }
 
-void Game::KillDead(Location *l)
+void Game::KillDead(const Location *l)
 {
 	if (!l->unit->IsAlive())
 	{

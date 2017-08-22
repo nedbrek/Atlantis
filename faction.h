@@ -108,9 +108,15 @@ public:
   int attitude;
 };
 
-class FactionPtr : public AListElem {
+class FactionPtr : public AListElem
+{
 public:
-  Faction * ptr;
+  Faction *ptr;
+
+  FactionPtr(Faction *p = NULL)
+  : ptr(p)
+  {
+  }
 };
 
 class Faction : public AListElem

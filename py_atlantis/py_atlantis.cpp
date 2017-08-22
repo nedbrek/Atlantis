@@ -9,9 +9,8 @@ class PyStructure;
 extern
 void usage();
 
-class PyFaction
+struct PyFaction
 {
-public:
 	PyFaction()
 	: f_(NULL)
 	{
@@ -39,7 +38,6 @@ public:
 		return f_->name->str();
 	}
 
-private:
 	Faction *f_;
 };
 typedef std::vector<PyFaction> PyFactionList;
@@ -92,7 +90,7 @@ struct PyRegion
 		return r_->name->str();
 	}
 
-	bool isSafeRegion()
+	bool isSafeRegion() const
 	{
 		return r_->IsSafeRegion() != 0;
 	}
@@ -133,7 +131,7 @@ struct PyUnit
 	int canSee(const PyRegion &r, const PyUnit &u) { return u_->CanSee(r.r_, u.u_); }
 	bool canCatch(const PyRegion &r, const PyUnit &u) { return u_->CanCatch(r.r_, u.u_) != 0; }
 
-	EAttitude attitude(const PyRegion &r, const PyUnit &u)
+	EAttitude attitude(const PyRegion &r, const PyUnit &u) const
 	{
 		return EAttitude(u_->GetAttitude(r.r_, u.u_));
 	}
@@ -259,7 +257,30 @@ public:
 		return ret;
 	}
 
-	int runBattle(const PyRegion &battle_region, const PyUnit &att_unit, const PyUnit &t, int asn, int adv)
+	PyFactionList getAttackingFactions(const PyRegion &r, const PyUnit &attacker, const PyUnit &victim_unit,
+	    const PyFactionList &def_facs, const PyFactionList &att_facs)
+	{
+		AList afacs;
+		for (PyFactionList::const_iterator i = att_facs.begin(); i != att_facs.end(); ++i)
+			afacs.push_back(new FactionPtr(i->f_));
+
+		AList dfacs;
+		for (PyFactionList::const_iterator i = def_facs.begin(); i != def_facs.end(); ++i)
+			dfacs.push_back(new FactionPtr(i->f_));
+
+		AList attackers;
+		game_.GetAFacs(r.r_, attacker.u_, victim_unit.u_, dfacs, afacs, attackers);
+
+		PyFactionList ret;
+		forlist(&attackers)
+		{
+			FactionPtr *e = (FactionPtr*)elem;
+			ret.push_back(PyFaction(e->ptr));
+		}
+		return ret;
+	}
+
+	int runBattle(const PyRegion &battle_region, PyUnit &att_unit, const PyUnit &t, int asn, int adv)
 	{
 		ARegion *r = battle_region.r_;
 		Unit *attacker = att_unit.u_;
@@ -270,30 +291,25 @@ public:
 		if (asn)
 		{
 			// assassination attempt
-			if (attacker->GetAttitude(r, target) == A_ALLY)
+			if (att_unit.attitude(battle_region, t) == A_ALLY)
 			{
-				attacker->Error("ASSASSINATE: Can't assassinate an ally.");
+				att_unit.addError("ASSASSINATE: Can't assassinate an ally.");
 				return BATTLE_IMPOSSIBLE;
 			}
 
-			FactionPtr *p = new FactionPtr;
-			p->ptr = attacker->faction;
-			afacs.Add(p);
-
-			p = new FactionPtr;
-			p->ptr = target->faction;
-			dfacs.Add(p);
+			afacs.Add(new FactionPtr(attacker->faction));
+			dfacs.Add(new FactionPtr(target->faction));
 		}
 		else
 		{
-			if ( r->IsSafeRegion() )
+			if ( battle_region.isSafeRegion() )
 			{
-				attacker->Error("ATTACK: No battles allowed in safe regions.");
+				att_unit.addError("ATTACK: No battles allowed in safe regions.");
 				return BATTLE_IMPOSSIBLE;
 			}
-			if (attacker->GetAttitude(r, target) == A_ALLY)
+			if (att_unit.attitude(battle_region, t) == A_ALLY)
 			{
-				attacker->Error("ATTACK: Can't attack an ally.");
+				att_unit.addError("ATTACK: Can't attack an ally.");
 				return BATTLE_IMPOSSIBLE;
 			}
 
@@ -301,7 +317,7 @@ public:
 
 			if (GetFaction2(&dfacs, attacker->faction->num))
 			{
-				attacker->Error("ATTACK: Can't attack an ally.");
+				att_unit.addError("ATTACK: Can't attack an ally.");
 				return BATTLE_IMPOSSIBLE;
 			}
 
@@ -330,14 +346,14 @@ public:
 		if (atts.Num() <= 0)
 		{
 			// this shouldn't happen, but just in case
-			Awrite(AString("Cannot find any attackers!"));
+			Awrite("Cannot find any attackers!");
 			return BATTLE_IMPOSSIBLE;
 		}
 
 		if (defs.Num() <= 0)
 		{
 			// this shouldn't happen, but just in case
-			Awrite(AString("Cannot find any defenders!"));
+			Awrite("Cannot find any defenders!");
 			return BATTLE_IMPOSSIBLE;
 		}
 
@@ -379,6 +395,7 @@ public:
 		return result;
 	}
 
+	void killDead(const PyLocation &l) { game_.KillDead(&l.l_); }
 	void runStealOrders() { game_.RunStealOrders(); }
 	void doGiveOrders() { game_.DoGiveOrders(); }
 	void doExchangeOrders() { game_.DoExchangeOrders(); }
@@ -633,7 +650,9 @@ BOOST_PYTHON_MODULE(Atlantis)
 	    .def("runPromoteOrders", &PyAtlantis::runPromoteOrders)
 	    .def("doAttackOrders", &PyAtlantis::doAttackOrders)
 	    .def("getDefendingFactions", &PyAtlantis::getDefendingFactions)
+	    .def("getAttackingFactions", &PyAtlantis::getAttackingFactions)
 	    .def("runBattle", &PyAtlantis::runBattle)
+	    .def("killDead", &PyAtlantis::killDead)
 	    .def("runStealOrders", &PyAtlantis::runStealOrders)
 	    .def("doGiveOrders", &PyAtlantis::doGiveOrders)
 	    .def("doExchangeOrders", &PyAtlantis::doExchangeOrders)
