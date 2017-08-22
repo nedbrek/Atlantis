@@ -43,7 +43,75 @@ class CAtlantis:
     def doAttackOrders(self):
         self.game.doAttackOrders()
 
-    def attemptAttack(r, u, t, silent, advance):
+    def runBattle(self, battle_region, att_unit, target, asn, advance):
+        afacs = Atlantis.FactionList()
+        dfacs = Atlantis.FactionList()
+        atts  = Atlantis.LocationList()
+        if asn:
+            # assassination attempt
+            if att_unit.attitude(battle_region, target) == Atlantis.EAttitude.ally:
+                att_unit.addError("ASSASSINATE: Can't assassinate an ally.")
+                return BATTLE_IMPOSSIBLE
+
+            afacs.append(att_unit.faction)
+            dfacs.append(target.faction)
+        else:
+            if battle_region.isSafeRegion():
+                att_unit.addError("ATTACK: No battles allowed in safe regions.")
+                return BATTLE_IMPOSSIBLE
+
+            if att_unit.attitude(battle_region, target) == Atlantis.EAttitude.ally:
+                att_unit.addError("ATTACK: Can't attack an ally.")
+                return BATTLE_IMPOSSIBLE
+
+            dfacs = self.game.getDefendingFactions(battle_region, target)
+
+            if att_unit.faction() in dfacs:
+                att_unit.addError("ATTACK: Can't attack an ally.")
+                return BATTLE_IMPOSSIBLE
+
+            atts = self.game.getAttackingFactions(battle_region, att_unit, target, dfacs, afacs)
+        #end else not asn
+
+        defs = Atlantis.LocationList()
+        if asn:
+            # assassination attempt
+            atts.append(PyLocation(att_unit, battle_region.getDummy(), battle_region))
+            defs.append(PyLocation(target, battle_region.getDummy(), battle_region))
+        else:
+            self.game.getSides(battle_region, afacs, dfacs, atts, defs, att_unit, target, advance)
+
+        if len(atts) <= 0:
+            # this shouldn't happen, but just in case
+            print "Cannot find any attackers!"
+            return BATTLE_IMPOSSIBLE
+
+        if len(defs) <= 0:
+            # this shouldn't happen, but just in case
+            print "Cannot find any defenders!"
+            return BATTLE_IMPOSSIBLE
+
+        b = Atlantis.Battle()
+        b.writeSides(self.game, battle_region, att_unit, target, atts, defs, asn)
+
+        self.game.addBattle(b)
+        for f in self.game.factions():
+            if (f in afacs or f in dfacs or battle_region.isPresent(f)):
+                f.addBattle(b)
+
+        result = b.run(battle_region, att_unit, atts, target, defs, asn, self.game)
+
+        # remove all dead units
+        for elem in atts:
+            self.game.killDead(elem)
+
+        for elem in defs:
+            self.game.killDead(elem)
+
+        return result
+    #end runBattle
+
+    def attemptAttack(self, r, u, t, silent, advance):
         if not t.isAlive(): return
 
         if not u.canSee(r, t):
@@ -56,7 +124,7 @@ class CAtlantis:
                 u.addError("ATTACK: Can't catch that unit.");
                 return
 
-        self.game.runBattle(r, u, t, 0, advance)
+        self.runBattle(r, u, t, 0, advance)
 
     #end attemptAttack
 
