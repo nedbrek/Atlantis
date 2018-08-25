@@ -439,7 +439,7 @@ public: // data
 protected:
 	/// limit the unit to one skill (for non MU)
 	void limitSkillNoMagic();
-	void limitSkillMagic();
+	void limitSkillMagic(unsigned max_no_magic);
 
 	AString SpoilsReport();
 	void SkillStarvation();

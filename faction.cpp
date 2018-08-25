@@ -174,10 +174,16 @@ AString* ItemDescription(int item, int full)
 	}
 	*temp += ".";
 
-	if(ItemDefs[item].type & IT_MAN) {
-		int man = ItemDefs[item].index;
-		int found = 0;
+	if (ItemDefs[item].type & IT_MAN)
+	{
+		const int man = ItemDefs[item].index;
+
+		*temp += " This race may know ";
+		*temp += ManDefs[man].max_skills;
+		*temp += " skills.";
+
 		*temp += " This race may study ";
+		int found = 0;
 		unsigned int c;
 		unsigned int len = sizeof(ManDefs[man].skills) /
 							sizeof(ManDefs[man].skills[0]);

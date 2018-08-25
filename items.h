@@ -119,6 +119,7 @@ extern ItemType *ItemDefs;
 class ManType
 {
 public:
+	int max_skills; ///< maximum number of skills that can be learned
 	int speciallevel; ///< highest level that can be attained in specialized skills
 	int defaultlevel; ///< highest level that can be attained in everything else
 	int skills[6]; ///< indexes of specialized skills

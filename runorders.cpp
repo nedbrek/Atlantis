@@ -2455,6 +2455,25 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 			return 0;
 		}
 
+		// check for max skills
+		int first_man_type = -1;
+		forlist(&t->items)
+		{
+			const Item *i = (const Item*)elem;
+			if (ItemDefs[i->type].type & IT_MAN)
+			{
+				first_man_type = ItemDefs[i->type].index;
+				break;
+			}
+		}
+
+		const int man_type = ItemDefs[o->item].index;
+		if (first_man_type != -1 && ManDefs[man_type].max_skills != ManDefs[first_man_type].max_skills)
+		{
+			u->Error("GIVE: Can't mix men with different maximum number of skills.");
+			return 0;
+		}
+
 		if (u->nomove) t->nomove = 1;
 
 		SkillList * temp = u->skills.Split(u->GetMen(),amt);

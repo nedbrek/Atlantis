@@ -1286,47 +1286,57 @@ int Unit::CanStudy(int sk)
 
 int Unit::Study(int sk, int days)
 {
-	// if non-leaders can only have one skill, and this is not a leader
-	if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader())
+	// count non-magic skills and find if this boosting an existing skill
+	Skill *existing_skill = NULL;
+	int num_nonmagic_skills = 0;
+	forlist(&skills)
 	{
-		// if we have a skill already
-		if (skills.Num())
+		Skill *s = (Skill*)elem;
+		if (s->type == sk)
+			existing_skill = s;
+
+		if ((SkillDefs[s->type].flags & SkillType::MAGIC) == 0)
+			++num_nonmagic_skills;
+	}
+
+	// if non-leaders are limited, and this is not a leader
+	// and we are not improving one of our skills
+	if (Globals->SKILL_LIMIT_NONLEADERS && !IsLeader() && !existing_skill)
+	{
+		// pull man type
+		int first_man_type = -1;
+		forlist (&items)
 		{
-			Skill *s = (Skill*)skills.First();
+			Item *i = (Item*)elem;
 
-			// if we are not improving our one skill
-			if (s->type != sk)
+			if (ItemDefs[i->type].type & IT_MAN)
 			{
-				// and it is not magic related
-				if (!Globals->MAGE_NONLEADERS)
-				{
-					Error("STUDY: Can know only 1 skill.");
-					return 0;
-				}
+				first_man_type = ItemDefs[i->type].index;
+				break;
+			}
+		}
 
-				//else, if this is not a magic skill
-				if ((SkillDefs[sk].flags & SkillType::MAGIC) == 0)
-				{
-					Error("STUDY: Can know only 1 skill.");
-					return 0;
-				}
+		// count 'magic' as one skill
+		const int total_skills = num_nonmagic_skills + ((type & U_MAGE) ? 1 : 0);
+		if (total_skills >= ManDefs[first_man_type].max_skills)
+		{
+			// check for non-leader mages and multiple magic skills
+			if (!Globals->MAGE_NONLEADERS)
+			{
+				Error("STUDY: Cannot learn a new skill.");
+				return 0;
+			}
 
-				//else, if our "one" skill is not magic
-				if ((SkillDefs[s->type].flags & SkillType::MAGIC) == 0)
-				{
-					Error("STUDY: Can know only 1 skill.");
-					return 0;
-				}
+			//else, if this is not a magic skill
+			if ((SkillDefs[sk].flags & SkillType::MAGIC) == 0)
+			{
+				Error("STUDY: Cannot learn a new skill.");
+				return 0;
 			}
 		}
 	}
 
-	forlist(&skills)
 	{
-		Skill *s = (Skill*)elem;
-		if (s->type != sk)
-			continue;
-
 		// find max skill level
 		int max = 1000;
 		forlist (&items)
@@ -1335,12 +1345,12 @@ int Unit::Study(int sk, int days)
 
 			if (ItemDefs[i->type].type & IT_MAN)
 			{
-				const int m = SkillMax(s->type, i->type);
+				const int m = SkillMax(sk, i->type);
 				if (m < max) max = m;
 			}
 		}
 
-		if (GetRealSkill(s->type) >= max)
+		if (GetRealSkill(sk) >= max)
 		{
 			Error("STUDY: Maximum level for skill reached.");
 			return 0;
@@ -1443,7 +1453,7 @@ int Unit::IsNormal()
 
 void Unit::limitSkillNoMagic()
 {
-	// find highest skill, eliminate others
+	// find highest skills, eliminate others
 	Skill *maxskill = NULL; // live-out
 
 	unsigned max = 0; // loop-carry
@@ -1471,16 +1481,42 @@ void Unit::limitSkillNoMagic()
 	}
 }
 
-void Unit::limitSkillMagic()
+void Unit::limitSkillMagic(unsigned max_no_magic)
 {
+	unsigned num_no_magic = 0;
+	int nomagic_skill_max = -1;
 	forlist(&skills)
 	{
 		Skill *s = (Skill*)elem;
 		if (SkillDefs[s->type].flags & SkillType::MAGIC)
 			continue;
 
-		skills.Remove(s);
-		delete s;
+		++num_no_magic;
+		if (int(s->days) > nomagic_skill_max)
+			nomagic_skill_max = s->days;
+	}
+
+	if (num_no_magic <= max_no_magic)
+		return; // done
+
+	{
+		// start deleting
+		forlist(&skills)
+		{
+			Skill *s = (Skill*)elem;
+			if (SkillDefs[s->type].flags & SkillType::MAGIC)
+				continue;
+
+			if (int(s->days) <= nomagic_skill_max)
+			{
+				--num_no_magic;
+				skills.Remove(s);
+				delete s;
+			}
+
+			if (num_no_magic <= max_no_magic)
+				return; // done
+		}
 	}
 }
 
@@ -1503,9 +1539,22 @@ void Unit::AdjustSkills()
 		return;
 	}
 	//else non-leaders
+	int first_man_type = -1;
+	{
+		forlist(&items)
+		{
+			Item *i = (Item*)elem;
+
+			if (ItemDefs[i->type].type & IT_MAN)
+			{
+				first_man_type = ItemDefs[i->type].index;
+				break;
+			}
+		}
+	}
 
 	// if we can only know 1 skill, but know more
-	if (Globals->SKILL_LIMIT_NONLEADERS && skills.Num() > 1)
+	if (Globals->SKILL_LIMIT_NONLEADERS && skills.Num() > ManDefs[first_man_type].max_skills)
 	{
 		if (!Globals->MAGE_NONLEADERS)
 		{
@@ -1513,7 +1562,7 @@ void Unit::AdjustSkills()
 		}
 		else
 		{
-			limitSkillMagic();
+			limitSkillMagic(ManDefs[first_man_type].max_skills - 1);
 		}
 	}
 
