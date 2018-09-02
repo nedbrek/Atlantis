@@ -44,12 +44,12 @@ class Game;
 #include "astring.h"
 
 enum {
-    A_HOSTILE,
-    A_UNFRIENDLY,
-    A_NEUTRAL,
-    A_FRIENDLY,
-    A_ALLY,
-    NATTITUDES
+	A_HOSTILE,
+	A_UNFRIENDLY,
+	A_NEUTRAL,
+	A_FRIENDLY,
+	A_ALLY,
+	NATTITUDES
 };
 
 enum {
@@ -114,6 +114,14 @@ public:
 
 class Faction : public AListElem
 {
+public:
+	 enum Alignments
+	 {
+		 ALL_NEUTRAL,
+		 SOME_EVIL,
+		 SOME_GOOD
+	 };
+
 public:
     Faction();
     Faction(int);
@@ -201,6 +209,7 @@ public:
 	ARegion *pReg;
 	ARegion *pStartLoc;
 	int noStartLeader;
+	Alignments alignments_;
 };
 
 Faction * GetFaction(AList *,int);

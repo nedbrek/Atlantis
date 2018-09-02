@@ -123,8 +123,10 @@ public:
 	{
 		NEUTRAL,
 		EVIL,
-		GOOD
+		GOOD,
+		NUM_ALIGN
 	};
+	static const char *const ALIGN_STRS[NUM_ALIGN];
 
 	int max_skills; ///< maximum number of skills that can be learned
 	int speciallevel; ///< highest level that can be attained in specialized skills

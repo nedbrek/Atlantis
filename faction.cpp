@@ -646,6 +646,7 @@ Faction::Faction()
 	pReg = NULL;
 	pStartLoc = NULL;
 	noStartLeader = 0;
+	alignments_ = ALL_NEUTRAL;
 }
 
 Faction::Faction(int n)
@@ -668,6 +669,7 @@ Faction::Faction(int n)
 	pReg = NULL;
 	pStartLoc = NULL;
 	noStartLeader = 0;
+	alignments_ = ALL_NEUTRAL;
 }
 
 Faction::~Faction()
@@ -702,6 +704,7 @@ void Faction::Writeout( Aoutfile *f )
 	f->PutInt(attitudes.Num());
 	forlist((&attitudes))
 		((Attitude *) elem)->Writeout( f );
+	f->PutInt(alignments_);
 }
 
 void Faction::Readin( Ainfile *f, ATL_VER v )
@@ -726,21 +729,29 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 	defaultattitude = f->GetInt();
 
 	// Is this a new version of the game file
-	if(defaultattitude == -1) {
+	if (defaultattitude == -1)
+	{
 		items.Readin(f);
 		defaultattitude = f->GetInt();
 	}
 
+	// attitudes
 	int n = f->GetInt();
-	for (i=0; i<n; i++) {
+	for (i = 0; i < n; ++i)
+	{
 		Attitude * a = new Attitude;
 		a->Readin(f,v);
-		if (a->factionnum == num) {
+		if (a->factionnum == num)
+		{
 			delete a;
-		} else {
+		}
+		else
+		{
 			attitudes.Add(a);
 		}
 	}
+
+	alignments_ = Alignments(f->GetInt());
 }
 
 void Faction::View()
@@ -752,10 +763,13 @@ void Faction::View()
 
 void Faction::SetName(AString * s)
 {
-	if (s) {
-		AString * newname = s->getlegal();
+	if (s)
+	{
+		AString *newname = s->getlegal();
 		delete s;
-		if (!newname) return;
+		if (!newname)
+			return;
+
 		delete name;
 		*newname += AString(" (") + num + ")";
 		name = newname;
@@ -804,7 +818,8 @@ AString Faction::FactionTypeStr()
 
 void Faction::WriteReport( Areport *f, Game *pGame )
 {
-	if (IsNPC() && num == 1) {
+	if (IsNPC() && num == 1)
+	{
 		if(Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
 			int i, j;
 			// Put all skills, items and objects in the GM report
@@ -900,17 +915,20 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			ATL_VER_STRING( Globals->RULESET_VERSION ));
 	f->EndLine();
 
-	if (!times) {
+	if (!times)
+	{
 		f->PutStr("Note: The Times is not being sent to you.");
 		f->EndLine();
 	}
 
-	if(*password == "none") {
+	if (*password == "none")
+	{
 		f->PutStr("REMINDER: You have not set a password for your faction!");
 		f->EndLine();
 	}
 
-	if(Globals->MAX_INACTIVE_TURNS != -1) {
+	if (Globals->MAX_INACTIVE_TURNS != -1)
+	{
 		int cturn = pGame->TurnNumber() - lastorders;
 		if((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
@@ -921,36 +939,47 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		}
 	}
 
-	if (!exists) {
-		if (quit == QUIT_AND_RESTART) {
+	if (!exists)
+	{
+		if (quit == QUIT_AND_RESTART)
+		{
 			f->PutStr( "You restarted your faction this turn. This faction "
 					"has been removed, and a new faction has been started "
 					"for you. (Your new faction report will come in a "
 					"separate message.)" );
-		} else if( quit == QUIT_GAME_OVER ) {
+		}
+		else if( quit == QUIT_GAME_OVER )
+		{
 			f->PutStr( "I'm sorry, the game has ended. Better luck in "
 					"the next game you play!" );
-		} else if( quit == QUIT_WON_GAME ) {
+		}
+		else if( quit == QUIT_WON_GAME )
+		{
 			f->PutStr( "Congratulations, you have won the game!" );
-		} else {
+		}
+		else
+		{
 			f->PutStr( "I'm sorry, your faction has been eliminated." );
-			// LLS
 			f->PutStr( "If you wish to restart, please let the "
 					"Gamemaster know, and you will be restarted for "
 					"the next available turn." );
 		}
-		f->PutStr( "" );
+
+		f->PutStr("");
 	}
 
 	f->PutStr("Faction Status:");
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+	{
 		f->PutStr( AString("Mages: ") + nummages + " (" +
 				pGame->AllowedMages( this ) + ")");
 		if(Globals->APPRENTICES_EXIST) {
 			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
 					pGame->AllowedApprentices(this)+ ")");
 		}
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	}
+	else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	{
 		f->PutStr( AString("Tax Regions: ") + war_regions.Num() + " (" +
 				pGame->AllowedTaxes( this ) + ")");
 		f->PutStr( AString("Trade Regions: ") + trade_regions.Num() + " (" +
@@ -962,9 +991,14 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 					pGame->AllowedApprentices(this)+ ")");
 		}
 	}
+
 	f->PutStr("");
 
-	if (errors.Num()) {
+	// alignment (TODO: ensure mapping from faction alignment to man alignment
+	f->PutStr(AString("Your faction is ") + ManType::ALIGN_STRS[alignments_] + ".");
+
+	if (errors.Num())
+	{
 		f->PutStr("Errors during turn:");
 		forlist((&errors)) {
 			f->PutStr(*((AString *) elem));

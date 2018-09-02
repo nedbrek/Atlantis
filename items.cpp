@@ -29,6 +29,13 @@
 #include "fileio.h"
 #include "astring.h"
 
+const char *const ManType::ALIGN_STRS[ManType::NUM_ALIGN] =
+{
+	"neutral",
+	"evil",
+	"good"
+};
+
 AString AttType(int atype)
 {
 	switch (atype)
