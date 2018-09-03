@@ -68,11 +68,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int i, j, k, l;
 	int last = -1;
 
+	Awrite("Generating rules documentation");
 	if(f.OpenByName(rules) == -1) {
+		Awrite(AString("Unable to open rules file ") + rules);
 		return 0;
 	}
 
 	if(introf.OpenByName(intro) == -1) {
+		Awrite(AString("Unable to open intro file ") + intro);
 		return 0;
 	}
 
@@ -1473,6 +1476,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Specialized Skills");
 		f.TagText("TH", "Max Level (specialized skills)");
 		f.TagText("TH", "Max Level (non-specialized skills)");
+		f.TagText("TH", "Max Skills");
 		f.Enclose(0, "TR");
 
 		for (i = 0; i < NITEMS; i++)
@@ -1510,18 +1514,28 @@ int Game::GenRules(const AString &rules, const AString &css,
 				comma++;
 			}
 
-			if(!spec) temp = "None.";
+			if (!spec) temp = "None.";
 			f.PutStr(temp);
 			f.Enclose(0, "TD");
+
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			if(spec)
 				f.PutStr(ManDefs[m].speciallevel);
 			else
 				f.PutStr("--");
 			f.Enclose(0, "TD");
+
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			f.PutStr(ManDefs[m].defaultlevel);
 			f.Enclose(0, "TD");
+
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			if (ManDefs[m].max_skills == -1)
+				f.PutStr("No limit");
+			else
+				f.PutStr(ManDefs[m].max_skills);
+			f.Enclose(0, "TD");
+
 			f.Enclose(0, "TR");
 		}
 		f.Enclose(0, "TABLE");
