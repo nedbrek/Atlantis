@@ -182,6 +182,11 @@ AString* ItemDescription(int item, int full)
 		*temp += ManDefs[man].max_skills;
 		*temp += " skills.";
 
+		int hits = ManDefs[man].hits;
+		if (!hits) hits = 1;
+		*temp += AString(" This race takes ") + hits + " " +
+		    ((hits > 1) ? "hits" : "hit") + " to kill.";
+
 		*temp += " This race may study ";
 		int found = 0;
 		unsigned int c;

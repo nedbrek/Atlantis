@@ -123,8 +123,15 @@ Soldier::Soldier(Unit *u, Object *o, int regtype, int r, int ass)
 		o->capacity--;
 	}
 
+	if (ItemDefs[r].type & IT_MAN)
+	{
+		const int man = ItemDefs[r].index;
+		hits = ManDefs[man].hits;
+		if (hits < 1) hits = 1;
+		maxhits = hits;
+	}
 	// Is this a monster?
-	if (ItemDefs[r].type & IT_MONSTER)
+	else if (ItemDefs[r].type & IT_MONSTER)
 	{
 		const int mon = ItemDefs[r].index;
 		const MonType &mon_def = MonDefs[mon];

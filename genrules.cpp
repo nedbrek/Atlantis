@@ -1473,6 +1473,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "TR");
 		f.TagText("TH", "Race/Type");
 		f.TagText("TH", "Alignment");
+		f.TagText("TH", "Hit points");
 		f.TagText("TH", "Specialized Skills");
 		f.TagText("TH", "Max Level (specialized skills)");
 		f.TagText("TH", "Max Level (non-specialized skills)");
@@ -1494,6 +1495,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			f.PutStr(ManType::ALIGN_STRS[ManDefs[m].align]);
+			f.Enclose(0, "TD");
+
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ManDefs[m].hits);
 			f.Enclose(0, "TD");
 
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
@@ -3038,9 +3043,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"attack.) ";
 	}
 	temp += "Each combatant will attempt to hit a randomly selected enemy. "
-		"If he hits, and the target has no armor, then the target is "
-		"automatically killed.  Armor may provide extra defense against "
-		"otherwise successful attacks.";
+		"If he hits, and the target has no armor, then the target will "
+		"suffer 1 hit/damage, and might be killed.  Some combatants require multiple "
+		"hits to kill (see ";
+	temp += f.Link("#tableraces", "RACES") +
+		").  Armor may provide extra defense against otherwise "
+		"successful attacks.";
 	f.Paragraph(temp);
 	temp = "The basic skill used in battle is the Combat skill; this is "
 		"used for hand to hand fighting.  If one soldier tries to hit "

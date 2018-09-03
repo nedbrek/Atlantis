@@ -132,6 +132,7 @@ public:
 	int speciallevel; ///< highest level that can be attained in specialized skills
 	int defaultlevel; ///< highest level that can be attained in everything else
 	int skills[6]; ///< indexes of specialized skills
+	int hits;
 	Alignment align;
 };
 extern ManType *ManDefs;
