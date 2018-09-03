@@ -640,7 +640,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += ".";
 	}
 	if (Globals->LEADERS_EXIST&&Globals->SKILL_LIMIT_NONLEADERS) {
-		temp += " Units made up of normal people may only know one skill, "
+		temp += " Units made up of normal people may only know a limited number of skills, "
 			"and cannot teach other units.  Units made up of leaders "
 			"may know as many skills as desired, and may teach other "
 			"units to speed the learning process.";
@@ -655,8 +655,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"the people within it, so a unit made up of two races with "
 			"different strengths and weaknesses will have all the "
 			"weaknesses, and none of the strengths of either race.";
+
+		temp += "Races are categorized as good, neutral, or evil. "
+		    "Your faction may not mix good and evil units.";
 	}
 	f.Paragraph(temp);
+
 	f.LinkRef("playing_turns");
 	f.TagText("H3", "Turns:");
 	temp = "Each turn, the Atlantis server takes the orders file that "
@@ -1465,32 +1469,47 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "TABLE BORDER=1");
 		f.Enclose(1, "TR");
 		f.TagText("TH", "Race/Type");
-		f.TagText("TH", "Specilized Skills");
+		f.TagText("TH", "Alignment");
+		f.TagText("TH", "Specialized Skills");
 		f.TagText("TH", "Max Level (specialized skills)");
 		f.TagText("TH", "Max Level (non-specialized skills)");
 		f.Enclose(0, "TR");
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(!(ItemDefs[i].type & IT_MAN)) continue;
+
+		for (i = 0; i < NITEMS; i++)
+		{
+			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
+			if (!(ItemDefs[i].type & IT_MAN)) continue;
+
 			f.Enclose(1, "TR");
-			int m = ItemDefs[i].index;
+
+			const int m = ItemDefs[i].index;
+
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			f.PutStr(ItemDefs[i].names);
 			f.Enclose(0, "TD");
+
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ManType::ALIGN_STRS[ManDefs[m].align]);
+			f.Enclose(0, "TD");
+
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			int spec = 0;
 			comma = 0;
 			temp = "";
-			for(j = 0; j < (int)(sizeof(ManDefs->skills) /
-						 sizeof(ManDefs->skills[0])); j++) {
+			for (j = 0; j < (int)(sizeof(ManDefs->skills) /
+						 sizeof(ManDefs->skills[0])); j++)
+			{
 				if(ManDefs[m].skills[j] < 0) continue;
 				if(SkillDefs[ManDefs[m].skills[j]].flags & SkillType::DISABLED)
 					continue;
 				spec = 1;
+
 				if(comma) temp += ", ";
+
 				temp += SkillDefs[ManDefs[m].skills[j]].name;
 				comma++;
 			}
+
 			if(!spec) temp = "None.";
 			f.PutStr(temp);
 			f.Enclose(0, "TD");
