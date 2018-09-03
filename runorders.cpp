@@ -31,6 +31,21 @@
 #include "game.h"
 #include "gamedata.h"
 
+//----------------------------------------------------------------------------
+///@return true if the man type given by 'manIdx' is compatible with faction alignment 'a'
+bool isAlignCompat(int manIdx, Faction::Alignments a)
+{
+	if (a == Faction::ALL_NEUTRAL)
+		return true;
+
+	const ManType::Alignment ma = ManDefs[manIdx].align;
+	if (ma == ManType::NEUTRAL)
+		return true;
+
+	return a == Faction::Alignments(ma);
+}
+
+//----------------------------------------------------------------------------
 void Game::RunOrders()
 {
 	//
@@ -1448,18 +1463,30 @@ void Game::DoSell(ARegion * r,Market * m)
 
 void Game::RunBuyOrders()
 {
+	//foreach region
 	forlist((&regions)) {
-		ARegion * r = (ARegion *) elem;
+		ARegion *r = (ARegion*)elem;
+
+		//foreach market
 		forlist((&r->markets)) {
-			Market * m = (Market *) elem;
+			Market *m = (Market*)elem;
+
+			// only process BUY orders
 			if (m->type == M_BUY)
 				DoBuy(r,m);
 		}
+
+		// process remainder as errors (BUY orders should be empty now)
 		{
+			//foreach object
 			forlist((&r->objects)) {
-				Object * obj = (Object *) elem;
+				Object *obj = (Object*)elem;
+
+				//foreach unit
 				forlist((&obj->units)) {
-					Unit * u = (Unit *) elem;
+					Unit *u = (Unit*)elem;
+
+					//foreach BUY order
 					forlist((&u->buyorders)) {
 						u->Error("BUY: Can't buy that.");
 					}
@@ -1479,75 +1506,112 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 			Unit * u = (Unit *) elem;
 			forlist ((&u->buyorders)) {
 				BuyOrder * o = (BuyOrder *) elem;
-				if (o->item == m->item) {
-					if (ItemDefs[o->item].type & IT_MAN) {
-						if (u->type == U_MAGE) {
+				if (o->item == m->item)
+				{
+					if (ItemDefs[o->item].type & IT_MAN)
+					{
+						if (u->type == U_MAGE)
+						{
 							u->Error("BUY: Mages can't recruit more men.");
 							o->num = 0;
 						}
-						if(u->type == U_APPRENTICE) {
-							u->Error("BUY: Apprentices can't recruit more "
-									"men.");
+
+						if (u->type == U_APPRENTICE)
+						{
+							u->Error("BUY: Apprentices can't recruit more men.");
 							o->num = 0;
 						}
+
 						if ((o->item == I_LEADERS && u->IsNormal()) ||
-								(o->item != I_LEADERS && u->IsLeader())) {
+						    (o->item != I_LEADERS && u->IsLeader()))
+						 {
 							u->Error("BUY: Can't mix leaders and normal men.");
 							o->num = 0;
 						}
-					}
-					if (ItemDefs[o->item].type & IT_TRADE) {
-						if( !TradeCheck( r, u->faction )) {
-							u->Error( "BUY: Can't buy trade items in that "
-									"many regions.");
+
+						// check max skills
+						const int man_type = ItemDefs[o->item].index;
+						const int first_man_type = u->firstManType();
+						if (first_man_type != -1 && ManDefs[man_type].max_skills != ManDefs[first_man_type].max_skills)
+						{
+							u->Error("BUY: Can't mix men with different maximum number of skills.");
+							o->num = 0;
+						}
+
+						if (!isAlignCompat(ItemDefs[o->item].index, u->faction->alignments_))
+						{
+							u->Error("BUY: Can't mix good and evil men faction-wide.");
 							o->num = 0;
 						}
 					}
 
+					if (ItemDefs[o->item].type & IT_TRADE)
+					{
+						if( !TradeCheck( r, u->faction ))
+						{
+							u->Error( "BUY: Can't buy trade items in that many regions.");
+							o->num = 0;
+						}
+					}
+
+					// figure out how much money the unit can get
 					const int max_money = (o->num == -1) ? -1 : o->num * m->price;
 					const int unit_money = u->canConsume(I_SILVER, max_money);
 
 					// if buy max
-					if (o->num == -1) {
+					if (o->num == -1)
+					{
 						o->num = unit_money / m->price;
 					}
 
-					if (o->num * m->price > unit_money) {
+					if (o->num * m->price > unit_money)
+					{
 						o->num = unit_money / m->price;
 						u->Error("BUY: Unit attempted to buy more than it could afford.");
 					}
 					num += o->num;
 				}
-				if (o->num < 1 && o->num != -1) {
+
+				if (o->num < 1 && o->num != -1)
+				{
 					u->buyorders.Remove(o);
 					delete o;
 				}
 			}
 		}
 	}
+
 	return num;
 }
 
 void Game::DoBuy(ARegion * r,Market * m)
 {
-	/* First, find the number of items being purchased */
-	int attempted = GetBuyAmount(r,m);
-
-	if (m->amount != -1)
-		if (attempted < m->amount) attempted = m->amount;
-
+	// clear accumulator
 	m->activity = 0;
-	int oldamount = m->amount;
+
+	// First, find the number of items being purchased
+	int attempted = GetBuyAmount(r,m);
+	if (!attempted)
+		return; // nothing to do
+
+	// if not unlimited and not buying all
+	if (m->amount != -1 && attempted < m->amount)
+		attempted = m->amount; // pretend we're buying all (simplifies apportioning logic)
+
+	// save amount available
+	const int oldamount = m->amount;
+
 	forlist((&r->objects)) {
 		Object * obj = (Object *) elem;
 		forlist((&obj->units)) {
 			Unit * u = (Unit *) elem;
 			forlist((&u->buyorders)) {
 				BuyOrder * o = (BuyOrder *) elem;
+
 				if (o->item == m->item) {
 					int temp = 0;
 					if (m->amount == -1) {
-						/* unlimited market */
+						// unlimited market
 						temp = o->num;
 					} else {
 						if (attempted) {
@@ -1559,18 +1623,34 @@ void Game::DoBuy(ARegion * r,Market * m)
 						m->amount -= temp;
 						m->activity += temp;
 					}
-					if (ItemDefs[o->item].type & IT_MAN) {
-						/* recruiting; must dilute skills */
-						SkillList * sl = new SkillList;
+
+					if (ItemDefs[o->item].type & IT_MAN)
+					{
+						// recruiting; must dilute skills
 						u->AdjustSkills();
-						delete sl;
+
+						// adjust faction alignment
+						const int mt = ItemDefs[o->item].index;
+						if (ManDefs[mt].align != ManType::NEUTRAL)
+						{
+							if (u->faction->alignments_ == Faction::ALL_NEUTRAL)
+							{
+								u->faction->alignments_ = Faction::Alignments(ManDefs[mt].align);
+							}
+							//else should be compatible
+						}
 					}
+
 					u->items.SetNum(o->item,u->items.GetNum(o->item) + temp);
-					u->faction->DiscoverItem(o->item, 0, 1);
 					u->consume(I_SILVER, temp * m->price);
-					u->buyorders.Remove(o);
+
 					u->Event(AString("Buys ") + ItemString(o->item,temp)
-							+ " at $" + m->price + " each.");
+					      + " at $" + m->price + " each.");
+
+					// send a message about the item, if it is unknown
+					u->faction->DiscoverItem(o->item, 0, 1);
+
+					u->buyorders.Remove(o);
 					delete o;
 				}
 			}
@@ -2429,43 +2509,42 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 	}
 
 	/* If the item to be given is a man, combine skills */
-	if (ItemDefs[o->item].type & IT_MAN) {
+	if (ItemDefs[o->item].type & IT_MAN)
+	{
 		if (u->type == U_MAGE || u->type == U_APPRENTICE ||
-				t->type == U_MAGE || t->type == U_APPRENTICE) {
+		    t->type == U_MAGE || t->type == U_APPRENTICE)
+		{
 			u->Error("GIVE: Magicians can't transfer men.");
 			return 0;
 		}
-		if (o->item == I_LEADERS && t->IsNormal()) {
+
+		if (o->item == I_LEADERS && t->IsNormal())
+		{
 			u->Error("GIVE: Can't mix leaders and normal men.");
 			return 0;
-		} else {
-			if (o->item != I_LEADERS && t->IsLeader()) {
-				u->Error("GIVE: Can't mix leaders and normal men.");
-				return 0;
-			}
 		}
-		// Small hack for Ceran
-		if(o->item == I_MERC && t->GetMen()) {
+
+		if (o->item != I_LEADERS && t->IsLeader())
+		{
+			u->Error("GIVE: Can't mix leaders and normal men.");
+			return 0;
+		}
+
+		// hack for Ceran
+		if (o->item == I_MERC && t->GetMen())
+		{
 			u->Error("GIVE: Can't mix mercenaries with other men.");
 			return 0;
 		}
 
-		if (u->faction != t->faction) {
+		if (u->faction != t->faction)
+		{
 			u->Error("GIVE: Can't give men to another faction.");
 			return 0;
 		}
 
 		// check for max skills
-		int first_man_type = -1;
-		forlist(&t->items)
-		{
-			const Item *i = (const Item*)elem;
-			if (ItemDefs[i->type].type & IT_MAN)
-			{
-				first_man_type = ItemDefs[i->type].index;
-				break;
-			}
-		}
+		const int first_man_type = t->firstManType();
 
 		const int man_type = ItemDefs[o->item].index;
 		if (first_man_type != -1 && ManDefs[man_type].max_skills != ManDefs[first_man_type].max_skills)

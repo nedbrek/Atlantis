@@ -200,6 +200,9 @@ public:
 	///@return 1 if unit has men who are not leaders
 	int IsNormal();
 
+	///@return item id of first man type
+	int firstManType();
+
 	///@return number of monsters in unit
 	int GetMons();
 

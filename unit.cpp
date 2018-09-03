@@ -1451,6 +1451,17 @@ int Unit::IsNormal()
 	return (GetMen() && !IsLeader()) ? 1 : 0;
 }
 
+int Unit::firstManType()
+{
+	forlist(&items)
+	{
+		const Item *i = (const Item*)elem;
+		if (ItemDefs[i->type].type & IT_MAN)
+			return ItemDefs[i->type].index;
+	}
+	return -1;
+}
+
 void Unit::limitSkillNoMagic()
 {
 	// find highest skills, eliminate others
