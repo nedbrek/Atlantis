@@ -179,7 +179,10 @@ AString* ItemDescription(int item, int full)
 		const int man = ItemDefs[item].index;
 
 		*temp += " This race may know ";
-		*temp += ManDefs[man].max_skills;
+		if (ManDefs[man].max_skills == -1)
+			*temp += "any number of";
+		else
+			*temp += ManDefs[man].max_skills;
 		*temp += " skills.";
 
 		int hits = ManDefs[man].hits;
