@@ -190,6 +190,9 @@ AString* ItemDescription(int item, int full)
 		*temp += AString(" This race takes ") + hits + " " +
 		    ((hits > 1) ? "hits" : "hit") + " to kill.";
 
+		*temp += AString(" This race has alignment ") +
+		    ManType::ALIGN_STRS[ManDefs[man].align] + ".";
+
 		*temp += " This race may study ";
 		int found = 0;
 		unsigned int c;
@@ -213,6 +216,7 @@ AString* ItemDescription(int item, int full)
 				ManDefs[man].defaultlevel;
 		}
 	}
+
 	if(ItemDefs[item].type & IT_MONSTER) {
 		*temp += " This is a monster.";
 		int mon = ItemDefs[item].index;
