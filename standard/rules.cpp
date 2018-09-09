@@ -141,8 +141,9 @@ static GameDefs g = {
 
 	"Atlantis", // WORLD_NAME
 
-	0,  // NEXUS_GATE_OUT
-	0,  // NEXUS_IS_CITY
+	0, // NEXUS_GATE_OUT
+	0, // NEXUS_IS_CITY
+	0, // NEXUS_NO_EXITS
 	0,	// BATTLE_FACTION_INFO
 	0,	// ALLOW_WITHDRAW
 	0,	// CITY_RENAME_COST

@@ -2112,13 +2112,18 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month, ARegionList *pReg
 
 	if (type == R_NEXUS)
 	{
+		f->PutStr("");
+
 		const int len = strlen(AC_STRING)+2*strlen(Globals->WORLD_NAME);
 		char *nexus_desc = new char[len];
 		sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME, Globals->WORLD_NAME);
-		f->PutStr("");
-		f->PutStr(nexus_desc);
-		f->PutStr("");
+		AString tmp(nexus_desc);
+		if (Globals->NEXUS_NO_EXITS)
+			tmp += " You will need to 'CAST Gate_Lore RANDOM' to leave the Nexus.";
+		f->PutStr(tmp);
 		delete[] nexus_desc;
+
+		f->PutStr("");
 	}
 
 	f->DropTab();
@@ -3968,7 +3973,9 @@ void ARegionList::SetACNeighbors(int levelSrc, int levelTo, int maxX, int maxY)
 				if (!pReg)
 					continue;
 
-				AC->neighbors[i] = pReg;
+				if (!Globals->NEXUS_NO_EXITS)
+					AC->neighbors[i] = pReg;
+
 				pReg->MakeStartingCity();
 				if (Globals->GATES_EXIST)
 				{

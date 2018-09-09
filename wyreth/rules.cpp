@@ -140,8 +140,9 @@ static GameDefs g = {
 
 	"Wyreth", // WORLD_NAME
 
-	1,  // NEXUS_GATE_OUT
-	0,  // NEXUS_IS_CITY
+	1, // NEXUS_GATE_OUT
+	0, // NEXUS_IS_CITY
+	0, // NEXUS_NO_EXITS
 	0,	// BATTLE_FACTION_INFO
 	1,	// ALLOW_WITHDRAW
 	0,	// CITY_RENAME_COST

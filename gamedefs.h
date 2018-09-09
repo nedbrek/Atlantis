@@ -184,6 +184,7 @@ public:
 
 	int NEXUS_GATE_OUT; ///< can you cast gate from the nexus
 	int NEXUS_IS_CITY; ///< make the nexus a city
+	int NEXUS_NO_EXITS; ///< don't connect the nexus to starting cities
 
 	int BATTLE_FACTION_INFO; ///< battle reports show faction
 

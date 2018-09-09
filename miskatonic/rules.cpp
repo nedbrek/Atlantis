@@ -140,8 +140,9 @@ static GameDefs g = {
 
 	"Edledhron", // WORLD_NAME
 
-	1,  // NEXUS_GATE_OUT
-	1,  // NEXUS_IS_CITY
+	1, // NEXUS_GATE_OUT
+	1, // NEXUS_IS_CITY
+	1, // NEXUS_NO_EXITS
 	1,	// BATTLE_FACTION_INFO
 	1,	// ALLOW_WITHDRAW
 	1000,	// CITY_RENAME_COST
