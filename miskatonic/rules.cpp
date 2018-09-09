@@ -1,4 +1,4 @@
-// START A3HEADER
+ // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
 // Copyright (C) 1995-1999 Geoff Dunbar
@@ -151,6 +151,7 @@ static GameDefs g = {
 	2,	// UNDERDEEP_LEVELS
 	1,	// ABYSS_LEVEL
 	100,	// TOWN_PROBABILITY
+	100,	// UNDERWORLD_TOWN_PROBABILITY	
 	0,	// TOWN_SPREAD
 	0,	// TOWNS_NOT_ADJACENT
 	0,	// LESS_ARCTIC_TOWNS

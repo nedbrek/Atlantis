@@ -200,6 +200,7 @@ public:
 	int ABYSS_LEVEL; ///< 0: no abyss, else: one level of abyss (1/64 size)
 
 	int TOWN_PROBABILITY; ///< town probability: 100 = default
+	int UNDERWORLD_TOWN_PROBABILITY; ///< adjusts TOWN_PROBABILITY for underworld: 100 = default
 
 	// Default = 0. For high values the town probability will need to be adjusted
 	// downwards to get comparable number of towns

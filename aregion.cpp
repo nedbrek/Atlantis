@@ -323,6 +323,8 @@ void ARegion::SetupPop()
 		int adjacent = 0;
 		int prob = Globals->TOWN_PROBABILITY;
 		if (prob < 1) prob = 100;
+		int uprob = Globals->UNDERWORLD_TOWN_PROBABILITY;
+		if (uprob < 1) uprob = 100;
 		int townch = (int) 80000 / prob;
 		if (Globals->TOWNS_NOT_ADJACENT)
 		{
@@ -350,6 +352,9 @@ void ARegion::SetupPop()
 		if (spread > 100) spread = 100;
 
 		int townprob = (TerrainDefs[type].economy * 4 * (100 - spread) + 100 * spread) / 100;
+
+		if (zloc > 1)
+			townprob = (townprob * uprob) / 100;
 
 		if (adjacent > 0)
 			townprob = townprob * (100 - Globals->TOWNS_NOT_ADJACENT) / 100;
