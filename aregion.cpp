@@ -336,7 +336,7 @@ void ARegion::SetupPop()
 			}
 		}
 
-		if (Globals->LESS_ARCTIC_TOWNS)
+		if (Globals->LESS_ARCTIC_TOWNS && zloc == 1)
 		{
 			const int dnorth = GetPoleDistance(D_NORTH);
 			const int dsouth = GetPoleDistance(D_SOUTH);
