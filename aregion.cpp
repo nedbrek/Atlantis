@@ -336,16 +336,17 @@ void ARegion::SetupPop()
 			}
 		}
 
-		if (Globals->LESS_ARCTIC_TOWNS)
+		if (Globals->LESS_ARCTIC_TOWNS && zloc == 1)
 		{
+			const int arctic_zone_size = parentRegionArray->y / 10;
 			const int dnorth = GetPoleDistance(D_NORTH);
 			const int dsouth = GetPoleDistance(D_SOUTH);
 
-			if (dnorth < 9)
-				townch += 25 * (9 - dnorth) * (9 - dnorth) * Globals->LESS_ARCTIC_TOWNS;
+			if (dnorth < arctic_zone_size)
+				townch += 25 * (arctic_zone_size - dnorth) * (arctic_zone_size - dnorth) * Globals->LESS_ARCTIC_TOWNS;
 
-			if (dsouth < 9)
-				townch += 25 * (9 - dsouth) * (9 - dsouth) * Globals->LESS_ARCTIC_TOWNS;
+			if (dsouth < arctic_zone_size)
+				townch += 25 * (arctic_zone_size - dsouth) * (arctic_zone_size - dsouth) * Globals->LESS_ARCTIC_TOWNS;
 		}
 
 		int spread = Globals->TOWN_SPREAD;
@@ -921,8 +922,10 @@ int ARegion::GetPoleDistance(int dir)
 	return ct;
 }
 
-void ARegion::Setup()
+void ARegion::Setup(ARegionArray *pArr)
 {
+	parentRegionArray = pArr;
+	
 	// type and location have been setup, do everything else
 	SetupProds();
 
@@ -3879,7 +3882,7 @@ void ARegionList::FinalSetup(ARegionArray *pArr)
 					reg->wages = -1;
 			}
 
-			reg->Setup();
+			reg->Setup(pArr);
 		}
 	}
 }
