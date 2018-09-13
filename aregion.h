@@ -181,7 +181,7 @@ public:
 	/// destructor
 	~ARegion();
 
-	void Setup();
+	void Setup(ARegionArray *pArr);
 
 	void Writeout(Aoutfile *f);
 	void Readin(Ainfile *f, AList *facs, ATL_VER v);
@@ -366,6 +366,7 @@ public: // data
 	ProductionList products;
 	MarketList markets;
 	int xloc, yloc, zloc;
+	ARegionArray *parentRegionArray;
 };
 
 //----------------------------------------------------------------------------
