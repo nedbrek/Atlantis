@@ -194,21 +194,29 @@ AString* ItemDescription(int item, int full)
 		    ManType::ALIGN_STRS[ManDefs[man].align] + ".";
 
 		*temp += " This race may study ";
-		int found = 0;
-		unsigned int c;
-		unsigned int len = sizeof(ManDefs[man].skills) /
-							sizeof(ManDefs[man].skills[0]);
-		for(c = 0; c < len; c++) {
-			int skill = ManDefs[man].skills[c];
-			if(skill != -1) {
-				if(SkillDefs[skill].flags & SkillType::DISABLED) continue;
-				if(found) *temp += ", ";
-				if(found && c == len - 1) *temp += "and ";
-				found = 1;
+		bool found = false;
+		const unsigned len = sizeof(ManDefs[man].skills) / sizeof(ManDefs[man].skills[0]);
+		for (unsigned c = 0; c < len; c++)
+		{
+			const int skill = ManDefs[man].skills[c];
+			if (skill == S_MAGIC)
+			{
+				if (found) *temp += ", ";
+				if (found && c == len - 1) *temp += "and ";
+				found = true;
+				*temp += "all magic skills";
+			}
+			else if (skill != -1)
+			{
+				if (SkillDefs[skill].flags & SkillType::DISABLED) continue;
+				if (found) *temp += ", ";
+				if (found && c == len - 1) *temp += "and ";
+				found = true;
 				*temp += SkillStrs(ManDefs[man].skills[c]);
 			}
 		}
-		if(found) {
+
+		if (found) {
 			*temp += AString(" to level ") + ManDefs[man].speciallevel +
 				" and all others to level " + ManDefs[man].defaultlevel;
 		} else {

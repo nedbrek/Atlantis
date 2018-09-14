@@ -515,7 +515,8 @@ enum SkillDef
 	// Food related skills
 	S_COOKING,
 	S_CREATE_FOOD,
-	NSKILLS
+	NSKILLS,
+	S_MAGIC
 };
 
 /// Types of special attacks

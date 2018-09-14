@@ -1267,6 +1267,7 @@ int Unit::CanStudy(int sk)
 
 	const int curlev = GetRealSkill(sk);
 
+	// check dependencies
 	for (unsigned c = 0; c < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); ++c)
 	{
 		const int skillIdx = SkillDefs[sk].depends[c].skill;

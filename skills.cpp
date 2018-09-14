@@ -58,11 +58,13 @@ int SkillCost(int skill)
 
 int SkillMax(int skill, int race)
 {
+	const bool skill_is_magic = SkillDefs[skill].flags & SkillType::MAGIC;
+
 	// if non-leaders can't study magic
 	if (!Globals->MAGE_NONLEADERS)
 	{
 		// if skill requires magic and unit is not leaders
-		if ((SkillDefs[skill].flags & SkillType::MAGIC) && race != I_LEADERS)
+		if (skill_is_magic && race != I_LEADERS)
 			return 0;
 	}
 
@@ -70,9 +72,14 @@ int SkillMax(int skill, int race)
 
 	for (unsigned c = 0; c < sizeof(ManDefs[mantype].skills) / sizeof(ManDefs[mantype].skills[0]); ++c)
 	{
+		// allow all magic to use "special level"
+		if (skill_is_magic && ManDefs[mantype].skills[c] == S_MAGIC)
+			return ManDefs[mantype].speciallevel;
+
 		if (ManDefs[mantype].skills[c] == skill)
 			return ManDefs[mantype].speciallevel;
 	}
+
 	return ManDefs[mantype].defaultlevel;
 }
 
