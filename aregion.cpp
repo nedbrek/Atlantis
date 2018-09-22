@@ -481,6 +481,8 @@ void ARegion::SetupCityMarket()
 		// specific food items
 		if (i == I_GRAIN || i == I_LIVESTOCK || i == I_FISH)
 		{
+			if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+
 			if (i == I_FISH && !IsCoastal())
 				continue;
 
@@ -504,6 +506,8 @@ void ARegion::SetupCityMarket()
 		// generic food
 		if (i == I_FOOD)
 		{
+			if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
+
 			int amt = Globals->CITY_MARKET_NORMAL_AMT;
 			int price = ItemDefs[i].baseprice;
 
@@ -541,6 +545,8 @@ void ARegion::SetupCityMarket()
 
 				if (canProduce)
 				{
+					if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
+
 					// item can be produced here
 					if (getrandom(2) == 0)
 						continue;
@@ -568,6 +574,8 @@ void ARegion::SetupCityMarket()
 				// perhaps it is in demand here?
 				if (!getrandom(6))
 				{
+					if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+
 					int amt = Globals->CITY_MARKET_NORMAL_AMT;
 					int price = ItemDefs[i].baseprice;
 
@@ -590,6 +598,8 @@ void ARegion::SetupCityMarket()
 			// chance to sell
 			if (getrandom(3) == 0)
 			{
+				if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
 				int price = ItemDefs[i].baseprice;
 
@@ -606,6 +616,8 @@ void ARegion::SetupCityMarket()
 				markets.Add(new Market (M_SELL, i, price, amt/6, population+cap+offset, population+citymax, 0, amt));
 				continue;
 			}
+
+			if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
 
 			// chance to buy
 			if (getrandom(6) != 0)
@@ -630,6 +642,9 @@ void ARegion::SetupCityMarket()
 
 			continue;
 		}
+
+		// Everything else is SELL
+		if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
 
 		if (ItemDefs[i].type & IT_ADVANCED)
 		{
@@ -726,6 +741,9 @@ void ARegion::SetupCityMarket()
 
 		sell1--;
 		sell2--;
+
+		if (ItemDefs[i].flags & ItemType::NOBUY) addbuy = 0;
+		if (ItemDefs[i].flags & ItemType::NOSELL) addsell = 0;
 
 		if (addbuy)
 		{

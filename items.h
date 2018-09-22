@@ -78,9 +78,11 @@ public:
 	{
 		CANTGIVE = 0x01, ///< item cannot be target of GIVE command
 		DISABLED = 0x02, ///< item is disabled in this ruleset
-		NOMARKET = 0x04, ///< item does not appear in city markets
 		ORINPUTS = 0x08, ///< item requires ANY one of its inputs (not ALL of them)
 		SKILLOUT = 0x10, ///< batch size equal to the producer's skill, based on a fixed number of inputs
+		NOSELL   = 0x20, ///< item is not sold by city markets		
+		NOBUY    = 0x40, ///< item is not bought by city markets
+		NOMARKET = 0x60, ///< item does not appear in city markets		
 	};
 	int flags;
 
