@@ -294,6 +294,11 @@ CastOrder::~CastOrder()
 {
 }
 
+CastEnchantOrder::CastEnchantOrder()
+: output_item(-1)
+{
+}
+
 CastMindOrder::CastMindOrder()
 {
 	id = NULL;

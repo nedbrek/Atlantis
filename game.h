@@ -347,6 +347,7 @@ private:
 	void ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck);
 	void ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck);
     void ProcessCastOrder(Unit *,AString *, OrdersCheck *pCheck );
+	 void ProcessEnchantSpell(Unit *u, AString *o, int spell, OrdersCheck *pCheck);
     void ProcessEntertainOrder(Unit *, OrdersCheck *pCheck );
     void ProcessForgetOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessReshowOrder(Unit *,AString *, OrdersCheck *pCheck );

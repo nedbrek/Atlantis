@@ -349,6 +349,15 @@ public:
 	int level;
 };
 
+/// Cast enchant (armor or weapon)
+class CastEnchantOrder : public CastOrder
+{
+public:
+	CastEnchantOrder();
+
+	int output_item;
+};
+
 /// Cast mind reading
 class CastMindOrder : public CastOrder
 {
