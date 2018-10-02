@@ -844,8 +844,10 @@ void ARegion::AddTown()
 	{
 		int popch = Globals->CITY_POP * 16/10;
 
-		if (Globals->LESS_ARCTIC_TOWNS)
+		// Underground is not affected by LESS_ARTIC_TOWNS
+		if (Globals->LESS_ARCTIC_TOWNS && zloc == 1)
 		{
+			const int arctic_zone_size = parentRegionArray->y / 10;
 			const int dnorth = GetPoleDistance(D_NORTH);
 			const int dsouth = GetPoleDistance(D_SOUTH);
 
@@ -854,8 +856,8 @@ void ARegion::AddTown()
 			int dist = dnorth;
 			if (dsouth < dist) dist = dsouth;
 
-			if (dist < 9)
-				popch = popch - (9 - dist) * ((9 - dist) + 10) * 15;
+			if (dist < arctic_zone_size)
+				popch = popch - (arctic_zone_size - dist) * ((arctic_zone_size - dist) + 10) * 15;
 		}
 
 		town->pop += getrandom(popch);

@@ -2213,7 +2213,12 @@ void Game::CreateCityMon( ARegion *pReg, int percent, int needmage )
 	u->SetName( s );
 	u->type = U_GUARD;
 	u->guard = GUARD_GUARD;
-	u->SetMen(I_LEADERS,num);
+
+	// Use local race for guards, where possible
+	int guard_race = I_LEADERS;
+	if (pReg->race > 0) { guard_race = pReg->race; }
+	u->SetMen(guard_race,num);
+
 	u->items.SetNum(I_SWORD,num);
 	if (IV) u->items.SetNum(I_AMULETOFI,num);
 	u->SetMoney(num * Globals->GUARD_MONEY);
@@ -2298,7 +2303,11 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 			men = Globals->CITY_GUARD * (towntype+1);
 	}
 
-    u->SetMen(I_LEADERS,men);
+	// Use local race for guards, where possible
+	int guard_race = I_LEADERS;
+	if (r->race > 0) { guard_race = r->race; }
+	u->SetMen(guard_race,men);
+
 	if (IV) u->items.SetNum(I_AMULETOFI,men);
 
 	if(u->type == U_GUARDMAGE) {
