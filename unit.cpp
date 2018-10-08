@@ -1620,11 +1620,8 @@ int Unit::MaintCost()
 	int i = leaders * Globals->LEADER_COST;
 	if (Globals->MULTIPLIER_USE != GameDefs::MULT_NONE)
 	{
-		// higher leader cost: maintenance_multiplier * total skill points
-		const int multiI = leaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
-
-		if (multiI > i)
-			i = multiI;
+		// Skill costs are in addtion to base LEADER_COST
+		i += leaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
 	}
 
 	int retval = i;
@@ -1639,9 +1636,8 @@ int Unit::MaintCost()
 	i = nonleaders * Globals->MAINTENANCE_COST;
 	if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL)
 	{
-		const int multiI = nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
-		if (multiI > i)
-			i = multiI;
+		// Skill costs are in addtion to base MAINTENANCE_COST
+		i += nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;			
 	}
 
 	retval += i;

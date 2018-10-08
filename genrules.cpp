@@ -1751,12 +1751,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		} else {
 			temp += "All units ";
 		}
-		temp += "pay a fee based on the number of skill levels the character "
-			"has.  This fee is the maximum of $";
+		temp += "pay an additional fee based on the number of skill levels the character "
+			"has.  This fee is $";
 		temp += AString(Globals->MAINTENANCE_MULTIPLIER) + " per skill level";
-		temp += " and a cost of $";
-		temp += AString(Globals->MAINTENANCE_COST) + " for normal characters";
-		temp += AString(" or $") + Globals->LEADER_COST + " for leaders";
 		if(Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
 			temp += ". All other characters pay a fee of ";
 			temp += Globals->MAINTENANCE_COST;
