@@ -582,6 +582,8 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 		temp += AString(WalkingCapacity());
 		temp += "/";
 		temp += AString(SwimmingCapacity());
+		temp += ". Upkeep: $";
+		temp += AString(MaintCost());
 		temp += ". Skills: ";
 		temp += skills.Report(GetMen());
 	}
@@ -635,6 +637,8 @@ AString Unit::TemplateReport()
 	temp += AString(WalkingCapacity());
 	temp += "/";
 	temp += AString(SwimmingCapacity());
+	temp += ". Upkeep: $";
+	temp += AString(MaintCost());
 	temp += ". Skills: ";
 	temp += skills.Report(GetMen());
 
@@ -1610,39 +1614,73 @@ int Unit::MaintCost()
 	if (type == U_WMON || type == U_GUARD || type == U_GUARDMAGE)
 		return 0;
 
+	int unit_maint_cost = 0;
+
 	// handle leaders
 	int leaders = GetMen(I_LEADERS);
 	if (leaders < 0)
 		leaders = 0;
 
+	// Base cost
+	int group_maint_cost = leaders * Globals->LEADER_COST;
+
 	// leaders are counted at maintenance_multiplier * skills in all except
 	// the case where it's not being used (mages, leaders, all)
-	int i = leaders * Globals->LEADER_COST;
 	if (Globals->MULTIPLIER_USE != GameDefs::MULT_NONE)
 	{
 		// Skill costs are in addtion to base LEADER_COST
-		i += leaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
+		group_maint_cost += leaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
 	}
 
-	int retval = i;
+    // Leader units pay per hit point (can be additive with skill maint)
+	if (Globals->MAINT_COST_PER_HIT) {
+		const int leader_hits = ManDefs[MAN_LEADER].hits - 1;  // 1 hit paid for in base cost
+		if (leader_hits > 0) {
+			group_maint_cost += leaders * leader_hits * Globals->LEADER_COST;
+		//  cout<<"leader maintance: changed to i="<<i<<"\n";
+		}
+	}
+
+	unit_maint_cost = group_maint_cost;
 
 	// handle non-leaders
 	int nonleaders = GetMen() - leaders;
 	if (nonleaders < 0)
 		nonleaders = 0;
 
+	// Base cost
+	group_maint_cost = nonleaders * Globals->MAINTENANCE_COST;  // resets group cost
+
 	// non-leaders are counted at maintenance_multiplier * skills only if
 	// all characters pay that way
-	i = nonleaders * Globals->MAINTENANCE_COST;
 	if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL)
 	{
 		// Skill costs are in addtion to base MAINTENANCE_COST
-		i += nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;			
+		group_maint_cost += nonleaders * SkillLevels() * Globals->MAINTENANCE_MULTIPLIER;
 	}
 
-	retval += i;
+	if (Globals->MAINT_COST_PER_HIT) {
+		// Check each man to determine hit upkeep
+		for (int i = 0; i <= NITEMS; ++i)
+		{
+			if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 
-	return retval;
+			if (i == I_LEADERS) { continue; }
+
+			const int men_in_unit = GetMen(i);
+
+			if (men_in_unit > 0) {
+				const int nonleader_hits = ManDefs[ItemDefs[i].index].hits - 1;  // 1 hit paid for in base cost
+				if (nonleader_hits > 0) {
+					group_maint_cost += men_in_unit * nonleader_hits * Globals->MAINTENANCE_COST;
+				}
+			}
+		}
+	}
+
+	unit_maint_cost += group_maint_cost;
+
+	return unit_maint_cost;
 }
 
 void Unit::Short(int needed, int hunger)

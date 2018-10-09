@@ -74,6 +74,8 @@ public:
 	int MAINTENANCE_COST; ///< cost in silver per man per month
 	int LEADER_COST; ///< base maintenance cost of leaders
 
+	int MAINT_COST_PER_HIT;  ///< pay MAINTENANCE_COST per hit per man per month
+
 	// Settings for using skill level multiplier (units pay X per level of skill they have per man)
 	int MAINTENANCE_MULTIPLIER; ///< cost (in silver) per level of skill
 
