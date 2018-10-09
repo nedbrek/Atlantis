@@ -67,6 +67,7 @@ static GameDefs g = {
 	10, /* STUDENTS_PER_TEACHER */
 	10, /* MAINTENANCE_COST */
 	20, /* LEADER_COST */
+	0,  /* MAINT_COST_PER_HIT */
 
 	0,  /* MAINTAINENCE_MULTIPLIER */
 	GameDefs::MULT_NONE, /* MULTIPLIER_USE */
