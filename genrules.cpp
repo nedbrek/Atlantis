@@ -1735,14 +1735,26 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += "to your units for maintenance, as a last resort.";
 	f.Paragraph(temp);
 	temp = "";
-	if(Globals->MULTIPLIER_USE == GameDefs::MULT_NONE) {
-		temp += AString("This fee is generally ") + Globals->MAINTENANCE_COST +
-			" silver for a normal character";
-		if (Globals->LEADERS_EXIST) {
-			temp += AString(", and ") + Globals->LEADER_COST +
-				" silver for a leader";
+
+	// Base cost
+	temp += AString("This fee is ") + Globals->MAINTENANCE_COST +
+		" silver ";
+	if (Globals->MAINT_COST_PER_HIT) {
+		temp += "per hit ";
+	}
+	temp += "for a normal character";
+	if (Globals->LEADERS_EXIST) {
+		temp += AString(", and ") + Globals->LEADER_COST +
+			" silver ";
+		if (Globals->MAINT_COST_PER_HIT) {
+			temp += "per hit ";
 		}
-	} else {
+		temp += "for a leader";
+	}
+
+	// Per skill cost
+	if(Globals->MULTIPLIER_USE != GameDefs::MULT_NONE) {
+		temp += ". ";
 		if(Globals->MULTIPLIER_USE == GameDefs::MULT_MAGES) {
 			temp += "Mages ";
 		} else if(Globals->MULTIPLIER_USE==GameDefs::MULT_LEADERS &&
@@ -1754,17 +1766,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += "pay an additional fee based on the number of skill levels the character "
 			"has.  This fee is $";
 		temp += AString(Globals->MAINTENANCE_MULTIPLIER) + " per skill level";
-		if(Globals->MULTIPLIER_USE != GameDefs::MULT_ALL) {
-			temp += ". All other characters pay a fee of ";
-			temp += Globals->MAINTENANCE_COST;
-			temp += " silver for a normal character";
-			if (Globals->LEADERS_EXIST) {
-				temp += ", and ";
-				temp += Globals->LEADER_COST;
-				temp += " silver for a leader";
-			}
-		}
 	}
+
 	temp += ".";
 	if (Globals->FOOD_ITEMS_EXIST) {
 		temp += " Units may substitute one unit of grain, livestock, or "
