@@ -1115,7 +1115,7 @@ int Game::RunGame()
 
     Awrite("Writing Playerinfo File...");
     WritePlayers();
-    EmptyHell(); 
+    EmptyHell();
 
     Awrite("Removing Dead Factions...");
     DeleteDeadFactions();
@@ -2332,4 +2332,22 @@ void Game::AdjustCityMon( ARegion *r, Unit *u )
 		}
 		u->items.SetNum(I_SWORD,men);
 	}
+}
+
+int Game::GetAvgMaintPerMan()
+{
+	int man_count = 0;
+	int hits_sum = 0;
+
+	for (int i = 0; i <= NITEMS; ++i)
+	{
+		if (!(ItemDefs[i].type & IT_MAN)) { continue; }
+		if (ItemDefs[i].flags & ItemType::DISABLED) { continue; }
+		if (i == I_LEADERS) { continue; }
+
+		man_count++;
+		hits_sum += ManDefs[ItemDefs[i].index].hits;
+	}
+
+	return hits_sum / man_count * Globals->MAINTENANCE_COST;
 }

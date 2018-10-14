@@ -41,7 +41,7 @@ class Game;
 #include "object.h"
 #include "orders.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 6 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 9 )
 
 class OrdersCheck
 {
@@ -124,6 +124,9 @@ public:
 	// JLT
 	// Functions to allow enabling/disabling parts of the data tables
 	void ModifyTablesPerRuleset(void);
+
+    // Get average maintenance per man for use in economy
+    static int GetAvgMaintPerMan();
 
 private:
     //
