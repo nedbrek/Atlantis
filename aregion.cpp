@@ -307,7 +307,7 @@ void ARegion::SetupPop()
 	// setup wages
 	int mw = typer->wages;
 	//--- adjust for variable maintenance cost
-	mw += Globals->MAINTENANCE_COST - 10;
+	mw += Game::GetAvgMaintPerMan() - 10;
 	if (mw < 0) mw = 0;
 
 	if (Globals->RANDOM_ECONOMY)
@@ -367,7 +367,7 @@ void ARegion::SetupPop()
 	// add wages to products
 	Production *p = new Production;
 	p->itemtype = I_SILVER;
-	money = Population() * (Wages() - Globals->MAINTENANCE_COST);
+	money = Population() * (Wages() - Game::GetAvgMaintPerMan());
 	p->amount = money / Globals->WORK_FRACTION;
 	p->skill = -1;
 	p->level = 1;
@@ -1090,7 +1090,7 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			wages++;
 
 		// set money
-		money = (Wages() - Globals->MAINTENANCE_COST) * Population();
+		money = (Wages() - Game::GetAvgMaintPerMan()) * Population();
 		if (money < 0) money = 0;
 
 		// setup working
