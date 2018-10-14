@@ -312,7 +312,7 @@ void ARegion::SetupPop()
 
 	if (Globals->RANDOM_ECONOMY)
 	{
-		mw += getrandom(3);
+		mw += getrandom(5);
 	}
 
 	wages = mw;
@@ -945,7 +945,7 @@ int ARegion::GetPoleDistance(int dir)
 void ARegion::Setup(ARegionArray *pArr)
 {
 	parentRegionArray = pArr;
-	
+
 	// type and location have been setup, do everything else
 	SetupProds();
 
