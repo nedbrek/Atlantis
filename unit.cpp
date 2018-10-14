@@ -1637,7 +1637,6 @@ int Unit::MaintCost()
 		const int leader_hits = ManDefs[MAN_LEADER].hits - 1;  // 1 hit paid for in base cost
 		if (leader_hits > 0) {
 			group_maint_cost += leaders * leader_hits * Globals->LEADER_COST;
-		//  cout<<"leader maintance: changed to i="<<i<<"\n";
 		}
 	}
 
