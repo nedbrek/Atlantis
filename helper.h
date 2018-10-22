@@ -38,8 +38,7 @@ typedef unsigned int ATL_VER;
 
 #define ATL_VER_STRING( x ) AString( AString( (int) ATL_VER_MAJOR( x ) ) + \
 "." + AString( (int) ATL_VER_MINOR( x ) ) + "." + \
-AString( (int) ATL_VER_PATCH( x ) ) ) + \
-( ( ATL_VER_MINOR( x ) % 2 ) ? "" : " (beta)" )
+AString( (int) ATL_VER_PATCH( x ) ) )
 
 #define ATL_VER_STR( x ) AString((int)ATL_VER_MAJOR(x)) + \
 		"." + ((int)ATL_VER_MINOR(x)) + "." + (int)ATL_VER_PATCH(x)
