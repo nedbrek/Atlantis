@@ -2132,13 +2132,23 @@ void Game::CreateWorld()
         }
     }
 
+    int water_pct = -1;
+    while (water_pct < 0) {
+        Awrite("What percent of the map should be water? (default 60) ");
+        water_pct = Agetint();
+        if( water_pct < 0 || water_pct > 100 ) {
+            water_pct = -1;
+            Awrite( "The percent must be between 0 and 100" );
+        }
+    }
+
     regions.CreateLevels(2 + Globals->UNDERWORLD_LEVELS +
 			            Globals->UNDERDEEP_LEVELS + Globals->ABYSS_LEVEL);
 
     SetupNames();
 
     regions.CreateNexusLevel( 0, nx, ny, "nexus" );
-    regions.CreateSurfaceLevel( 1, xx, yy, 60, 16, 0 );
+    regions.CreateSurfaceLevel( 1, xx, yy, water_pct, 8, 0 );
 
 	// Create underworld levels
 	int i;
@@ -2290,9 +2300,12 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 18) return R_CERAN_TUNDRA2;
 			if (r < 24) return R_CERAN_TUNDRA3;
 			if (r < 26) return R_MOUNTAIN;
-			if (r < 28) return R_CERAN_MOUNTAIN1;
-			if (r < 30) return R_CERAN_MOUNTAIN2;
-			if (r < 32) return R_CERAN_MOUNTAIN3;
+			if (r < 27) return R_CERAN_MOUNTAIN1;
+			if (r < 28) return R_CERAN_MOUNTAIN2;
+			if (r < 29) return R_CERAN_MOUNTAIN3;
+            if (r < 30) return R_CERAN_HILL;
+			if (r < 31) return R_CERAN_HILL1;
+			if (r < 32) return R_CERAN_HILL2;
 			if (r < 34) return R_FOREST;
 			if (r < 36) return R_CERAN_FOREST1;
 			if (r < 38) return R_CERAN_FOREST2;
@@ -2307,20 +2320,20 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 6) return R_CERAN_PLAIN1;
 			if (r < 9) return R_CERAN_PLAIN2;
 			if (r < 12) return R_CERAN_PLAIN3;
-			if (r < 18) return R_FOREST;
-			if (r < 24) return R_CERAN_FOREST1;
-			if (r < 30) return R_CERAN_FOREST2;
-			if (r < 36) return R_CERAN_FOREST3;
-			if (r < 38) return R_CERAN_MYSTFOREST;
-			if (r < 39) return R_CERAN_MYSTFOREST1;
-			if (r < 40) return R_CERAN_MYSTFOREST2;
+			if (r < 19) return R_FOREST;
+			if (r < 26) return R_CERAN_FOREST1;
+			if (r < 33) return R_CERAN_FOREST2;
+			if (r < 40) return R_CERAN_FOREST3;
+			//if (r < 38) return R_CERAN_MYSTFOREST;
+			//if (r < 39) return R_CERAN_MYSTFOREST1;
+			//if (r < 40) return R_CERAN_MYSTFOREST2;
 			if (r < 42) return R_MOUNTAIN;
 			if (r < 43) return R_CERAN_MOUNTAIN1;
 			if (r < 44) return R_CERAN_MOUNTAIN2;
 			if (r < 45) return R_CERAN_MOUNTAIN3;
 			if (r < 46) return R_CERAN_HILL;
-			if (r < 47) return R_CERAN_HILL1;
-			if (r < 48) return R_CERAN_HILL2;
+			if (r < 48) return R_CERAN_HILL1;
+			if (r < 50) return R_CERAN_HILL2;
 			if (r < 52) return R_SWAMP;
 			if (r < 56) return R_CERAN_SWAMP1;
 			if (r < 62) return R_CERAN_SWAMP2;
@@ -2331,20 +2344,23 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 15) return R_CERAN_PLAIN2;
 			if (r < 19) return R_CERAN_PLAIN3;
 			if (r < 22) return R_FOREST;
-			if (r < 24) return R_CERAN_FOREST1;
-			if (r < 26) return R_CERAN_FOREST2;
-			if (r < 28) return R_CERAN_FOREST3;
-			if (r < 30) return R_CERAN_MYSTFOREST;
-			if (r < 32) return R_CERAN_MYSTFOREST1;
-			if (r < 33) return R_CERAN_MYSTFOREST2;
+//			if (r < 24) return R_CERAN_FOREST1;
+			if (r < 26) return R_CERAN_FOREST1;
+//			if (r < 28) return R_CERAN_FOREST3;
+			if (r < 30) return R_CERAN_FOREST2;
+//			if (r < 32) return R_CERAN_MYSTFOREST1;
+			if (r < 33) return R_CERAN_FOREST3;
 			if (r < 34) return R_MOUNTAIN;
 			if (r < 35) return R_CERAN_MOUNTAIN1;
 			if (r < 36) return R_CERAN_MOUNTAIN2;
 			if (r < 37) return R_CERAN_MOUNTAIN3;
-			if (r < 39) return R_SWAMP;
-			if (r < 41) return R_CERAN_SWAMP1;
-			if (r < 42) return R_CERAN_SWAMP2;
-			if (r < 43) return R_CERAN_SWAMP3;
+			if (r < 38) return R_CERAN_HILL;
+			if (r < 39) return R_CERAN_HILL1;
+			if (r < 40) return R_CERAN_HILL2;
+			if (r < 41) return R_SWAMP;
+			if (r < 42) return R_CERAN_SWAMP1;
+			if (r < 43) return R_CERAN_SWAMP2;
+			if (r < 44) return R_CERAN_SWAMP3;
 			if (r < 46) return R_JUNGLE;
 			if (r < 48) return R_CERAN_JUNGLE1;
 			if (r < 50) return R_CERAN_JUNGLE2;
@@ -2360,18 +2376,21 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 8) return R_CERAN_PLAIN1;
 			if (r < 12) return R_CERAN_PLAIN2;
 			if (r < 16) return R_CERAN_PLAIN3;
-			if (r < 18) return R_MOUNTAIN;
-			if (r < 20) return R_CERAN_MOUNTAIN1;
-			if (r < 22) return R_CERAN_MOUNTAIN2;
-			if (r < 24) return R_CERAN_MOUNTAIN3;
-			if (r < 27) return R_SWAMP;
-			if (r < 30) return R_CERAN_SWAMP1;
-			if (r < 33) return R_CERAN_SWAMP2;
-			if (r < 36) return R_CERAN_SWAMP3;
-			if (r < 39) return R_JUNGLE;
-			if (r < 42) return R_CERAN_JUNGLE1;
-			if (r < 45) return R_CERAN_JUNGLE2;
-			if (r < 48) return R_CERAN_JUNGLE3;
+			if (r < 17) return R_MOUNTAIN;
+			if (r < 18) return R_CERAN_MOUNTAIN1;
+			if (r < 19) return R_CERAN_MOUNTAIN2;
+			if (r < 20) return R_CERAN_MOUNTAIN3;
+            if (r < 22) return R_CERAN_HILL;
+			if (r < 24) return R_CERAN_HILL1;
+			if (r < 26) return R_CERAN_HILL2;
+			if (r < 29) return R_SWAMP;
+			if (r < 32) return R_CERAN_SWAMP1;
+			if (r < 35) return R_CERAN_SWAMP2;
+			if (r < 38) return R_CERAN_SWAMP3;
+			if (r < 41) return R_JUNGLE;
+			if (r < 44) return R_CERAN_JUNGLE1;
+			if (r < 47) return R_CERAN_JUNGLE2;
+			if (r < 50) return R_CERAN_JUNGLE3;
 			if (r < 52) return R_DESERT;
 			if (r < 55) return R_CERAN_DESERT1;
 			if (r < 58) return R_CERAN_DESERT2;
@@ -2589,6 +2608,9 @@ void ARegion::MakeStartingCity()
 {
 	Market *m;
 	float ratio;
+
+    // Without NEXUS exits, starting cities are not needed
+    if(Globals->NEXUS_NO_EXITS) return;
 
 	if(!Globals->TOWNS_EXIST) return;
 
