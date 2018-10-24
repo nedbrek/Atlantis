@@ -1957,7 +1957,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_ENCHANT_SWORDS,2,4, {{I_SWORD,1},{-1,0},{-1,0},{-1,0}},
-	 1,IT_NORMAL | IT_WEAPON, 600,1,WEAPON_ESWORD, 0,
+	 1,IT_ADVANCED | IT_WEAPON, 600,1,WEAPON_ESWORD, 0,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -2155,7 +2155,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_ENCHANT_SWORDS,1,1, {{I_SHORTBOW,1},{-1,0},{-1,0},{-1,0}},
-	 1, IT_NORMAL | IT_WEAPON, 40,1,WEAPON_ESHORTBOW, 0,
+	 1, IT_ADVANCED | IT_WEAPON, 40,1,WEAPON_ESHORTBOW, 0,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -2173,7 +2173,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_ENCHANT_SWORDS,3,1, {{I_LONGBOW,1},{-1,0},{-1,0},{-1,0}},
-	 1, IT_NORMAL | IT_WEAPON, 1200,1,WEAPON_ELONGBOW, 0,
+	 1, IT_ADVANCED | IT_WEAPON, 1200,1,WEAPON_ELONGBOW, 0,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -2182,7 +2182,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_ENCHANT_SWORDS,2,1, {{I_CROSSBOW,1},{-1,0},{-1,0},{-1,0}},
-	 1, IT_NORMAL | IT_WEAPON, 600,1,WEAPON_ECROSSBOW, 0,
+	 1, IT_ADVANCED | IT_WEAPON, 600,1,WEAPON_ECROSSBOW, 0,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -2439,7 +2439,7 @@ ItemType id[] =
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 0, IT_ADVANCED | IT_ARMOR, 5000,1,ARMOR_WIZROBE, 0,
+	 1, IT_ADVANCED | IT_ARMOR, 5000,1,ARMOR_WIZROBE, 0,
 	 0,0,0,0,
 	 -1,0,
 	 -1,0},
@@ -2486,7 +2486,7 @@ ManType mt[] = {
 	{2,5,2,{S_COMBAT,S_MINING,S_WEAPONSMITH,S_ARMORER,-1,-1}, 2, ManType::GOOD},// MOUNTAINDWARF
 	{2,5,2,{S_CARPENTER,S_ENTERTAINMENT,S_BUILDING,-1,-1,-1}, 1, ManType::GOOD},// GNOME
 	{2,5,2,{S_LONGBOW,S_WEAPONSMITH,-1,-1,-1,-1}, 2, ManType::GOOD},// GREYELF
-	{2,5,2,{S_FARMING,S_CARPENTER,S_HORSETRAINING,S_RIDING,-1,-1}, 2, ManType::NEUTRAL},// HUMAN
+	{2,5,3,{S_FARMING,S_CARPENTER,S_HORSETRAINING,S_RIDING,-1,-1}, 2, ManType::NEUTRAL},// HUMAN
 	{1,5,2,{S_LUMBERJACK,S_RANCHING,S_HUNTING,S_HERBLORE,-1,-1}, 2, ManType::NEUTRAL},// LIZARDMAN
 	{1,5,2,{S_COMBAT,S_RANCHING,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::NEUTRAL},// HALFORC
 	{1,5,2,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 3, ManType::EVIL},// MINOTAUR
@@ -2494,9 +2494,9 @@ ManType mt[] = {
 	{2,5,2,{S_COMBAT,S_WEAPONSMITH,S_ARMORER,S_BUILDING,-1,-1}, 2, ManType::EVIL},// HOBGOBLIN
 	{1,5,2,{S_COMBAT,S_QUARRYING,S_HUNTING,-1,-1,-1}, 2, ManType::EVIL},// GNOLL
 	{1,5,1,{S_COMBAT,-1,-1,-1,-1,-1}, 3, ManType::EVIL},// OGRE
-	{2,5,2,{S_CROSSBOW,S_MONSTERTRAINING,-1,-1,-1,-1}, 1, ManType::EVIL},// GOBLIN
+	{1,5,2,{S_CROSSBOW,S_MONSTERTRAINING,-1,-1,-1,-1}, 1, ManType::EVIL},// GOBLIN
 	{2,5,2,{S_COMBAT,S_CROSSBOW,S_MINING,S_QUARRYING,S_ARMORER,-1}, 2, ManType::EVIL},// UNDERDWARF
-	{2,5,2,{S_COMBAT,S_RANCHING,S_WEAPONSMITH,S_STEALTH,-1,-1}, 2, ManType::EVIL},// DARKELF
+	{2,5,3,{S_COMBAT,S_RANCHING,S_WEAPONSMITH,S_STEALTH,-1,-1}, 2, ManType::EVIL},// DARKELF
 	{1,5,2,{S_MINING,S_QUARRYING,S_STEALTH,-1,-1,-1}, 1, ManType::EVIL},// KOBOLD
 };
 
@@ -3958,37 +3958,37 @@ static ObjectType ot[] =
 	{"Road N",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Road NW",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Road NE",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Road SW",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Road SE",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Road S",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,50,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,3,
 	 24,6,4,
 	 -1,-1},
 	{"Temple",
@@ -5123,4 +5123,3 @@ static RangeType rtd[] = {
 };
 
 RangeType *RangeDefs = rtd;
-
