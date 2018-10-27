@@ -38,11 +38,11 @@
 // the html file containing the rules to correctly reflect the changes!
 //
 
-static int am[] = { 2, 2, 2, 2, 2, 2, 2 };
+static int am[] = { 3, 3, 3, 3, 3, 3, 3 };
 int *allowedMages = am;
 int allowedMagesSize = sizeof(am) / sizeof(am[0]);
 
-static int aa[] = { 2, 2, 2, 2, 2, 2, 2 };
+static int aa[] = { 3, 3, 3, 3, 3, 3, 3 };
 int *allowedApprentices = aa;
 int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
 
@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 0 ),    // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 1 ),    // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
