@@ -3820,7 +3820,7 @@ static ObjectType ot[] =
 	 I_STONE,10,S_BUILDING,1,
 	 5,1,2,
 	 -1,-1},
-	{"Fort",
+	{"Keep",
 	 ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 75,0,0,20,
 	 I_STONE,40,S_BUILDING,2,
