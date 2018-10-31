@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 1 ),    // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 2 ),    // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -191,7 +191,7 @@ static GameDefs g = {
 	5,	// SKILL_PRACTISE_AMOUNT
 	0,	// UPKEEP_MINIMUM_FOOD
 	-1,	// UPKEEP_MAXIMUM_FOOD
-	30,	// UPKEEP_FOOD_VALUE
+	50,	// UPKEEP_FOOD_VALUE
 	1,	// PREVENT_SAIL_THROUGH
 	0,	// ALLOW_TRIVIAL_PORTAGE
 };
