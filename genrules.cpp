@@ -3426,6 +3426,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"Foundations.  As a unit studies the Foundations, he will be able "
 		"to study deeper into the magical arts; the additional skills that "
 		"he may study will be indicated on your turn report.";
+	if(Globals->RACES_EXIST) {
+		temp += " All Magic Skills count as 1 skill in terms of race Max Skills count.";
+	}
 	f.Paragraph(temp);
 	temp = "There are two major differences between Magic skills and most "
 		"normal skills. The first is that the ability to study Magic skills "
