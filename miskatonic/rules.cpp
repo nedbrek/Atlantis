@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 2 ),    // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 3 ),    // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -122,9 +122,9 @@ static GameDefs g = {
 
 	50,	// BASE_MAN_COST
 	0, // LASTORDERS_MAINTAINED_BY_SCRIPTS
-	10, // MAX_INACTIVE_TURNS
+	5, // MAX_INACTIVE_TURNS
 
-	0, // EASIER_UNDERWORLD
+	1, // EASIER_UNDERWORLD
 
 	1, // DEFAULT_WORK_ORDER
 
