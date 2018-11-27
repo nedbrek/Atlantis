@@ -1446,7 +1446,7 @@ void Army::Kill(int killed)
 		else
 		{
 			// assume everything that isn't a monster is a man
-			hitsalive--;
+			hitsalive -= ManDefs[temp->race].hits;
 		}
 	}
 
