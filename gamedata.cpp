@@ -2480,7 +2480,7 @@ ManType mt[] = {
 	// Additional Races for Miskatonic
 	{3,5,3,{S_LONGBOW,S_FARMING,S_HORSETRAINING,S_HEALING,-1,-1}, 2, ManType::GOOD},// HIGHELF
 	{1,5,2,{S_LONGBOW,S_LUMBERJACK,-1,-1,-1,-1}, 2, ManType::GOOD},// WOODELF
-	{2,5,2,{S_CROSSBOW,S_QUARRYING,-1,-1,-1,-1}, 2, ManType::GOOD},// HILLDWARF
+	{2,5,2,{S_CROSSBOW,S_QUARRYING,S_BUILDING,-1,-1,-1}, 2, ManType::GOOD},// HILLDWARF
 	{2,5,2,{S_FARMING,S_RANCHING,S_STEALTH,-1,-1,-1}, 1, ManType::GOOD},// HALFLING
 	{1,5,1,{S_COMBAT,S_RANCHING,S_HORSETRAINING,-1,-1,-1}, 3, ManType::GOOD},// CENTAUR
 	{2,5,2,{S_COMBAT,S_MINING,S_WEAPONSMITH,S_ARMORER,-1,-1}, 2, ManType::GOOD},// MOUNTAINDWARF
@@ -3958,37 +3958,37 @@ static ObjectType ot[] =
 	{"Road N",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Road NW",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Road NE",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Road SW",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Road SE",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Road S",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_STONE,25,S_BUILDING,3,
+	 I_STONE,25,S_BUILDING,2,
 	 24,6,4,
 	 -1,-1},
 	{"Temple",
