@@ -734,7 +734,7 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 
 	for (i=0; i<NFACTYPES; i++) {
 		type[i] = f->GetInt();
-	} 
+	}
 
 	lastchange = f->GetInt();
 	lastorders = f->GetInt();
@@ -1017,6 +1017,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	// alignment (TODO: ensure mapping from faction alignment to man alignment
 	f->PutStr(AString("Your faction is ") + ManType::ALIGN_STRS[alignments_] + ".");
 
+	f->PutStr("");
+
 	if (errors.Num())
 	{
 		f->PutStr("Errors during turn:");
@@ -1107,7 +1109,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	forlist(&present_regions) {
 		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->month,
 												 &( pGame->regions ));
-	} 
+	}
 
 	if (temformat != TEMPLATE_OFF) {
 		f->PutStr("");
@@ -1367,5 +1369,5 @@ void Faction::DiscoverItem(int item, int force, int full)
 	}
 	if(force) {
 		itemshows.Add(ItemDescription(item, full));
-	}   
+	}
 }
