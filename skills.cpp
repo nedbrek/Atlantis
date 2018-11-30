@@ -70,12 +70,15 @@ int SkillMax(int skill, int race)
 
 	const int mantype = ItemDefs[race].index;
 
+	// use racial magic skill value as priority
+	if (skill_is_magic)
+	{
+		return ManDefs[mantype].magiclevel;
+	}
+
+	// check for racial specialized skill
 	for (unsigned c = 0; c < sizeof(ManDefs[mantype].skills) / sizeof(ManDefs[mantype].skills[0]); ++c)
 	{
-		// allow all magic to use "special level"
-		if (skill_is_magic && ManDefs[mantype].skills[c] == S_MAGIC)
-			return ManDefs[mantype].speciallevel;
-
 		if (ManDefs[mantype].skills[c] == skill)
 			return ManDefs[mantype].speciallevel;
 	}

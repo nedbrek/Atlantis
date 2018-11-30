@@ -80,9 +80,9 @@ public:
 		DISABLED = 0x02, ///< item is disabled in this ruleset
 		ORINPUTS = 0x08, ///< item requires ANY one of its inputs (not ALL of them)
 		SKILLOUT = 0x10, ///< batch size equal to the producer's skill, based on a fixed number of inputs
-		NOSELL   = 0x20, ///< item is not sold by city markets		
+		NOSELL   = 0x20, ///< item is not sold by city markets
 		NOBUY    = 0x40, ///< item is not bought by city markets
-		NOMARKET = 0x60, ///< item does not appear in city markets		
+		NOMARKET = 0x60, ///< item does not appear in city markets
 	};
 	int flags;
 
@@ -132,7 +132,8 @@ public:
 
 	int max_skills; ///< maximum number of skills that can be learned
 	int speciallevel; ///< highest level that can be attained in specialized skills
-	int defaultlevel; ///< highest level that can be attained in everything else
+	int defaultlevel; ///< highest level that can be attained in everything else, except magic
+	int magiclevel; ///< highest level that can be attained in magic skills
 	int skills[6]; ///< indexes of specialized skills
 	int hits;
 	Alignment align;
