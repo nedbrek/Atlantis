@@ -199,14 +199,7 @@ AString* ItemDescription(int item, int full)
 		for (unsigned c = 0; c < len; c++)
 		{
 			const int skill = ManDefs[man].skills[c];
-			if (skill == S_MAGIC)
-			{
-				if (found) *temp += ", ";
-				if (found && c == len - 1) *temp += "and ";
-				found = true;
-				*temp += "all magic skills";
-			}
-			else if (skill != -1)
+			if (skill != -1)
 			{
 				if (SkillDefs[skill].flags & SkillType::DISABLED) continue;
 				if (found) *temp += ", ";
@@ -218,10 +211,17 @@ AString* ItemDescription(int item, int full)
 
 		if (found) {
 			*temp += AString(" to level ") + ManDefs[man].speciallevel +
-				" and all others to level " + ManDefs[man].defaultlevel;
+				" and all other non-magic skills to level " + ManDefs[man].defaultlevel + ".";
 		} else {
-			*temp += AString("all skills to level ") +
-				ManDefs[man].defaultlevel;
+			*temp += AString("all non-magic skills to level ") +
+				ManDefs[man].defaultlevel + ".";
+		}
+
+		// if non-leaders can't study magic
+		if ((Globals->MAGE_NONLEADERS || item == I_LEADERS) && ManDefs[man].magiclevel != 0) {
+			*temp += AString(" This race may study all magic skills to ") + ManDefs[man].magiclevel + ".";
+		} else {
+			*temp += AString(" This race may not study magic skills.");
 		}
 	}
 
@@ -734,7 +734,7 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 
 	for (i=0; i<NFACTYPES; i++) {
 		type[i] = f->GetInt();
-	} 
+	}
 
 	lastchange = f->GetInt();
 	lastorders = f->GetInt();
@@ -1017,6 +1017,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	// alignment (TODO: ensure mapping from faction alignment to man alignment
 	f->PutStr(AString("Your faction is ") + ManType::ALIGN_STRS[alignments_] + ".");
 
+	f->PutStr("");
+
 	if (errors.Num())
 	{
 		f->PutStr("Errors during turn:");
@@ -1107,7 +1109,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	forlist(&present_regions) {
 		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->month,
 												 &( pGame->regions ));
-	} 
+	}
 
 	if (temformat != TEMPLATE_OFF) {
 		f->PutStr("");
@@ -1367,5 +1369,5 @@ void Faction::DiscoverItem(int item, int force, int full)
 	}
 	if(force) {
 		itemshows.Add(ItemDescription(item, full));
-	}   
+	}
 }

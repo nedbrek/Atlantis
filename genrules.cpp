@@ -1465,7 +1465,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"even higher levels. ";
 		}
 		temp += "Here is a list of the races (including leaders) and the "
-			"information on normal skill levels and specialized skills.";
+			"information on skill levels.";
 		f.Paragraph(temp);
 		f.LinkRef("tableraces");
 		f.Enclose(1, "CENTER");
@@ -1475,8 +1475,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Alignment");
 		f.TagText("TH", "Hit points");
 		f.TagText("TH", "Specialized Skills");
-		f.TagText("TH", "Max Level (specialized skills)");
-		f.TagText("TH", "Max Level (non-specialized skills)");
+		f.TagText("TH", "Max Level (specialized)");
+		f.TagText("TH", "Max Level (non-specialized)");
+		f.TagText("TH", "Max Level (magic)");
 		f.TagText("TH", "Max Skills");
 		f.Enclose(0, "TR");
 
@@ -1519,10 +1520,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 				comma++;
 			}
 
-			if (!spec) temp = "None.";
+			if (!spec) temp = "--";
 			f.PutStr(temp);
 			f.Enclose(0, "TD");
 
+			// Max Level (specialized)
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			if(spec)
 				f.PutStr(ManDefs[m].speciallevel);
@@ -1530,8 +1532,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 				f.PutStr("--");
 			f.Enclose(0, "TD");
 
+			// Max Level (non-specialized)
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
 			f.PutStr(ManDefs[m].defaultlevel);
+			f.Enclose(0, "TD");
+
+			// Max Level (magic)
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			if(ManDefs[m].magiclevel != 0)
+				f.PutStr(ManDefs[m].magiclevel);
+			else
+				f.PutStr("--");
 			f.Enclose(0, "TD");
 
 			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
