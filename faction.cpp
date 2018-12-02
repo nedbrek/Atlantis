@@ -610,7 +610,7 @@ FactionVector::FactionVector(int size)
 
 FactionVector::~FactionVector()
 {
-	delete vector;
+	delete[] vector;
 }
 
 void FactionVector::ClearVector()

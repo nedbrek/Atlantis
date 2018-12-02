@@ -2801,7 +2801,7 @@ ARegionList::~ARegionList()
 			delete pRegionArrays[i];
 		}
 
-		delete pRegionArrays;
+		delete[] pRegionArrays;
 	}
 }
 

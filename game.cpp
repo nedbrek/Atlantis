@@ -43,22 +43,23 @@
 
 Game::Game()
 {
-    gameStatus = GAME_STATUS_UNINIT;
-    ppUnits = 0;
-	maxppunits = 0;
-}
-
-Game::~Game() {
-    delete ppUnits;
+	gameStatus = GAME_STATUS_UNINIT;
 	ppUnits = 0;
 	maxppunits = 0;
 }
 
-int Game::TurnNumber() {
+Game::~Game()
+{
+	delete[] ppUnits;
+	ppUnits = 0;
+	maxppunits = 0;
+}
+
+int Game::TurnNumber()
+{
 	return (year-1)*12 + month + 1;
 }
 
-// ALT, 25-Jul-2000
 // Default work order procedure
 void Game::DefaultWorkOrder()
 {
@@ -1666,7 +1667,7 @@ void Game::FixBoatNums()
 
 void Game::SetupUnitNums()
 {
-    if(ppUnits) delete ppUnits;
+    if(ppUnits) delete[] ppUnits;
 
 	SetupUnitSeq();
 

@@ -253,7 +253,7 @@ AString* AString::gettoken()
 
 	if (place2 == sizeof(buf)-1 || place == len_ || str_[place] == ';')
 	{
-		delete str_;
+		delete[] str_;
 		str_ = new char[1];
 		len_ = 0;
 		str_[0] = '\0';
@@ -275,7 +275,7 @@ AString* AString::gettoken()
 	buf2[place2] = '\0';
 
 	len_ = newlen;
-	delete str_;
+	delete[] str_;
 	str_ = buf2;
 
 	// return token
@@ -336,7 +336,7 @@ AString* AString::getlegal() const
 
 	*temp2 = '\0';
 	AString * retval = new AString(temp);
-	delete temp;
+	delete[] temp;
 	return retval;
 }
 
