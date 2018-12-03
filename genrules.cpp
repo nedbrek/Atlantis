@@ -312,6 +312,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("LI", f.Link("#sail", "sail"));
 	if(Globals->TOWNS_EXIST)
 		f.TagText("LI", f.Link("#sell", "sell"));
+	f.TagText("LI", f.Link("#share", "share"));
 	f.TagText("LI", f.Link("#show", "show"));
 	f.TagText("LI", f.Link("#spoils", "spoils"));
 	if(has_stea)
@@ -4828,6 +4829,22 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp2 = "SELL 10 furs";
 		f.CommandExample(temp, temp2);
 	}
+
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("share");
+	f.TagText("H4", "SHARE [flag]");
+	temp = "Turn on (or off) sharing for the unit. A unit that is sharing will"
+	       " allow other units (from the same faction) access to its"
+	       "  inventory: for silver when studying or buying, and raw materials"
+	       " when producing or building.";
+	f.Paragraph(temp);
+	f.Paragraph("Examples:");
+	temp = "Turn on sharing.";
+	temp2 = "SHARE 1";
+	f.CommandExample(temp, temp2);
+	temp = "Turn off sharing.";
+	temp2 = "SHARE 0";
+	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("show");

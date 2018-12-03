@@ -41,7 +41,7 @@ class Game;
 #include "object.h"
 #include "orders.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 17 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 18 )
 
 class OrdersCheck
 {
