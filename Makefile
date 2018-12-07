@@ -5,18 +5,19 @@ CXXFLAGS := $(CFLAGS)
 
 CXXBUILD = $(CXX) $(CXXFLAGS) -MF $(patsubst %.cpp,dep/%.d,$<) -c -o $@ $<
 
+# objects shared by all rule sets
 OBJ := alist.o aregion.o army.o astring.o battle.o faction.o \
-  fileio.o game.o gamedata.o gamedefs.o gameio.o genrules.o items.o main.o \
+  fileio.o game.o gamedefs.o gameio.o genrules.o items.o main.o \
   market.o modify.o monthorders.o npc.o object.o orders.o parseorders.o \
   production.o runorders.o shields.o skills.o skillshows.o specials.o \
   spells.o template.o unit.o
 ALL_OBJ := $(OBJ) rand.o
 
-RULESET := extra.o monsters.o rules.o world.o
+# objects per rule set
+RULESET := extra.o monsters.o rules.o world.o gamedata.o
 
+# sub games
 GAMES := ceran conquest miskatonic realms standard wyreth
-
-GAME_OBJS := $(foreach dir,$(GAMES),$(addprefix $(dir)/obj/,$(RULESET)))
 
 DEP  := $(addprefix dep/,$(OBJ:.o=.d))
 OBJS := $(addprefix obj/,$(OBJ))
