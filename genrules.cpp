@@ -1129,19 +1129,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(0, "TD");
 		cap = ItemDefs[i].walk - ItemDefs[i].weight;
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-		if(ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
-			if(ItemDefs[i].hitchItem == -1)
-				f.PutStr(cap);
-			else {
-				temp = (cap + ItemDefs[i].hitchwalk);
-				temp += " (with ";
-				temp += ItemDefs[ItemDefs[i].hitchItem].name;
-				temp += ")";
-				f.PutStr(temp);
+
+		temp = "";
+		int hitchCount = 0;
+		for (unsigned c = 0; c < sizeof(ItemDefs[i].hitchItems)/sizeof(HitchItem); ++c) {
+			const HitchItem &hitch = ItemDefs[i].hitchItems[c];
+			if (hitch.item == -1)
+				continue;
+
+			hitchCount++;
+			int hitchCap = ItemDefs[i].walk - ItemDefs[i].weight + hitch.walk;
+			if (hitchCap) {
+					temp += (hitchCount > 1?", ":"");
+					temp += hitchCap;
+					temp += " with ";
+					temp += ItemDefs[hitch.item].name;
 			}
+		}
+
+		if (hitchCount > 0) {
+			f.PutStr(temp);
 		} else {
 			f.PutStr("&nbsp;");
 		}
+
 		f.Enclose(0, "TD");
 		f.Enclose(0, "TR");
 	}
@@ -1898,20 +1909,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.PutStr(temp);
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-		temp = ItemDefs[i].weight;
-		cap = ItemDefs[i].walk - ItemDefs[i].weight;
-		if(ItemDefs[i].walk || (ItemDefs[i].hitchItem != -1)) {
-			temp += " (";
-			if(ItemDefs[i].hitchItem == -1)
-				temp += cap;
-			else {
-				temp += (cap + ItemDefs[i].hitchwalk);
-				temp += " with ";
-				temp += ItemDefs[ItemDefs[i].hitchItem].name;
+
+		temp = "";
+		int hitchCount = 0;
+		for (unsigned c = 0; c < sizeof(ItemDefs[i].hitchItems)/sizeof(HitchItem); ++c) {
+			const HitchItem &hitch = ItemDefs[i].hitchItems[c];
+			if (hitch.item == -1)
+				continue;
+
+			hitchCount++;
+			int hitchCap = ItemDefs[i].walk - ItemDefs[i].weight + hitch.walk;
+			if (hitchCap) {
+					temp += (hitchCount > 1?", ":"");
+					temp += hitchCap;
+					temp += " with ";
+					temp += ItemDefs[hitch.item].name;
 			}
-			temp += ")";
 		}
-		f.PutStr(temp);
+
+		if (hitchCount > 0) {
+			f.PutStr(AString(ItemDefs[i].weight) + " (" + temp + ")");
+		} else {
+			f.PutStr(ItemDefs[i].weight);
+		}
+
 		f.Enclose(0, "TD");
 		f.Enclose(1, "TD ALIGN=LEFT");
 		temp = "";

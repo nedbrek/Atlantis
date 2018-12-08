@@ -137,13 +137,15 @@ void Game::ModifyItemProductionBooster(int it, int item, int bonus)
 	ItemDefs[it].mult_val = bonus;
 }
 
-void Game::ModifyItemHitch(int it, int item, int capacity)
+void Game::ModifyItemHitch(int it, int i, int item, int capacity)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
 	if(item < -1 || item > (NITEMS-1)) return;
 	if(capacity < 0) return;
-	ItemDefs[it].hitchItem = item;
-	ItemDefs[it].hitchwalk = capacity;
+	if(i < 0 || i >= (int)(sizeof(ItemDefs[it].hitchItems)/sizeof(HitchItem)))
+		return;
+	ItemDefs[it].hitchItems[i].item = item;
+	ItemDefs[it].hitchItems[i].walk = capacity;
 }
 
 void Game::ModifyItemProductionSkill(int it, int sk, int lev)

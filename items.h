@@ -66,6 +66,13 @@ struct Materials
 	int amt;  ///< number of input items required to produce 1 batch of this item
 };
 
+/// items which be used to hitch another item
+struct HitchItem
+{
+	int item; ///< index of the hitch item
+	int walk;  ///< walking capacity
+};
+
 /// Description of an item in the game
 class ItemType
 {
@@ -109,8 +116,7 @@ public:
 	int fly;  ///< carrying capacity while moving through air
 	int swim; ///< carrying capacity while moving through water
 
-	int hitchItem; ///< index of item this can be attached to for increased capacity
-	int hitchwalk; ///< added capacity
+	HitchItem hitchItems[6];  ///< array of item/capacity that can be attached to for increased capacity
 
 	int mult_item; ///< index of item which can increase production
 	int mult_val;  ///< number of additional items produced
