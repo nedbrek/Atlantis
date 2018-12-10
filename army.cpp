@@ -1446,7 +1446,8 @@ void Army::Kill(int killed)
 		else
 		{
 			// assume everything that isn't a monster is a man
-			hitsalive -= ManDefs[temp->race].hits;
+			const int man = ItemDefs[temp->race].index;
+			hitsalive -= ManDefs[man].hits;
 		}
 	}
 
