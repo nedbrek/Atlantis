@@ -41,7 +41,7 @@ class Game;
 #include "object.h"
 #include "orders.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 20 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 21 )
 
 class OrdersCheck
 {
@@ -198,7 +198,7 @@ private:
 	void ModifyItemBasePrice(int it, int price);
 	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
 	void ModifyItemProductionBooster(int it, int item, int bonus);
-	void ModifyItemHitch(int it, int item, int bonus);
+	void ModifyItemHitch(int it, int i, int item, int capacity);
 	void ModifyItemProductionSkill(int it, int sk, int lev);
 	void ModifyItemProductionOutput(int it, int months, int count);
 	void ModifyItemProductionInput(int it, int i, int input, int amount);

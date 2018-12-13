@@ -30,6 +30,7 @@
 #include "object.h"
 #include "orders.h"
 #include <cstdlib>
+#include <map>
 
 //----------------------------------------------------------------------------
 UnitId::UnitId(bool)
@@ -1829,26 +1830,63 @@ int Unit::SwimmingCapacity()
 int Unit::WalkingCapacity()
 {
 	int cap = 0;
+	std::map<int, int> used_items;  // pulling/pullable itmes (e.g. horses, camels, wagon, etc)
+
 	forlist(&items)
 	{
 		Item *i = (Item*)elem;
 
 		cap += ItemDefs[i->type].walk * i->num;
 
-		if (ItemDefs[i->type].hitchItem != -1)
-		{
-			const int hitch = ItemDefs[i->type].hitchItem;
+		// Add capacity of pullable items (wagons, etc)
+		for (unsigned c = 0; c < sizeof(ItemDefs[i->type].hitchItems)/sizeof(HitchItem); ++c) {
 
-			if (!(ItemDefs[hitch].flags & ItemType::DISABLED))
-			{
-				const int hitches = items.GetNum(hitch);
+			const HitchItem &pulling_item = ItemDefs[i->type].hitchItems[c];
 
-				int hitched = i->num;
-				if (hitched > hitches)
-					hitched = hitches;
+			// No pulling item specified
+			if (pulling_item.item == -1)
+				continue;
 
-				cap += hitched * ItemDefs[i->type].hitchwalk;
-			}
+			// Same item cannot pull itself
+			if (pulling_item.item == i->type)
+				continue;
+
+			const ItemType &pullable_item = ItemDefs[i->type];
+
+			int pulling_items = items.GetNum(pulling_item.item);  // horse, camel, etc
+			int pullable_items = i->num;  // wagon, etc
+
+			int used_pulling_items = 0;
+			if (used_items.find(pulling_item.item) != used_items.end())
+				used_pulling_items = used_items[pulling_item.item];
+
+			int used_pullable_items = 0;
+			if (used_items.find(pullable_item.index) != used_items.end())
+				used_pullable_items = used_items[pullable_item.index];
+
+			// Subtract already used pulling items
+			pulling_items -= used_pulling_items;
+			if (pulling_items <= 0)
+				continue;
+
+			// More pulling items than needed, leave the rest for other pullables
+			if (pulling_items > pullable_items)
+				pulling_items = pullable_items;
+
+			// Subtract already used pullable items
+			pullable_items -= used_pullable_items;
+			if (pullable_items <= 0)
+				continue;
+
+			// Not enough pulling items, less pullables will be used
+			if (pullable_items > pulling_items)
+				pullable_items = pulling_items;
+
+			cap += pullable_items * pulling_item.walk;  // pulling_item.walk is wagon bonus walk capacity
+
+			// Update the used item values
+			used_items[pulling_item.item] = pulling_items + used_pulling_items;
+			used_items[pullable_item.index] = pullable_items + used_pullable_items;
 		}
 	}
 

@@ -131,16 +131,20 @@ AString* ItemDescription(int item, int full)
 			*temp += ", can walk";
 		}
 	}
-	if((ItemDefs[item].hitchItem != -1 )&&
-			!(ItemDefs[ItemDefs[item].hitchItem].flags & ItemType::DISABLED)) {
-		int cap = ItemDefs[item].walk - ItemDefs[item].weight +
-			ItemDefs[item].hitchwalk;
+	// Each hitch item has its own weight (larger creatures can pull more in the same wagon, for example)
+	for (unsigned c = 0; c < sizeof(ItemDefs[item].hitchItems)/sizeof(HitchItem); ++c) {
+		const HitchItem &hitch = ItemDefs[item].hitchItems[c];
+		if (hitch.item == -1)
+			continue;
+
+		int cap = ItemDefs[item].walk - ItemDefs[item].weight + hitch.walk;
 		if(cap) {
 			*temp += AString(", walking capacity ") + cap +
 				" when hitched to a " +
-				ItemDefs[ItemDefs[item].hitchItem].name;
+				ItemDefs[hitch.item].name;
 		}
 	}
+
 	if (ItemDefs[item].ride) {
 		int cap = ItemDefs[item].ride - ItemDefs[item].weight;
 		if(cap) {
