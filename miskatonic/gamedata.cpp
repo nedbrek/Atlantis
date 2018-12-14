@@ -2928,17 +2928,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 	// WEAPON_HALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 	// WEAPON_MAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 
 	// Mithril
 	// WEAPON_MDAGGER
@@ -2975,17 +2975,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 	// WEAPON_MHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 	// WEAPON_MMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 
 	// Admantium
 	// WEAPON_ADAGGER
@@ -3022,17 +3022,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 	// WEAPON_AHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 	// WEAPON_AMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 
 	// Ranged
 	// WEAPON_SHORTBOW
@@ -3101,17 +3101,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 	// WEAPON_EHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 	// WEAPON_EMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 
 	// Enchanted Mithril
 	// WEAPON_EMDAGGER
@@ -3148,17 +3148,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 	// WEAPON_EMHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 	// WEAPON_EMMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 
 	// Enchanted Admantium
 	// WEAPON_EADAGGER
@@ -3195,17 +3195,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 	// WEAPON_EAHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 	// WEAPON_EAMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 
 	// Enchanted Ranged
 	// WEAPON_ESHORTBOW
