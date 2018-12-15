@@ -281,6 +281,9 @@ public:
 	///@return 1 if 'sk' can be studied
 	int CanStudy(int sk);
 
+	///@return the maximum level that can be studied in 'skill' for unit based on all men of type 'race'
+	int SkillMax(int sk);
+
 	/// increase 'sk' by 'days', @return 1 on success, else 0
 	int Study(int sk, int days);
 

@@ -393,13 +393,26 @@ AString Unit::StudyableSkills()
 	AString temp;
 	bool j = false;
 
-	for (int i = 0; i < NSKILLS; ++i)
+	for (int sk = 0; sk < NSKILLS; ++sk)
 	{
-		if (SkillDefs[i].depends[0].skill == -1)
+		// Magic skills without depencies should not be skipped
+		if (SkillDefs[sk].depends[0].skill == -1 && !(SkillDefs[sk].flags & SkillType::MAGIC))
 			continue;
 
-		if (!CanStudy(i))
+		// CanStudy gets prereqs, does not check max level
+		if (!CanStudy(sk))
 			continue;
+
+		// Check for maximum skill level for magic foundation skills
+		if (SkillDefs[sk].flags & SkillType::FOUNDATION) {
+			// This is only used with mages to display studiable magic skills
+			if (type != U_MAGE)
+				return temp;
+
+			// Compare current skill level to maximum level
+			if (GetRealSkill(sk) >= SkillMax(sk))
+				continue;
+		}
 
 		if (j)
 		{
@@ -411,7 +424,7 @@ AString Unit::StudyableSkills()
 			j = true;
 		}
 
-		temp += SkillStrs(i);
+		temp += SkillStrs(sk);
 	}
 
 	return temp;
@@ -1290,6 +1303,25 @@ int Unit::CanStudy(int sk)
 	return 1;
 }
 
+// Gets maximum skill level for unit based on all man races
+int Unit::SkillMax(int sk)
+{
+	// find max skill level
+	int max = 1000;
+	forlist (&items)
+	{
+		Item *i = (Item*)elem;
+
+		if (ItemDefs[i->type].type & IT_MAN)
+		{
+			const int m = ::SkillMax(sk, i->type);
+			if (m < max) max = m;
+		}
+	}
+
+	return max;
+}
+
 int Unit::Study(int sk, int days)
 {
 	// count non-magic skills and find if this boosting an existing skill
@@ -1343,20 +1375,7 @@ int Unit::Study(int sk, int days)
 	}
 
 	{
-		// find max skill level
-		int max = 1000;
-		forlist (&items)
-		{
-			Item *i = (Item*)elem;
-
-			if (ItemDefs[i->type].type & IT_MAN)
-			{
-				const int m = SkillMax(sk, i->type);
-				if (m < max) max = m;
-			}
-		}
-
-		if (GetRealSkill(sk) >= max)
+		if (GetRealSkill(sk) >= SkillMax(sk))
 		{
 			Error("STUDY: Maximum level for skill reached.");
 			return 0;
@@ -1396,22 +1415,8 @@ int Unit::Practise(int sk)
 	if (men < 1 || days < 1)
 		return 0; // no practice
 
-	// calculate max level (min of all our man types)
-	int max = 1000;
-	forlist (&items)
-	{
-		Item *i = (Item*)elem;
-
-		if (ItemDefs[i->type].type & IT_MAN)
-		{
-			const int m = SkillMax(sk, i->type);
-			if (m < max)
-				max = m;
-		}
-	}
-
 	const int curlev = GetRealSkill(sk);
-	if (curlev >= max)
+	if (curlev >= SkillMax(sk))
 		return 0; // no practice needed
 
 	for (unsigned i = 0; i < sizeof(SkillDefs[sk].depends)/sizeof(SkillDepend); ++i)
@@ -1546,9 +1551,9 @@ void Unit::AdjustSkills()
 		forlist(&skills)
 		{
 			Skill *s = (Skill*)elem;
-			if (GetRealSkill(s->type) >= SkillMax(s->type, I_LEADERS))
+			if (GetRealSkill(s->type) >= ::SkillMax(s->type, I_LEADERS))
 			{
-				s->days = GetDaysByLevel(SkillMax(s->type, I_LEADERS)) *
+				s->days = GetDaysByLevel(::SkillMax(s->type, I_LEADERS)) *
 					GetMen();
 			}
 		}
@@ -1588,19 +1593,7 @@ void Unit::AdjustSkills()
 	{
 		Skill *theskill = (Skill*)elem;
 
-		int max = 100;
-		forlist(&items)
-		{
-			Item *i = (Item*)elem;
-
-			if (ItemDefs[i->type].type & IT_MAN)
-			{
-				if (SkillMax(theskill->type, i->type) < max)
-				{
-					max = SkillMax(theskill->type,i->type);
-				}
-			}
-		}
+		const int max = SkillMax(theskill->type);
 
 		if (GetRealSkill(theskill->type) >= max)
 		{
