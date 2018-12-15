@@ -2479,25 +2479,25 @@ ManType mt[] = {
 	{1,3,2,4,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 1, ManType::NEUTRAL},//MOUNTAINMAN
 	// Additional Races for Miskatonic
 	{3,5,3,4,{S_LONGBOW,S_FARMING,S_HORSETRAINING,S_HEALING,-1,-1}, 2, ManType::GOOD},// HIGHELF
-	{1,5,2,4,{S_LONGBOW,S_LUMBERJACK,-1,-1,-1,-1}, 2, ManType::GOOD},// WOODELF
-	{2,5,2,4,{S_CROSSBOW,S_QUARRYING,S_BUILDING,-1,-1,-1}, 2, ManType::GOOD},// HILLDWARF
-	{2,5,2,4,{S_FARMING,S_RANCHING,S_STEALTH,-1,-1,-1}, 1, ManType::GOOD},// HALFLING
-	{1,5,1,3,{S_COMBAT,S_RANCHING,S_HORSETRAINING,-1,-1,-1}, 3, ManType::GOOD},// CENTAUR
-	{2,5,2,4,{S_COMBAT,S_MINING,S_WEAPONSMITH,S_ARMORER,-1,-1}, 2, ManType::GOOD},// MOUNTAINDWARF
-	{2,5,2,4,{S_CARPENTER,S_ENTERTAINMENT,S_BUILDING,-1,-1,-1}, 1, ManType::GOOD},// GNOME
-	{2,5,2,4,{S_LONGBOW,S_WEAPONSMITH,-1,-1,-1,-1}, 2, ManType::GOOD},// GREYELF
+	{1,5,3,4,{S_LONGBOW,S_LUMBERJACK,-1,-1,-1,-1}, 2, ManType::GOOD},// WOODELF
+	{2,5,3,4,{S_CROSSBOW,S_QUARRYING,S_BUILDING,-1,-1,-1}, 2, ManType::GOOD},// HILLDWARF
+	{2,5,3,4,{S_FARMING,S_RANCHING,S_STEALTH,-1,-1,-1}, 1, ManType::GOOD},// HALFLING
+	{1,5,2,3,{S_COMBAT,S_RANCHING,S_HORSETRAINING,-1,-1,-1}, 3, ManType::GOOD},// CENTAUR
+	{2,5,3,4,{S_COMBAT,S_MINING,S_WEAPONSMITH,S_ARMORER,-1,-1}, 2, ManType::GOOD},// MOUNTAINDWARF
+	{2,5,3,4,{S_CARPENTER,S_ENTERTAINMENT,S_BUILDING,-1,-1,-1}, 1, ManType::GOOD},// GNOME
+	{2,5,3,4,{S_LONGBOW,S_WEAPONSMITH,-1,-1,-1,-1}, 2, ManType::GOOD},// GREYELF
 	{2,5,3,4,{S_FARMING,S_CARPENTER,S_HORSETRAINING,S_RIDING,-1,-1}, 2, ManType::NEUTRAL},// HUMAN
-	{1,5,2,4,{S_LUMBERJACK,S_RANCHING,S_HUNTING,S_HERBLORE,-1,-1}, 2, ManType::NEUTRAL},// LIZARDMAN
-	{1,5,2,4,{S_COMBAT,S_RANCHING,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::NEUTRAL},// HALFORC
-	{1,5,2,4,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 3, ManType::EVIL},// MINOTAUR
-	{1,5,2,4,{S_COMBAT,S_LUMBERJACK,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::EVIL},// ORC
-	{2,5,2,4,{S_COMBAT,S_WEAPONSMITH,S_ARMORER,S_BUILDING,-1,-1}, 2, ManType::EVIL},// HOBGOBLIN
-	{1,5,2,4,{S_COMBAT,S_QUARRYING,S_HUNTING,-1,-1,-1}, 2, ManType::EVIL},// GNOLL
-	{1,5,1,3,{S_COMBAT,-1,-1,-1,-1,-1}, 3, ManType::EVIL},// OGRE
-	{1,5,2,4,{S_CROSSBOW,S_MONSTERTRAINING,-1,-1,-1,-1}, 1, ManType::EVIL},// GOBLIN
-	{2,5,2,4,{S_COMBAT,S_CROSSBOW,S_MINING,S_QUARRYING,S_ARMORER,-1}, 2, ManType::EVIL},// UNDERDWARF
+	{1,5,3,4,{S_LUMBERJACK,S_RANCHING,S_HUNTING,S_HERBLORE,-1,-1}, 2, ManType::NEUTRAL},// LIZARDMAN
+	{1,5,3,4,{S_COMBAT,S_RANCHING,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::NEUTRAL},// HALFORC
+	{1,5,2,3,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 3, ManType::EVIL},// MINOTAUR
+	{1,5,3,4,{S_COMBAT,S_LUMBERJACK,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::EVIL},// ORC
+	{2,5,3,4,{S_COMBAT,S_WEAPONSMITH,S_ARMORER,S_BUILDING,-1,-1}, 2, ManType::EVIL},// HOBGOBLIN
+	{1,5,3,4,{S_COMBAT,S_QUARRYING,S_HUNTING,-1,-1,-1}, 2, ManType::EVIL},// GNOLL
+	{1,5,2,3,{S_COMBAT,-1,-1,-1,-1,-1}, 3, ManType::EVIL},// OGRE
+	{1,5,3,4,{S_CROSSBOW,S_MONSTERTRAINING,-1,-1,-1,-1}, 1, ManType::EVIL},// GOBLIN
+	{2,5,3,4,{S_COMBAT,S_CROSSBOW,S_MINING,S_QUARRYING,S_ARMORER,-1}, 2, ManType::EVIL},// UNDERDWARF
 	{2,5,3,4,{S_COMBAT,S_RANCHING,S_WEAPONSMITH,S_STEALTH,-1,-1}, 2, ManType::EVIL},// DARKELF
-	{1,5,2,4,{S_MINING,S_QUARRYING,S_STEALTH,-1,-1,-1}, 1, ManType::EVIL},// KOBOLD
+	{1,5,3,4,{S_MINING,S_QUARRYING,S_STEALTH,-1,-1,-1}, 1, ManType::EVIL},// KOBOLD
 };
 
 ManType * ManDefs = mt;
@@ -2527,12 +2527,12 @@ MonType md[] = {
 	 0,0,0,
 	 -1,0,
 	 40,-1,10,10,"Wolf Pack"},
-	{2,{2,0,0,0,0,0},
-	 6,6,0,
+	{3,{3,0,0,0,0,0},
+	 2,5,0,
 	 0,0,2,
 	 -1,0,
 	 250,-1,10,3,"Grizzly Bears"},
-	{3,{3,3,3,3,0,0},
+	{2,{2,3,3,3,0,0},
 	 1,1,0,
 	 1,1,1,
 	 -1,0,
@@ -2548,11 +2548,11 @@ MonType md[] = {
 	 -1,0,
 	 80,-1,10,8,"Giant Scorpions"},
 	{2,{2,2,0,2,0,0},
-	 6,6,0,
+	 2,5,0,
 	 0,0,2,
 	 -1,0,
 	 250,-1,10,3,"Polar Bears"},
-	{1,{1,1,1,1,1,0},
+	{1,{1,0,0,0,0,0},
 	 1,1,0,
 	 0,2,0,
 	 -1,0,
@@ -2602,28 +2602,28 @@ MonType md[] = {
 	 4,0,3,
 	 SPECIAL_FIREBREATH,6,
 	 10000,IT_MAGIC,50,1,"Dragon"},
-	{4,{4,0,0,0,3,0},
-	 2,2,0,
+	{2,{2,0,0,0,3,0},
+	 1,3,0,
 	 0,1,1,
 	 -1,0,
 	 150,IT_NORMAL,10,8,"Tribe of Centaurs"},
-	{2,{2,0,0,0,0,0},
+	{1,{1,0,0,0,0,0},
 	 1,1,0,
 	 0,1,0,
 	 -1,0,
 	 40,IT_NORMAL,10,20,"Kobold Pack"},
-	{3,{3,2,0,2,0,0},
-	 10,10,0,
+	{3,{3,1,0,1,0,0},
+	 1,3,0,
 	 0,0,0,
 	 -1,0,
 	 600,IT_NORMAL,10,2,"Family of Ogres"},
-	{3,{3,3,0,3,0,0},
-	 1,1,0,
+	{2,{2,0,0,2,0,0},
+	 1,2,0,
 	 0,0,1,
 	 -1,0,
 	 50,IT_NORMAL,10,10,"Lizard Men"},
-	{3,{3,0,0,0,0,0},
-	 1,1,0,
+	{2,{2,0,0,0,0,0},
+	 1,2,0,
 	 0,2,0,
 	 -1,0,
 	 50,IT_NORMAL,10,10,"Clan of Wild Men"},
@@ -2638,7 +2638,7 @@ MonType md[] = {
 	 -1,0,
 	 150,IT_NORMAL,10,5,"Yeti"},
 	{2,{2,0,0,0,0,0},
-	 1,1,0,
+	 1,2,0,
 	 0,0,0,
 	 -1,0,
 	 40,IT_NORMAL,10,40,"Goblin Horde"},
@@ -2652,7 +2652,7 @@ MonType md[] = {
 	 2,0,0,
 	 -1,0,
 	 1200,IT_NORMAL,10,2,"Ettins"},
-	{2,{2,5,5,3,0,0},
+	{1,{1,5,5,3,0,0},
 	 1,1,0,
 	 0,0,0,
 	 -1,0,
@@ -2713,8 +2713,8 @@ MonType md[] = {
 	 -1,0,
 	 0,-1,0,0,"Illusion"},
 	// Ceran new monsters
-	{2,{2,2,0,0,2,0},
-	 2,2,0,
+	{1,{1,2,0,0,0,0},
+	 1,1,0,
 	 1,2,0,
 	 -1,0,
 	 20,-1,20,30,"Rad Rats"},
@@ -2730,8 +2730,8 @@ MonType md[] = {
 	 100,IT_NORMAL,10,10,"Mutants"},
 	// Tzargs new monsters
 	{3,{3,3,3,3,0,0},
-	 1,1,0,
-	 1,3,2,
+	 1,2,0,
+	 1,1,2,
 	 -1,0,
 	 70,IT_NORMAL,50,100,"Drow Warriors"},
 	{2,{5,3,0,0,0,0},
@@ -2755,22 +2755,22 @@ MonType md[] = {
 	 SPECIAL_MINDBLAST,5,
 	 10000,IT_MAGIC,50,1,"Illyrthid"},
 	{1,{1,0,0,0,0,0},
-	 1,1,0,
+	 1,2,0,
 	 3,0,3,
 	 SPECIAL_FIREBALL,3,
 	 200,IT_ADVANCED,50,5,"Evil Sorcerers"},
 	{1,{1,0,0,0,0,0},
-	 1,1,0,
+	 1,2,0,
 	 3,0,3,
 	 SPECIAL_LSTRIKE,3,
 	 200,IT_ADVANCED,50,2,"Evil Magicians"},
 	{1,{1,0,0,0,0,0},
-	 1,1,0,
+	 1,2,0,
 	 5,0,3,
 	 SPECIAL_BLACK_WIND,3,
 	 1000,IT_MAGIC,50,1,"Dark Mage"},
 	{3,{3,0,0,0,0,0},
-	 1,1,0,
+	 1,2,0,
 	 0,0,0,
 	 -1,0,
 	 50,IT_NORMAL,50,20,"Evil Warriors"},
@@ -2928,17 +2928,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 	// WEAPON_HALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 	// WEAPON_MAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 4, 2, 0},
+	 4, 1, 0},
 
 	// Mithril
 	// WEAPON_MDAGGER
@@ -2975,17 +2975,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 	// WEAPON_MHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 	// WEAPON_MMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 6, 3, 0},
+	 6, 2, 0},
 
 	// Admantium
 	// WEAPON_ADAGGER
@@ -3022,17 +3022,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 	// WEAPON_AHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 	// WEAPON_AMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 8, 4, 0},
+	 8, 3, 0},
 
 	// Ranged
 	// WEAPON_SHORTBOW
@@ -3101,17 +3101,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 	// WEAPON_EHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 	// WEAPON_EMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 5, 3, 0},
+	 5, 2, 0},
 
 	// Enchanted Mithril
 	// WEAPON_EMDAGGER
@@ -3148,17 +3148,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 	// WEAPON_EMHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 	// WEAPON_EMMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 7, 4, 0},
+	 7, 3, 0},
 
 	// Enchanted Admantium
 	// WEAPON_EADAGGER
@@ -3195,17 +3195,17 @@ WeaponType wepd[] = {
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 SLASHING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 	// WEAPON_EAHALBERD
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CLEAVING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 	// WEAPON_EAMAUL
 	{WeaponType::NOMOUNT | WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, -2,
-	 9, 5, 0},
+	 9, 4, 0},
 
 	// Enchanted Ranged
 	// WEAPON_ESHORTBOW
