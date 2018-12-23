@@ -1058,7 +1058,7 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 	u->MoveUnit( to );
 
 	if (u->object && u->object->type != O_DUMMY)
-		u->Event(AString("Enters ") + *u->object->name);
+		u->Event(AString("Enters ") + *u->object->name + ".");
 }
 
 void Game::RemoveEmptyObjects()
