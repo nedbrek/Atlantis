@@ -1235,8 +1235,9 @@ void Game::RunBirdLore(ARegion *r,Unit *u)
 void Game::RunWolfLore(ARegion *r,Unit *u)
 {
 	if (TerrainDefs[r->type].similar_type != R_MOUNTAIN &&
-		TerrainDefs[r->type].similar_type != R_FOREST) {
-		u->Error("CAST: Can only summon wolves in mountain and "
+		TerrainDefs[r->type].similar_type != R_FOREST &&
+		TerrainDefs[r->type].similar_type != R_CERAN_HILL) {
+		u->Error("CAST: Can only summon wolves in mountain, hill and "
 				 "forest regions.");
 		return;
 	}
