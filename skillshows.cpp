@@ -666,7 +666,7 @@ AString* ShowSkill::Report(Faction *f)
 				"wolves equal to his skill level, and control a total number "
 				"of his skill level squared times 4 wolves; the wolves will "
 				"be placed in the mages inventory. Note, however, that wolves "
-				"may only be summoned in mountain and forest regions. To "
+				"may only be summoned in mountain, hill and forest regions. To "
 				"summon wolves, the mage should issue the order CAST "
 				"Wolf_Lore.";
 			break;
