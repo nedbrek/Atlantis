@@ -2584,7 +2584,7 @@ MonType md[] = {
 	 2000,IT_ADVANCED,25,2,"Swamp Creatures"},
 	{4,{4,3,0,3,1,0},
 	 25,25,0,
-	 0,2,2,
+	 0,0,2,
 	 -1,0,
 	 2500,IT_ADVANCED,25,2,"Great Apes"},
 	{4,{4,4,4,4,3,0},
@@ -3038,7 +3038,7 @@ WeaponType wepd[] = {
 	// WEAPON_SHORTBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_LONGBOW, -1,
-	 PIERCING, ATTACK_RANGED, 3,
+	 PIERCING, ATTACK_RANGED, 2,
 	 -4, 0, 0},
 	// WEAPON_BOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
@@ -3048,7 +3048,7 @@ WeaponType wepd[] = {
 	// WEAPON_LONGBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_LONGBOW, -1,
-	 PIERCING, ATTACK_RANGED, 1,
+	 PIERCING, ATTACK_RANGED, 2,
 	 -2, 0, 0},
 	// WEAPON_CROSSBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
