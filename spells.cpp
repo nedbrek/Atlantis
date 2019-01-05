@@ -464,7 +464,7 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		u->Error("CAST: Requires a target mage.");
 		return;
 	}
-	int gate = token->value();
+	const int gate = token->value(); // actually unit with portal stone
 	delete token;
 	token = o->gettoken();
 
@@ -1679,9 +1679,7 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 
 void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 {
-	int level = u->GetSkill(S_PORTAL_LORE);
-	TeleportOrder *order = u->teleportorders;
-
+	const int level = u->GetSkill(S_PORTAL_LORE);
 	if (!level) {
 		u->Error("CAST: Doesn't know Portal Lore.");
 		return;
@@ -1692,32 +1690,36 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	int maxweight = 50 * level;
-	int maxdist = 2 * level * level;
+	// check weight limit
+	const int maxweight = 50 * level;
+
 	int weight = 0;
+
+	TeleportOrder *const order = u->teleportorders;
 	forlist (&(order->units)) {
-		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
+		Unit *taru = r->GetUnitId((UnitId*)elem, u->faction->num);
 		if (taru) weight += taru->Weight();
 	}
 
-    if (weight > maxweight) {
-		u->Error("CAST: That mage cannot teleport that much weight through a "
-				"Portal.");
+	if (weight > maxweight) {
+		u->Error("CAST: That mage cannot teleport that much weight through a Portal.");
 		return;
 	}
 
+	// gate is actually a unit num
 	Location *tar = regions.FindUnit(order->gate);
 	if (!tar) {
 		u->Error("CAST: No such target mage.");
 		return;
 	}
 
+	// check target unit
 	if (tar->unit->faction->GetAttitude(u->faction->num) < A_FRIENDLY) {
 		u->Error("CAST: Target mage is not friendly.");
 		return;
 	}
 
-	if (tar->unit->type != U_MAGE) {
+	if (tar->unit->type != U_MAGE && tar->unit->type != U_APPRENTICE) {
 		u->Error("CAST: Target is not a mage.");
 		return;
 	}
@@ -1727,7 +1729,8 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
-	if (regions.GetDistance(r,tar->region) > maxdist) {
+	const int maxdist = 2 * level * level;
+	if (regions.GetDistance(r, tar->region) > maxdist) {
 		u->Error("CAST: Can't Portal Jump that far.");
 		return;
 	}
@@ -1736,22 +1739,32 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 	u->Practise(S_PORTAL_LORE);
 
 	{
+		// move the units
 		forlist(&(order->units)) {
-			Location *loc = r->GetLocation((UnitId *) elem,u->faction->num);
-			if (loc) {
-				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->Error("CAST: Unit is not allied.");
-				} else {
-					loc->unit->Event(AString("Is teleported to ") +
-							tar->region->Print( &regions ) +
-							" by " + *u->name + ".");
-					loc->unit->MoveUnit( tar->obj );
-					if (loc->unit != u) loc->unit->ClearCastOrders();
-				}
-				delete loc;
-			} else {
+			Location *loc = r->GetLocation((UnitId*)elem, u->faction->num);
+			if (!loc)
+			{
 				u->Error("CAST: No such unit.");
+				continue;
 			}
+
+			if (loc->unit->GetAttitude(r, u) < A_ALLY)
+			{
+				u->Error("CAST: Unit is not allied.");
+			}
+			else
+			{
+				loc->unit->Event(AString("Is teleported to ") +
+						tar->region->Print( &regions ) +
+						" by " + *u->name + ".");
+
+				loc->unit->MoveUnit( tar->obj );
+
+				if (loc->unit != u)
+					loc->unit->ClearCastOrders();
+			}
+
+			delete loc;
 		}
 	}
 

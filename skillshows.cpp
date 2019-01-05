@@ -1218,7 +1218,7 @@ AString* ShowSkill::Report(Faction *f)
 		case S_CONSTRUCT_PORTAL:
 			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
-			if(ITEM_DISABLED(I_MPLATE)) break;
+			if (ITEM_DISABLED(I_PORTAL)) break;
 			*str += "A mage with the Construct Portal skill may construct a "
 				"Portal";
 			if(SKILL_ENABLED(S_PORTAL_LORE)) {
