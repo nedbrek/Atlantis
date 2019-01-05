@@ -1174,14 +1174,37 @@ AString* ShowSkill::Report(Faction *f)
 				"CAST Construct_Gate.";
 			break;
 		case S_ENCHANT_SWORDS:
-			/* XXX -- This should be cleaner somehow. */
-			if(level > 1) break;
-			if(ITEM_DISABLED(I_MSWORD)) break;
-			*str += "A mage with the Enchant Swords skill may magically "
-				"create mithril swords. A mage may create 5 times his "
-				"skill level mithril swords per turn. The mage should "
-				"issue the order CAST Enchant_Swords to cast this spell.";
+			if (level == 1)
+			{
+				// basic description
+				*str += "A mage with the Enchant Swords skill may magically create enchanted weapons.";
+			}
+
+			for (unsigned i = 0; i < NITEMS; ++i)
+			{
+				if (ITEM_DISABLED(i) || ItemDefs[i].mSkill != S_ENCHANT_SWORDS || ItemDefs[i].mLevel != level)
+					continue;
+
+				*str += AString(" A mage may create ") + ItemDefs[i].mOut + " times his skill level " +
+				    ItemDefs[i].names + " per turn.";
+
+				*str += " Each output requires: ";
+				bool first = true;
+				for (unsigned c = 0; c < sizeof(ItemDefs[i].mInput) / sizeof(Materials); ++c)
+				{
+					const int in_item = ItemDefs[i].mInput[c].item;
+					const int a = ItemDefs[i].mInput[c].amt;
+					if (in_item != -1)
+					{
+						if (!first) *str += ", and ";
+						else first = false;
+						*str += AString(a) + " " + ItemDefs[in_item].names;
+					}
+				}
+				*str += AString(". The mage should issue the order CAST Enchant_Swords ") + ItemDefs[i].abr + " to cast this spell.";
+			}
 			break;
+
 		case S_ENCHANT_ARMOR:
 		{
 			if (level == 1)
