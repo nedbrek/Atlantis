@@ -908,7 +908,7 @@ ItemType id[] =
 	 1,1,1,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0},
-	{"portal","portals","PORT",
+	{"portal stone","portal stones","PORT",
 	 ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 S_CONSTRUCT_PORTAL,1,20, {{I_SILVER,600},{-1,0},{-1,0},{-1,0}},
