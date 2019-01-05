@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 12 ),    // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 13 ),    // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -182,7 +182,7 @@ static GameDefs g = {
 	1,  // RELEASE_MONSTERS
 	1,  // CHECK_MONSTER_CONTROL_MID_TURN
 	0,  // DETECT_GATE_NUMBERS
-	GameDefs::ARMY_ROUT_HITS_FIGURE,  // ARMY_ROUT
+	GameDefs::ARMY_ROUT_HITS_INDIVIDUAL,  // ARMY_ROUT
 	0,	// FULL_TRUESEEING_BONUS
 	0,	// IMPROVED_AMTS
 	0,	// FULL_INVIS_ON_SELF
