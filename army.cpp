@@ -1277,7 +1277,7 @@ int Army::RemoveEffects(int num, int effect)
 
 int Army::DoAnAttack(int special, int numAttacks, int attackType,
       int attackLevel, int flags, int weaponClass, int effect,
-      int mountBonus)
+      int mountBonus, int *num_killed)
 {
 	// 1. check against Global effects (not sure how yet)
 	// 2. attack shield
@@ -1402,7 +1402,10 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 				continue;
 
 			// 8. seeya!
-			Kill(tarnum);
+			const bool died = DamageSoldier(tarnum);
+			if (died)
+				++*num_killed;
+
 			++ret;
 		}
 		else
@@ -1418,11 +1421,11 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 	return ret;
 }
 
-void Army::Kill(int killed)
+bool Army::DamageSoldier(int killed)
 {
 	Soldier *const temp = soldiers[killed];
 	if (temp->amuletofi)
-		return;
+		return false;
 
 	if (Globals->ARMY_ROUT == GameDefs::ARMY_ROUT_HITS_INDIVIDUAL)
 		--hitsalive;
@@ -1432,7 +1435,7 @@ void Army::Kill(int killed)
 
 	// if soldier can take multiple hits
 	if (temp->hits > 0)
-		return; // done
+		return false; // done
 
 	// notify unit of loss
 	temp->unit->losses++;
@@ -1478,5 +1481,6 @@ void Army::Kill(int killed)
 	soldiers[killed] = soldiers[notbehind-1];
 	soldiers[notbehind-1] = temp;
 	notbehind--;
+	return true;
 }
 
