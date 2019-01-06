@@ -28,6 +28,7 @@
 #include "gameio.h"
 #include "unit.h"
 #include "army.h"
+#include <cstring>
 
 void Soldier::SetupHealing()
 {
@@ -193,56 +194,87 @@ void Battle::UpdateShields(Army *a)
 void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 		Army *def, int behind)
 {
-	SpecialType *spd;
-	int i, num, tot = -1;
+	if (a->special == -1)
+		return; // no special attack
+
+	// pull definition
+	SpecialType *const spd = &SpecialDefs[a->special];
+	if (!(spd->effectflags & SpecialType::FX_DAMAGE))
+		return;
+
+	int tot = -1;
 	AString results[4];
 	int dam = 0;
+	int num_killed = 0;
 
-	if(a->special == -1) return;
-	spd = &SpecialDefs[a->special];
+	for (int i = 0; i < 4; i++)
+	{
+		if (spd->damage[i].type == -1)
+			continue;
 
-	if(!(spd->effectflags & SpecialType::FX_DAMAGE)) return;
-
-	for(i = 0; i < 4; i++) {
-		if(spd->damage[i].type == -1) continue;
 		int times = spd->damage[i].value;
-		if(spd->effectflags & SpecialType::FX_USE_LEV)
+		if (spd->effectflags & SpecialType::FX_USE_LEV)
 			times *= a->slevel;
-		int realtimes = spd->damage[i].minnum + getrandom(times) +
-			getrandom(times);
-        num = def->DoAnAttack(a->special, realtimes,
+
+		const int realtimes = spd->damage[i].minnum + getrandom(times) + getrandom(times);
+
+		const int num = def->DoAnAttack(a->special, realtimes,
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
-				spd->damage[i].effect, 0);
-		if(spd->effectflags & SpecialType::FX_DONT_COMBINE && num != -1) {
-			if(spd->damage[i].effect == -1) {
-				results[dam] = AString("killing ") + num;
+				spd->damage[i].effect, 0, &num_killed);
+
+		if ((spd->effectflags & SpecialType::FX_DONT_COMBINE) && num != -1)
+		{
+			if (spd->damage[i].effect == -1) {
+				results[dam] = AString("damaging ") + num;
 				dam++;
 			} else {
 				results[dam] = AString(spd->spelldesc2) + num;
 			}
 		}
-		if(num != -1) {
-			if(tot == -1) tot = num;
+
+		if (num != -1)
+		{
+			if (tot == -1) tot = num;
 			else tot += num;
 		}
 	}
-	if(tot == -1) {
+
+	if (tot == -1)
+	{
 		AddLine(a->name + " " + spd->spelldesc + ", but it is deflected.");
-	} else {
-		if(spd->effectflags & SpecialType::FX_DONT_COMBINE) {
-			AString temp = a->name + " " + spd->spelldesc;
-			for(i = 0; i < dam; i++) {
-				if(i) temp += ", ";
-				if(i == dam-1) temp += " and ";
-				temp += results[dam];
-			}
-			temp += AString(spd->spelltarget) + ".";
-			AddLine(temp);
-		} else {
-			AddLine(a->name + " " + spd->spelldesc + ", " + spd->spelldesc2 +
-					tot + spd->spelltarget + ".");
+		return;
+	}
+
+	AString temp = a->name + " " + spd->spelldesc;
+
+	if (spd->effectflags & SpecialType::FX_DONT_COMBINE)
+	{
+		for (int i = 0; i < dam; i++)
+		{
+			if (i)
+				temp += ", ";
+
+			if (i == dam-1)
+				temp += " and ";
+
+			temp += results[dam];
 		}
+
+		temp += AString(spd->spelltarget) + ".";
+		AddLine(temp);
+	}
+	else
+	{
+		temp += AString(", ") + spd->spelldesc2 + tot;
+
+		if (num_killed)
+			temp += AString(", and killing ") + num_killed;
+
+		if (strlen(spd->spelltarget))
+			temp += AString(" ") + spd->spelltarget;
+
+		AddLine(temp + ".");
 	}
 }
 

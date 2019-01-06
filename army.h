@@ -179,10 +179,11 @@ public:
 	/// evaluate one attack on us
 	int DoAnAttack( int special, int numAttacks, int attackType,
 	      int attackLevel, int flags, int weaponClass, int effect,
-	      int mountBonus);
+	      int mountBonus, int *num_killed);
 
-	/// kill soldier 'i'
-	void Kill(int i);
+	/// damage soldier 'i'
+	///@return true if he dies
+	bool DamageSoldier(int i);
 
 	// in specials.cpp
 	int CheckSpecialTarget(int, int);
