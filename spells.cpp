@@ -61,7 +61,6 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 				ProcessMindReading(u,o, pCheck );
 				break;
 			case S_CONSTRUCT_PORTAL:
-			case S_ENCHANT_SWORDS:
 			case S_CONSTRUCT_GATE:
 			case S_ENGRAVE_RUNES_OF_WARDING:
 			case S_SUMMON_IMPS:
@@ -85,6 +84,7 @@ void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 			case S_CREATE_FOOD:
 				ProcessGenericSpell(u,sk, pCheck );
 				break;
+			case S_ENCHANT_SWORDS:
 			case S_ENCHANT_ARMOR:
 				ProcessEnchantSpell(u, o, sk, pCheck);
 				break;
@@ -374,7 +374,7 @@ void Game::ProcessEnchantSpell(Unit *u, AString *o, int spell, OrdersCheck *pChe
 	AString *token = o->gettoken();
 	if (!token)
 	{
-		u->Error("CAST Enchant_Armor: Must specify which armor to create.");
+		u->Error("CAST Enchant: Must specify which item to create.");
 		return;
 	}
 
@@ -622,10 +622,8 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 			RunMindReading(r,u);
 			break;
 		case S_ENCHANT_ARMOR:
-			RunEnchantArmor(r,u);
-			break;
 		case S_ENCHANT_SWORDS:
-			RunEnchantSwords(r,u);
+			RunEnchantItem(r,u);
 			break;
 		case S_CONSTRUCT_GATE:
 			RunConstructGate(r,u,sk);
@@ -828,7 +826,7 @@ void Game::RunMindReading(ARegion *r,Unit *u)
 	u->Event(temp);
 }
 
-void Game::RunEnchantArmor(ARegion *r,Unit *u)
+void Game::RunEnchantItem(ARegion *r,Unit *u)
 {
 	CastEnchantOrder *order = (CastEnchantOrder*)u->castorders;
 
@@ -840,7 +838,7 @@ void Game::RunEnchantArmor(ARegion *r,Unit *u)
 			++count;
 	}
 
-	const int level = u->GetSkill(S_ENCHANT_ARMOR);
+	const int level = u->GetSkill(order->spell);
 
 	int num = 0; // how many we can actually make
 	int max = ItemDefs[order->output_item].mOut * level;
@@ -881,55 +879,8 @@ void Game::RunEnchantArmor(ARegion *r,Unit *u)
 
 	u->items.SetNum(order->output_item, u->items.GetNum(order->output_item) + num);
 	u->Event(AString("Enchants ") + num + " " + (num > 1 ? ItemDefs[order->output_item].names : ItemDefs[order->output_item].name) + ".");
-	u->Practise(S_ENCHANT_ARMOR);
+	u->Practise(order->spell);
 	r->NotifySpell(u, S_ARTIFACT_LORE, &regions );
-}
-
-void Game::RunEnchantSwords(ARegion *r,Unit *u)
-{
-	int level = u->GetSkill(S_ENCHANT_SWORDS);
-	int max = ItemDefs[I_MSWORD].mOut * level;
-	int num = 0;
-	int count = 0;
-	unsigned int c;
-	int found;
-
-	// Figure out how many components there are
-	for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[I_MSWORD].mInput[c].item != -1) count++;
-	}
-
-	while(max) {
-		int i, a;
-		found = 0;
-		// See if we have enough of all items
-		for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MSWORD].mInput[c].item;
-			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if(i != -1) {
-				if(u->items.GetNum(i) >= a) found++;
-			}
-		}
-		// We do not, break.
-		if(found != count) break;
-
-		// Decrement our inputs
-		for(c=0; c<sizeof(ItemDefs[I_MSWORD].mInput)/sizeof(Materials); c++) {
-			i = ItemDefs[I_MSWORD].mInput[c].item;
-			a = ItemDefs[I_MSWORD].mInput[c].amt;
-			if(i != -1) {
-				u->items.SetNum(i, u->items.GetNum(i) - a);
-			}
-		}
-		// We've made one.
-		num++;
-		max--;
-	}
-
-	u->items.SetNum(I_MSWORD,u->items.GetNum(I_MSWORD) + num);
-	u->Event(AString("Enchants ") + num + " mithril swords.");
-	u->Practise(S_ENCHANT_SWORDS);
-	r->NotifySpell(u,S_ARTIFACT_LORE, &regions );
 }
 
 void Game::RunCreateFood(ARegion *r,Unit *u)
