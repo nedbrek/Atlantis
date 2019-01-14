@@ -3211,7 +3211,7 @@ WeaponType wepd[] = {
 	// WEAPON_ESHORTBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_LONGBOW, -1,
-	 PIERCING, ATTACK_RANGED, 3,
+	 PIERCING, ATTACK_RANGED, 2,
 	 -3, 0, 0},
 	// WEAPON_EBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
@@ -3221,7 +3221,7 @@ WeaponType wepd[] = {
 	// WEAPON_ELONGBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
 	 S_LONGBOW, -1,
-	 PIERCING, ATTACK_RANGED, 1,
+	 PIERCING, ATTACK_RANGED, 2,
 	 -1, 0, 0},
 	// WEAPON_ECROSSBOW
 	{WeaponType::NEEDSKILL | WeaponType::RANGED | WeaponType::NOATTACKERSKILL,
