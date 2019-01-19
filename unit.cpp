@@ -638,6 +638,7 @@ AString Unit::TemplateReport()
 	if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
 	if (GetFlag(FLAG_CONSUMING_FACTION)) temp += ", consuming faction's food";
 	if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
+	if (GetFlag(FLAG_SHARE)) temp += ", sharing";
 	temp += SpoilsReport();
 
 	temp += items.Report(2, 1, 0);
