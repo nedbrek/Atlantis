@@ -2562,7 +2562,7 @@ int ARegion::MoveCost(int movetype, ARegion *fromRegion, int dir, AString *road)
 
 			// update move message
 			if (road)
-				*road = " on a road";
+				*road = "on a road ";
 		}
 	}
 
