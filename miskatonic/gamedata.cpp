@@ -176,7 +176,7 @@ ItemType id[] =
 	 0,
 	 S_FARMING,1,1,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
-	 5, IT_NORMAL | IT_FOOD, 15,0,0, 0,
+	 2, IT_NORMAL | IT_FOOD, 15,0,0, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_BAG,2},
@@ -1346,7 +1346,7 @@ ItemType id[] =
 	 S_MONSTERTRAINING,3,3,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 50, IT_ADVANCED | IT_MOUNT, 30,1,MOUNT_MSPIDER, 0,
-	 60,60,0,0,
+	 65,65,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_LASSO,1},
 	{"giant mole","giant moles","MOLE",
@@ -3355,9 +3355,9 @@ MountType mountd[] = {
 	// MOUNT_MWOLF
 	{S_RIDING, 1, 3, 3, -1, 0},
 	// MOUNT_SPIDER
-	{S_RIDING, 2, 3, 3, -1, 0},
+	{S_RIDING, 2, 4, 4, -1, 0},
 	// MOUNT_MOLE
-	{S_RIDING, 2, 3, 3, -1, 0},
+	{S_RIDING, 2, 4, 4, -1, 0},
 };
 
 MountType *MountDefs = mountd;
