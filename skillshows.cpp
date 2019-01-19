@@ -381,11 +381,10 @@ AString* ShowSkill::Report(Faction *f)
 						"the region that you wish to view. If you omit the "
 						"<z> coordinate, the <z> coordinate of the caster's "
 						"current region will be used.";
-					if(Globals->UNDERWORLD_LEVELS +
-							Globals->UNDERDEEP_LEVELS == 1) {
+					if (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 0) {
 						*str += " The <z> coordinate for the surface is '1' "
-							"and the <z>-coordinate for the underworld is "
-							"'2'.";
+						    "and the <z>-coordinate for the start of the underworld is "
+						    "'2'.";
 					}
 					*str += " Note that Farsight cannot be used either into "
 						"or out of the Nexus.";
@@ -466,10 +465,9 @@ AString* ShowSkill::Report(Faction *f)
 						"teleport to. If you omit the <z> coordinate, the "
 						"<z> coordinate of the caster's current region will "
 						"be used.";
-					if(Globals->UNDERWORLD_LEVELS +
-							Globals->UNDERDEEP_LEVELS == 1) {
+					if (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 0) {
 						*str += " The <z> coordinate for the surface is '1' "
-							"and the <z>-coordinate for the underworld is "
+							"and the <z>-coordinate for the start of the underworld is "
 							"'2'.";
 					}
 					*str += " Note that Teleportation cannot be used either "
@@ -527,10 +525,9 @@ AString* ShowSkill::Report(Faction *f)
 						"predict the weather. If you omit the <z> "
 						"coordinate, the <z> coordinate of the caster's "
 						"current region will be used.";
-					if(Globals->UNDERWORLD_LEVELS +
-							Globals->UNDERDEEP_LEVELS == 1) {
+					if (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 0) {
 						*str += " The <z> coordinate for the surface is '1' "
-							"and the <z>-coordinate for the underworld is "
+							"and the <z>-coordinate for the start of the underworld is "
 							"'2'.";
 					}
 					*str += " Note that Weather Lore cannot be used either "
@@ -625,11 +622,10 @@ AString* ShowSkill::Report(Faction *f)
 							"improve the weather. If you omit the <z> "
 							"coordinate, the <z> coordinate of the caster's "
 							"current region will be used.";
-						if(Globals->UNDERWORLD_LEVELS +
-								Globals->UNDERDEEP_LEVELS == 1) {
+						if (Globals->UNDERWORLD_LEVELS + Globals->UNDERDEEP_LEVELS > 0) {
 							*str += " The <z> coordinate for the surface is "
 								"'1' and the <z>-coordinate for the "
-								"underworld is '2'.";
+								"start of the underworld is '2'.";
 						}
 						*str += " Note that Clear Skies cannot be used "
 							"either into or out of the Nexus.";
