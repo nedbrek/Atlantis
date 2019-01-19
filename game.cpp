@@ -825,13 +825,31 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 				if(pTemp) {
 					z = pTemp->value();
 					ARegion *pReg = regions.GetRegion( x, y, z );
-					if(pReg) {
-						pFac->pStartLoc = pReg;
-						if(!pFac->pReg) pFac->pReg = pReg;
-					} else {
+					if (pReg)
+					{
+						if (!newPlayer)
+						{
+							Awrite(AString("StartLoc must be used on new faction (set on faction ") + pFac->num + ")");
+							if (pTemp) delete pTemp;
+							return 1;
+						}
+
+						if (!pFac->pReg)
+							pFac->pReg = pReg;
+
+						// move starting units to start location
+						for (unsigned uidx = 0; uidx < unitseq; ++uidx)
+						{
+							if (ppUnits[uidx] && ppUnits[uidx]->faction == pFac)
+							{
+								ppUnits[uidx]->MoveUnit( pReg->GetDummy() );
+							}
+						}
+					}
+					else
+					{
 						Awrite(AString("Invalid StartLoc:")+x+","+y+","+z+
 								" in faction " + pFac->num);
-						pFac->pStartLoc = NULL;
 					}
 				}
 			}

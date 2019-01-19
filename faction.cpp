@@ -668,7 +668,6 @@ Faction::Faction()
 	defaultattitude = A_NEUTRAL;
 	unclaimed = 0;
 	pReg = NULL;
-	pStartLoc = NULL;
 	noStartLeader = 0;
 	alignments_ = ALL_NEUTRAL;
 }
@@ -691,7 +690,6 @@ Faction::Faction(int n)
 	quit = 0;
 	unclaimed = 0;
 	pReg = NULL;
-	pStartLoc = NULL;
 	noStartLeader = 0;
 	alignments_ = ALL_NEUTRAL;
 }
