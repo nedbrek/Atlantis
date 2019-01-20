@@ -3141,29 +3141,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Ranged weapons are slightly different from melee weapons.  The "
 		"target will generally not get any sort of combat bonus to defense "
 		"against a ranged attack. ";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
-		temp += "The skill check to hit with a long bow is made against an "
-			"effective defense of ";
-		temp += -(WeaponDefs[WEAPON_LONGBOW].attackBonus);
-		temp += "; i.e., a longbowman with a skill 1, having made the 50% "
-			"chance of getting an effective attack, has a 1:2 chance of "
-			"hitting a target. ";
-	}
-	if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
-		temp += "A crossbow is an easier weapon to use, so the chance to hit "
-			"is calculated against a defense of ";
-		temp += -(WeaponDefs[WEAPON_CROSSBOW].attackBonus);
-		if(WeaponDefs[WEAPON_CROSSBOW].numAttacks < 0) {
-			temp += "; on the other hand, a crossbow can only fire once "
-				"every ";
-			temp += -(WeaponDefs[WEAPON_CROSSBOW].numAttacks);
-			temp += " rounds, including the free round of attacks if ones "
-				"side has one";
-		}
-		temp += ".";
-	}
 	f.Paragraph(temp);
 	temp = "Weapons may have one of several different attack types: "
 		"Slashing, Piercing, Crushing, Cleaving and Armor Piercing.  "
