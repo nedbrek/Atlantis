@@ -63,9 +63,7 @@ int Game::SetupFaction( Faction *pFac )
 	}
 
     ARegion *reg = NULL;
-	if(pFac->pStartLoc) {
-		reg = pFac->pStartLoc;
-	} else if(!Globals->MULTI_HEX_NEXUS) {
+	if(!Globals->MULTI_HEX_NEXUS) {
 		reg = (ARegion *)(regions.First());
 	} else {
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
