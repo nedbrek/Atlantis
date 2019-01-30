@@ -1098,14 +1098,12 @@ int Game::ValidProd(Unit *u, ARegion *r, Production *p)
 	if (p->itemtype != po->item || p->skill != po->skill)
 		return 0;
 
-	if (p->skill == -1)
-	{
-		po->productivity = u->GetMen() * p->productivity;
-		return po->productivity;
-	}
+	// check level requirement
+	const int level = p->skill != -1 ? u->GetSkill(p->skill) : 1;
 
-	const int level = u->GetSkill(p->skill);
-	if (level < ItemDefs[p->itemtype].pLevel)
+	const ItemType &item_def = ItemDefs[p->itemtype];
+
+	if (p->skill != -1 && level < item_def.pLevel)
 	{
 		u->Error("PRODUCE: Unit isn't skilled enough.");
 
@@ -1117,6 +1115,7 @@ int Game::ValidProd(Unit *u, ARegion *r, Production *p)
 
 	// check faction limits on production. If the item is silver, then the
 	// unit is entertaining or working, and the limit does not apply
+	// (note this function increments number of trade regions)
 	if (p->itemtype != I_SILVER && !TradeCheck(r, u->faction))
 	{
 		u->Error("PRODUCE: Faction can't produce in that many regions.");
@@ -1129,7 +1128,10 @@ int Game::ValidProd(Unit *u, ARegion *r, Production *p)
 
 	// check for bonus production
 	const int bonus = u->GetProductionBonus(p->itemtype);
-	po->productivity = u->GetMen() * level * p->productivity + bonus;
+
+	const int div = item_def.pMonths == 0 ? 1 : item_def.pMonths;
+
+	po->productivity = ((u->GetMen() * level * p->productivity) + bonus) / div;
 	return po->productivity;
 }
 
