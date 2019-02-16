@@ -4737,12 +4737,27 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("produce");
 	f.TagText("H4", "PRODUCE [item]");
-	temp = "Spend the month producing as much as possible of the specified "
-		"item.";
+	f.TagText("H4", "PRODUCE [item] LIMIT [count]");
+	temp = "Spend the month producing specified items."
+	    " You can use LIMIT to divide time between producing different items. "
+	    " If you specify a LIMIT above the current capacity, any remainder "
+	    "will carry forward to the next turn. "
+	    "You may use multiple produce commands, except when producing raw "
+	    "materials (items which require no input item).";
 	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Produce as many crossbows as possible.";
+
+	f.Paragraph("Examples:");
+
+	temp = "Produce as many crossbows as possible:";
 	temp2 = "PRODUCE crossbows";
+	f.CommandExample(temp, temp2);
+
+	temp = "Produce 3 plate armor, and the rest in scale armor:";
+	temp2 = "PRODUCE PLAA LIMIT 3\nPRODUCE SCAA";
+	f.CommandExample(temp, temp2);
+
+	temp = "Produce 100 spears, and then crossbows:";
+	temp2 = "PRODUCE SPEA LIMIT 100\n@PRODUCE XBOW";
 	f.CommandExample(temp, temp2);
 
 	f.ClassTagText("DIV", "rule", "");
