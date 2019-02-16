@@ -772,10 +772,11 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 		return true;
 	}
 
+	const ItemType &item = ItemDefs[o->item];
 	const int input = ItemDefs[o->item].pInput[0].item;
 	if (input == -1)
 	{
-		u->Error("PRODUCE: Can't produce that.");
+		u->Error(AString("PRODUCE: ") + item.abr + ": can't use multiple PRODUCE commands with raw materials.");
 
 		return true;
 	}
@@ -783,7 +784,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	const int level = u->GetSkill(o->skill);
 	if (level < ItemDefs[o->item].pLevel)
 	{
-		u->Error("PRODUCE: Can't produce that.");
+		u->Error(AString("PRODUCE: ") + item.abr + ": Insufficient skill to produce that.");
 
 		return true;
 	}
