@@ -1775,7 +1775,7 @@ ItemType id[] =
 	 I_MHAMMER,1},
 
 	// admantium
-	// I_MDAGGER
+	// I_ADAGGER
 	{"admantium dagger","admantium daggers","ADAG",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,2,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1784,7 +1784,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MSPEAR
+	// I_ASPEAR
 	{"admantium spear","admantium spears","ASPE",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,3,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1793,7 +1793,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MAXE
+	// I_AAXE
 	{"admantium axe","admantium axes","AAXE",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,3,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1802,7 +1802,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MHAMMER
+	// I_AHAMMER
 	{"admantium hammer","admantium hammers","AHAM",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,3,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1811,7 +1811,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MMACE
+	// I_AMACE
 	{"admantium mace","admantium maces","AMAC",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,3,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1820,7 +1820,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MSWORD
+	// I_ASWORD
     {"admantium sword","admantium swords","ASWO",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,3,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -1829,7 +1829,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_M2HSWORD
+	// I_A2HSWORD
 	{"admantium two-handed sword","admantium two-handed swords","A2HS",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,4,1, {{I_ADMANTIUM,2},{-1,0},{-1,0},{-1,0}},
@@ -1838,7 +1838,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MHALBERD
+	// I_AHALBERD
 	{"admantium halberd","admantium halberds","AHAL",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,4,1, {{I_ADMANTIUM,1},{I_YEW,1},{-1,0},{-1,0}},
@@ -1847,7 +1847,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
-	// I_MMAUL
+	// I_AMAUL
 	{"admantium maul","admantium mauls","AMAU",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_WEAPONSMITH,5,4,1, {{I_ADMANTIUM,1},{I_YEW,1},{-1,0},{-1,0}},
@@ -1856,6 +1856,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AHAMMER,1},
+	// I_SHORTBOW
 	{"shortbow","shortbows","SHBO",
 	 ItemType::DISABLED | ItemType::NOSELL,
 	 S_WEAPONSMITH,1,1,1, {{I_WOOD,1},{-1,0},{-1,0},{-1,0}},
@@ -1864,6 +1865,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AXE,1},
+	// I_BOW
 	{"bow","bows","BOW",
 	 ItemType::DISABLED | ItemType::NOSELL,
 	 S_WEAPONSMITH,2,1,1, {{I_IRONWOOD,1},{-1,0},{-1,0},{-1,0}},
@@ -1872,6 +1874,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AXE,1},
+	// I_LONGBOW
 	{"longbow","longbows","LBOW",
 	 ItemType::DISABLED | ItemType::NOSELL,
 	 S_WEAPONSMITH,3,1,1, {{I_YEW,1},{-1,0},{-1,0},{-1,0}},
@@ -1880,6 +1883,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AXE,1},
+	// I_CROSSBOW
 	{"crossbow","crossbows","XBOW",
 	 ItemType::DISABLED | ItemType::NOSELL,
 	 S_WEAPONSMITH,2,1,1, {{I_WOOD,1},{-1,0},{-1,0},{-1,0}},
@@ -1888,6 +1892,7 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_AXE,1},
+	// I_HEAVYCROSSBOW
 	{"heavy crossbow","heavy crossbows","HXBO",
 	 ItemType::DISABLED | ItemType::NOSELL,
 	 S_WEAPONSMITH,3,1,1, {{I_IRONWOOD,1},{-1,0},{-1,0},{-1,0}},
@@ -2262,7 +2267,7 @@ ItemType id[] =
 	 2,IT_ADVANCED | IT_ARMOR, 250,1,ARMOR_MSCALE, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_MHAMMER,1},
 	{"mithril mail armor","mithril mail armor","MMAA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,4,3,1, {{I_MITHRIL,1},{-1,0},{-1,0},{-1,0}},
@@ -2270,7 +2275,7 @@ ItemType id[] =
 	 2,IT_ADVANCED | IT_ARMOR, 300,1,ARMOR_MMAIL, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_MHAMMER,1},
 	{"mithril plate mail armor","mithril plate mail armor","MPMA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,4,3,1, {{I_MITHRIL,2},{-1,0},{-1,0},{-1,0}},
@@ -2278,7 +2283,7 @@ ItemType id[] =
 	 3,IT_ADVANCED | IT_ARMOR, 500,1,ARMOR_MPLATEMAIL, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_MHAMMER,1},
 	{"mithril plate armor","mithril plate armor","MPLA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,4,4,1, {{I_MITHRIL,3},{-1,0},{-1,0},{-1,0}},
@@ -2286,7 +2291,7 @@ ItemType id[] =
 	 3,IT_ADVANCED | IT_ARMOR, 750,1,ARMOR_MPLATE, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_MHAMMER,1},
 	// Admantium
 	{"admantium scale armor","admantium scale armor","ASCA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
@@ -2295,7 +2300,7 @@ ItemType id[] =
 	 2,IT_ADVANCED | IT_ARMOR, 1250,1,ARMOR_ASCALE, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_AHAMMER,1},
 	{"admantium mail armor","admantium mail armor","AMAA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,5,4,1, {{I_ADMANTIUM,1},{-1,0},{-1,0},{-1,0}},
@@ -2303,7 +2308,7 @@ ItemType id[] =
 	 2,IT_ADVANCED | IT_ARMOR, 1500,1,ARMOR_AMAIL, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_AHAMMER,1},
 	{"admantium plate mail armor","admantium plate mail armor","APMA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,5,4,1, {{I_ADMANTIUM,2},{-1,0},{-1,0},{-1,0}},
@@ -2311,7 +2316,7 @@ ItemType id[] =
 	 3,IT_ADVANCED | IT_ARMOR, 2250,1,ARMOR_APLATEMAIL, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_AHAMMER,1},
 	{"admantium plate armor","admantium plate armor","APLA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 S_ARMORER,5,5,1, {{I_ADMANTIUM,3},{-1,0},{-1,0},{-1,0}},
@@ -2319,7 +2324,7 @@ ItemType id[] =
 	 3,IT_ADVANCED | IT_ARMOR, 3000,1,ARMOR_APLATE, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 I_AHAMMER,1},
 	// Enchanted Armor
 	{"enchanted padded armor","enchanted padded armor","EPDA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
@@ -2344,7 +2349,7 @@ ItemType id[] =
 	 2,IT_MAGIC | IT_ARMOR, 75,1,ARMOR_ESCALE, 0,
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
-	 I_HAMMER,1},
+	 -1,0},
 	{"enchanted mail armor","enchanted mail armor","EMAA",
 	 ItemType::DISABLED | ItemType::NOMARKET,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
