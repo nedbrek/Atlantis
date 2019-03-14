@@ -1118,17 +1118,16 @@ void Game::RunSummonSkeletons(ARegion *r,Unit *u)
 
 void Game::RunDragonLore(ARegion *r, Unit *u)
 {
-	int level = u->GetSkill(S_DRAGON_LORE);
-
-	int num = u->items.GetNum(I_DRAGON);
-	if (num >= level) {
-		u->Error("Mage may not summon more dragons.");
+	if (u->items.GetNum(I_DRAGON)) {
+		u->Error("Can't summon more than one dragon.");
 		return;
 	}
 
+	int level = u->GetSkill(S_DRAGON_LORE);
 	int chance = level * level * 4;
+
 	if (getrandom(100) < chance) {
-		u->items.SetNum(I_DRAGON,num + 1);
+		u->items.SetNum(I_DRAGON,1);
 		u->Event("Summons a dragon.");
 	} else {
 		u->Event("Attempts to summon a dragon, but fails.");

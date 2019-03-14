@@ -1990,6 +1990,14 @@ void Game::MonsterCheck(ARegion *r, Unit *u)
 				if(i->type == I_WOLF) skill = S_WOLF_LORE;
 				if(i->type == I_EAGLE) skill = S_BIRD_LORE;
 				if(i->type == I_DRAGON) skill = S_DRAGON_LORE;
+
+				// Enforce 1 dragon limit (for in-progress games)
+				if (i->type==I_DRAGON && i->num > 1) {
+					u->Event(AString("Loses control of ") +
+							ItemString(i->type, i->num-1) + ".");
+					u->items.SetNum(I_DRAGON,1);
+				}
+
 				level = u->GetSkill(skill);
 				if(!level) {
 					if(Globals->WANDERING_MONSTERS_EXIST &&
