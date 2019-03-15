@@ -691,14 +691,11 @@ AString* ShowSkill::Report(Faction *f)
 			/* XXX -- This should be cleaner somehow. */
 			if(level > 1) break;
 			if(ITEM_DISABLED(I_DRAGON)) break;
-			*str += "A mage with Dragon Lore skill can summon dragons to "
-				"join him, to aid in battle, and provide flying "
-				"transportation. A mage at level 1 has a low chance of "
-				"successfully summoning a dragon, gradually increasing until "
-				"at level 5 he may summon one dragon per turn; the total "
-				"number of dragons that a mage may control at one time is "
-				"equal to his skill level. To attempt to summon a dragon, "
-				"CAST Dragon_Lore.";
+			*str += "A mage with Dragon Lore skill can summon a single dragon "
+				"to join him, to aid in battle, and provide flying "
+				"transportation. A mage's chance to summon a dragon is "
+				"4 times the caster's skill level squared."
+				" To attempt to summon a dragon, CAST Dragon_Lore.";
 			break;
 		case S_NECROMANCY:
 			if(level > 1) break;
