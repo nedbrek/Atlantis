@@ -825,15 +825,7 @@ void Army::Regenerate(Battle *b)
 
 		if (s->damage != 0)
 		{
-			b->AddLine(aName + " takes " + s->damage +
-			           " hits bringing it to " + s->hits + "/" +
-			           s->maxhits + ".");
 			s->damage = 0;
-		}
-		else
-		{
-			b->AddLine(aName + " takes no hits leaving it at " +
-			      s->hits + "/" + s->maxhits + ".");
 		}
 
 		if (s->regen)
