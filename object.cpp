@@ -382,7 +382,7 @@ AString* ObjectDescription(int obj)
 	*temp += AString(o->name) + ": ";
 
 	if (o->capacity)
-		*temp += "This is a ship.";
+		*temp += AString("This is a ship with capacity ") + o->capacity + ".";
 	else
 		*temp += "This is a building.";
 
