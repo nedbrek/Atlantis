@@ -987,7 +987,8 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 
 			pi->menUsed_ += men_req;
 
-			bonus_item_iter->second += bonus_items_used;
+			if (bonus_item_iter != pi->bonusItemsUsed_.end())
+				bonus_item_iter->second += bonus_items_used;
 			pi->totalItemsUsed_ += bonus_items_used;
 		}
 	}
