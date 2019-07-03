@@ -1356,7 +1356,7 @@ int Unit::Study(int sk, int days)
 		}
 
 		// count 'magic' as one skill
-		const int total_skills = num_nonmagic_skills + ((type & U_MAGE) ? 1 : 0);
+		const int total_skills = num_nonmagic_skills + ((type == U_MAGE) ? 1 : 0);
 		if (total_skills >= ManDefs[first_man_type].max_skills)
 		{
 			// check for non-leader mages and multiple magic skills

@@ -2303,7 +2303,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 27) return R_CERAN_MOUNTAIN1;
 			if (r < 28) return R_CERAN_MOUNTAIN2;
 			if (r < 29) return R_CERAN_MOUNTAIN3;
-            if (r < 30) return R_CERAN_HILL;
+			if (r < 30) return R_CERAN_HILL;
 			if (r < 31) return R_CERAN_HILL1;
 			if (r < 32) return R_CERAN_HILL2;
 			if (r < 34) return R_FOREST;
@@ -2380,7 +2380,7 @@ int ARegionList::GetRegType( ARegion *pReg )
 			if (r < 18) return R_CERAN_MOUNTAIN1;
 			if (r < 19) return R_CERAN_MOUNTAIN2;
 			if (r < 20) return R_CERAN_MOUNTAIN3;
-            if (r < 22) return R_CERAN_HILL;
+			if (r < 22) return R_CERAN_HILL;
 			if (r < 24) return R_CERAN_HILL1;
 			if (r < 26) return R_CERAN_HILL2;
 			if (r < 29) return R_SWAMP;
