@@ -339,6 +339,7 @@ public:
 	/// isn't available, then the code will fall back to the internal list
 	int USE_WEAPON_ARMOR_COMMAND;
 
+	int WMONSTER_SPOILS_RECOVERY; ///< apply spoils recovery to wandering monsters
 	int MONSTER_NO_SPOILS; ///< >0: disable spoils from released monsters for that many months
 
 	// (has no effect unles MONSTER_NO_SPOILS is also set)

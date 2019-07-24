@@ -219,6 +219,8 @@ void Unit::MakeWMon(const char *monname, int mon, int num)
 	type = U_WMON;
 	items.SetNum(mon, num);
 	SetMonFlags();
+	if (Globals->WMONSTER_SPOILS_RECOVERY)
+		free = Globals->MONSTER_NO_SPOILS + Globals->MONSTER_SPOILS_RECOVERY;
 }
 
 void Unit::Writeout(Aoutfile *s)
