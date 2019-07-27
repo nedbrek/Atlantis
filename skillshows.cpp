@@ -1068,7 +1068,7 @@ AString* ShowSkill::Report(Faction *f)
 			if(ITEM_DISABLED(I_AMULETOFP)) break;
 			if(level > 1) break;
 			*str += "A mage with the Create Amulet of Protection skill may "
-				"create Amulets of Protection, which grants the possesor a "
+				"create Amulets of Protection, which grants the possessor a "
 				"personal Spirit Shield of 3. A mage may create his skill "
 				"level of these amulets per turn. To use this spell, CAST "
 				"Create_Amulet_of_Protection.";
@@ -1273,7 +1273,7 @@ AString* ShowSkill::Report(Faction *f)
 			break;
 		case S_MONSTERTRAINING:
 			if(level > 1) break;
-			*str += "This skill deals with all aspects of traking monster "
+			*str += "This skill deals with all aspects of training monster "
 				"mounts.";
 			break;
 		case S_COOKING:
