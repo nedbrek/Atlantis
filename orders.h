@@ -25,8 +25,9 @@
 //
 // END A3HEADER
 #include "alist.h"
+#include "astring.h"
 #include <deque>
-class AString;
+class ARegion;
 class UnitId;
 
 //----------------------------------------------------------------------------
@@ -134,7 +135,26 @@ public:
 	explicit Order(int t);
 	virtual ~Order();
 
+	virtual AString toString(ARegion*, int fac_num) const { return ""; }
+
+	AString repeatPrefix() const;
+
 	const int type;
+	int repeat;
+};
+
+class RawTextOrder : public Order
+{
+public:
+	explicit RawTextOrder(const AString &t)
+	: Order(NORDERS)
+	, t_(t)
+	{
+	}
+
+	virtual AString toString(ARegion*, int fac_num) const { return t_; }
+
+	const AString t_;
 };
 
 /// Move to adjacent hex or enter/leave an object
@@ -190,6 +210,8 @@ class TeachOrder : public Order
 public:
 	TeachOrder();
 	~TeachOrder();
+
+	virtual AString toString(ARegion *region, int fac_num) const;
 
 	AList targets;
 };

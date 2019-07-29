@@ -115,7 +115,7 @@ public:
 	Unit* GetUnitAlias(int alias, int faction);
 
 	///@return unit according to 'id'
-	Unit* GetUnitId(UnitId *id, int faction);
+	Unit* GetUnitId(const UnitId *id, int faction);
 
 	///@return 1 if this is a road, else 0
 	int IsRoad();

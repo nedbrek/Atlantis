@@ -4247,6 +4247,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "FORGET Mining";
 	f.CommandExample(temp, temp2);
 
+	//-----
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("form");
 	f.TagText("H4", "FORM [alias]");
@@ -4271,16 +4272,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"numbers).  The new unit can then be referred to as NEW <alias> in "
 		"place of the regular unit number.";
 	f.Paragraph(temp);
+
+	temp = AString("For recurring ") + f.Link("#teach", "TEACH") + " orders"
+		" (using '@'), you can use !NEW <alias> to get the new unit number."
+		" In other words, '@3 TEACH !NEW 1' will put '@2 TEACH 413' into"
+		" your orders template next turn.";
+	f.Paragraph(temp);
+
 	temp = "You can refer to newly created units belonging to other "
 		"factions, if you know what alias number they are, e.g. FACTION 15 "
 		"NEW 2 will refer to faction 15's newly created unit with alias 2.";
 	f.Paragraph(temp);
+
 	temp = "Note: If a unit moves out of the region in which it was formed "
 		"(by the ";
 	temp += f.Link("#move", "MOVE") + " order, or otherwise), the alias "
 		"will no longer work. This is to prevent conflicts with other units "
 		"that may have the same alias in other regions.";
 	f.Paragraph(temp);
+
 	temp = "If the demand for recruits in that region that month is much "
 		"higher than the supply, it may happen that the new unit does not "
 		"gain all the recruits you ordered it to buy, or it may not gain "
@@ -4290,6 +4300,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"unit will be dissolved, and the silver and any other items it was "
 		"given will revert to the first unit you have in that region.";
 	f.Paragraph(temp);
+
 	f.Paragraph("Example:");
 	temp = "This set of orders for unit 17 would create two new units with "
 		"alias numbers 1 and 2, name them Merlin's Guards and Merlin's "
@@ -4300,6 +4311,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"unit that created these two then pays them enough money (using the "
 		"NEW keyword to refer to them by alias numbers) to cover the costs "
 		"of recruitment and the month's maintenance.";
+
 	temp2 = "UNIT 17\n";
 	temp2 += "FORM 1\n";
 	temp2 += "    NAME UNIT \"Merlin's Guards\"\n";
@@ -4322,6 +4334,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 += "GIVE NEW 2 2000 silver\n";
 	f.CommandExample(temp,temp2);
 
+	temp = "Create a new squad of men each turn for training:";
+	temp2 = "@TURN\n  FORM 1\n    BUY 20 MEN\n    @3 STUDY COMB\n  END\n\n"
+		"  @3 TEACH !NEW 1\nENDTURN";
+	f.CommandExample(temp,temp2);
+
+	//-----
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("give");
 	f.TagText("H4", "GIVE [unit] [quantity] [item]");

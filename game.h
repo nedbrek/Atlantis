@@ -41,7 +41,7 @@ class Game;
 #include "object.h"
 #include "orders.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 44 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 45 )
 
 class OrdersCheck
 {
@@ -305,8 +305,8 @@ private:
     int ParseDir(AString * token);
 
     void ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck );
-    void ProcessOrder( int orderNum, Unit *unit, AString *order,
-                       OrdersCheck *pCheck );
+    Order* ProcessOrder( int orderNum, Unit *unit, AString *order,
+                       OrdersCheck *pCheck, int at_value );
     void ProcessMoveOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessAdvanceOrder(Unit *,AString *, OrdersCheck *pCheck );
     Unit *ProcessFormOrder( Unit *former, AString *order,
@@ -321,7 +321,7 @@ private:
 	void ProcessWithdrawOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessDeclareOrder(Faction *,AString *, OrdersCheck *pCheck );
     void ProcessStudyOrder(Unit *,AString *, OrdersCheck *pCheck );
-    void ProcessTeachOrder(Unit *,AString *, OrdersCheck *pCheck );
+    Order* ProcessTeachOrder(Unit *,AString *, OrdersCheck *pCheck, int at_value);
     void ProcessWorkOrder(Unit *, OrdersCheck *pCheck );
     void ProcessProduceOrder(Unit *,AString *, OrdersCheck *pCheck );
     void ProcessBuyOrder( Unit *, AString *, OrdersCheck *pCheck );

@@ -218,7 +218,7 @@ public:
 	Unit* GetUnitAlias(int alias, int faction);
 
 	///@return unit matching 'id' for 'faction'
-	Unit* GetUnitId(UnitId *id, int faction);
+	Unit* GetUnitId(const UnitId *id, int faction);
 
 	///@return new Location wrapping id, faction, this
 	Location* GetLocation(UnitId *id, int faction);

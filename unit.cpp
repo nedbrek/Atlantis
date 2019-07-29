@@ -40,10 +40,11 @@ UnitId::UnitId(bool)
 {
 }
 
-UnitId::UnitId(int unit_num, int alias, int faction)
+UnitId::UnitId(int unit_num, int alias, int faction, bool r)
 : unitnum(unit_num)
 , alias  (alias)
 , faction(faction)
+, rename(r)
 {
 	if (unit_num < 0)
 	{
@@ -66,7 +67,7 @@ UnitId::~UnitId()
 {
 }
 
-AString UnitId::Print() const
+AString UnitId::Print(ARegion *region, int fac_num) const
 {
 	if (unitnum)
 		return AString(unitnum);
@@ -75,6 +76,13 @@ AString UnitId::Print() const
 	{
 		return AString("faction ") + AString(faction) + " new " +
 		   AString(alias);
+	}
+
+	if (region && rename)
+	{
+		Unit *u = region->GetUnitId(this, fac_num);
+		if (u)
+			return AString(u->num);
 	}
 
 	return AString("new ") + AString(alias);

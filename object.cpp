@@ -214,7 +214,7 @@ Unit* Object::GetUnitAlias(int alias, int faction)
 	return Unit::findByFaction(units, alias, faction);
 }
 
-Unit* Object::GetUnitId(UnitId *id, int faction)
+Unit* Object::GetUnitId(const UnitId *id, int faction)
 {
 	if (id == NULL)
 		return NULL;

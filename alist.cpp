@@ -89,7 +89,7 @@ void AList::push_back(AListElem *e)
 	}
 }
 
-AListElem* AList::next(AListElem *e)
+AListElem* AList::next(AListElem *e) const
 {
 	return e ? e->next : 0;
 }

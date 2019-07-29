@@ -108,10 +108,10 @@ class UnitId : public AListElem
 {
 public:
 	UnitId(bool nobody);
-	UnitId(int unit_num, int alias = 0, int faction = 0);
+	UnitId(int unit_num, int alias = 0, int faction = 0, bool rename = false);
 	~UnitId();
 
-	AString Print() const;
+	AString Print(ARegion *region, int fac_num = 0) const;
 
 	///@return true if unitnum does not refer to "no one"
 	bool valid() const { return unitnum != -1; }
@@ -123,6 +123,7 @@ private: // data
 	int unitnum; ///< 0 -> new unit
 	int alias;   ///< "new alias"
 	int faction; ///< "faction F new alias"
+	bool rename; ///< write out with new unit number
 };
 
 //----------------------------------------------------------------------------

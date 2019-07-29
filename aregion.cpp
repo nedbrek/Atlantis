@@ -1678,7 +1678,7 @@ Unit* ARegion::GetUnitAlias(int alias, int faction)
 	return NULL;
 }
 
-Unit* ARegion::GetUnitId(UnitId *id, int faction)
+Unit* ARegion::GetUnitId(const UnitId *id, int faction)
 {
 	forlist(&objects)
 	{
@@ -2344,7 +2344,8 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac, ARegionList *pRegs, int mo
 
 			forlist(&(u->oldorders))
 			{
-				f->PutStr(*((AString*)elem));
+				Order *old_order = (Order*)elem;
+				f->PutStr(old_order->toString(this, fac->num));
 			}
 			u->oldorders.DeleteAll();
 

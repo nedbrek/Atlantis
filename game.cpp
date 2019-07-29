@@ -1045,9 +1045,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac,
 										"for faction "+pFac->num);
 							} else {
 								if(getatsign) {
-									u->oldorders.Add(new AString(saveorder));
+									u->oldorders.Add(new RawTextOrder(saveorder));
 								}
-								ProcessOrder(o, u, pLine, NULL);
+								ProcessOrder(o, u, pLine, NULL, 0);
 							}
 						}
 					}
