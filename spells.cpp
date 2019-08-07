@@ -377,11 +377,17 @@ void Game::ProcessEnchantSpell(Unit *u, AString *o, int spell, OrdersCheck *pChe
 		u->Error("CAST Enchant: Must specify which item to create.");
 		return;
 	}
+	const int item = ParseEnabledItem(token);
+	if (item == -1)
+	{
+		u->Error(AString("CAST Enchant: Unknown item '") + *token + "'.");
+		return;
+	}
 
 	CastEnchantOrder *orders = new CastEnchantOrder;
 	orders->spell = spell;
 	orders->level = 1;
-	orders->output_item = ParseEnabledItem(token);
+	orders->output_item = item;
 
 	u->ClearCastOrders();
 	u->castorders = orders;
