@@ -124,6 +124,7 @@ public:
 
 	/// ?shuffles front and behind?
 	void Reset();
+	void endRound(Battle *b);
 
 	/// deallocate soldiers, append spoils from monsters
 	void Lose(Battle *b, ItemList *spoils);
@@ -179,7 +180,7 @@ public:
 	/// evaluate one attack on us
 	int DoAnAttack( int special, int numAttacks, int attackType,
 	      int attackLevel, int flags, int weaponClass, int effect,
-	      int mountBonus, int *num_killed);
+	      int mountBonus, int *num_killed, bool riding);
 
 	/// damage soldier 'i'
 	///@return true if he dies
@@ -202,6 +203,8 @@ public: // data
 
 	int hitsalive; ///< Current number of "living hits"
 	int hitstotal; ///< Number of hits at start of battle
+
+	int kills_from[6];
 
 private:
 	void DoHealLevel(Battle *b, int type, int useItems);

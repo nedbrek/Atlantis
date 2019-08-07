@@ -587,6 +587,13 @@ void Soldier::Dead()
 //----------------------------------------------------------------------------
 Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 {
+	kills_from[0] = 0;
+	kills_from[1] = 0;
+	kills_from[2] = 0;
+	kills_from[3] = 0;
+	kills_from[4] = 0;
+	kills_from[5] = 0;
+
 	int tacspell = 0;
 	Unit *tactitian = ldr;
 
@@ -700,6 +707,33 @@ void Army::Reset()
 	canfront = notfront;
 	canbehind = notbehind;
 	notfront = notbehind;
+}
+
+void Army::endRound(Battle *b)
+{
+	bool had_losses = false;
+
+	const char *attack_type_str[6] =
+	{
+		"melee",
+		"cavalry",
+		"ranged",
+		"energy",
+		"weather",
+		"spirit"
+	};
+	for (unsigned i = 0; i < 6; ++i)
+	{
+		if (kills_from[i])
+		{
+			b->AddLine(*(leader->name) + " loses " + kills_from[i] + " to " + attack_type_str[i] + " attacks.");
+			had_losses = true;
+			kills_from[i] = 0;
+		}
+	}
+
+	if (!had_losses)
+		b->AddLine(*(leader->name) + " loses 0.");
 }
 
 void Army::WriteLosses(Battle *b)
@@ -1269,7 +1303,7 @@ int Army::RemoveEffects(int num, int effect)
 
 int Army::DoAnAttack(int special, int numAttacks, int attackType,
       int attackLevel, int flags, int weaponClass, int effect,
-      int mountBonus, int *num_killed)
+      int mountBonus, int *num_killed, bool riding)
 {
 	// 1. check against Global effects (not sure how yet)
 	// 2. attack shield
@@ -1291,6 +1325,24 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 			canShield = 1;
 			break;
 	}
+	int attack_bin = 0;
+	if (attackType == ATTACK_COMBAT)
+	{
+		if (riding)
+			attack_bin = 1;
+		else
+			attack_bin = 0;
+	}
+	else if (attackType == ATTACK_RIDING)
+		attack_bin = 1;
+	else if (attackType == ATTACK_RANGED)
+		attack_bin = 2;
+	else if (attackType == ATTACK_ENERGY)
+		attack_bin = 3;
+	else if (attackType == ATTACK_WEATHER)
+		attack_bin = 4;
+	else if (attackType == ATTACK_SPIRIT)
+		attack_bin = 5;
 
 	if (canShield)
 	{
@@ -1396,7 +1448,10 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 			// 8. seeya!
 			const bool died = DamageSoldier(tarnum);
 			if (died)
+			{
 				++*num_killed;
+				++kills_from[attack_bin];
+			}
 
 			++ret;
 		}
