@@ -58,8 +58,8 @@ public:
 	AListElem* get(AListElem *e);
 
 	///@return the element after 'e'
-	AListElem* Next(AListElem *e) { return next(e); }
-	AListElem* next(AListElem *e);
+	AListElem* Next(AListElem *e) const { return next(e); }
+	AListElem* next(AListElem *e) const;
 
 	///@return true if 'e' was in this (before being removed)
 	bool Remove(AListElem *e) { return remove(e); }

@@ -104,11 +104,26 @@ int Parse1Order(AString *token)
 
 Order::Order(int o)
 : type(o)
+, repeat(0)
 {
 }
 
 Order::~Order()
 {
+}
+
+AString Order::repeatPrefix() const
+{
+	AString ret("@");
+	if (repeat == -1)
+		return ret;
+
+	if (repeat <= 2)
+		return "";
+
+	ret += AString(repeat - 1);
+	ret += " ";
+	return ret;
 }
 
 ExchangeOrder::ExchangeOrder()
@@ -187,6 +202,24 @@ TeachOrder::TeachOrder()
 
 TeachOrder::~TeachOrder()
 {
+}
+
+AString TeachOrder::toString(ARegion *region, int fac_num) const
+{
+	if (repeat == 0 || repeat == 1)
+		return AString();
+
+	AString ret = repeatPrefix();
+	ret += "teach";
+
+	forlist(&targets)
+	{
+		UnitId *id = (UnitId*)elem;
+		ret += " ";
+		ret += id->Print(region, fac_num);
+	}
+
+	return ret;
 }
 
 ProduceOrder::ProduceOrder()

@@ -2225,7 +2225,7 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	Unit *t = r->GetUnitId(o->target,u->faction->num);
 	if (!t) {
 		u->Error(AString("EXCHANGE: Nonexistant target (") +
-				o->target->Print() + ").");
+				o->target->Print(NULL) + ").");
 		u->exchangeorders.Remove(o);
 		return;
 	}
@@ -2260,7 +2260,7 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	// New RULE -- Must be able to see unit to give something to them!
 	if(!u->CanSee(r, t)) {
 		u->Error(AString("EXCHANGE: Nonexistant target (") +
-				o->target->Print() + ").");
+				o->target->Print(NULL) + ").");
 		return;
 	}
 	// Check other unit has enough to give
@@ -2350,7 +2350,7 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 	if (!exchangeOrderFound) {
 		if(!u->CanSee(r, t)) {
 			u->Error(AString("EXCHANGE: Nonexistant target (") +
-					o->target->Print() + ").");
+					o->target->Print(NULL) + ").");
 			u->exchangeorders.Remove(o);
 			return;
 		} else {
@@ -2423,7 +2423,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 
 	Unit * t = r->GetUnitId(o->target,u->faction->num);
 	if (!t) {
-		u->Event(AString("GIVE: Nonexistant target (") + o->target->Print() + ").");
+		u->Event(AString("GIVE: Nonexistant target (") + o->target->Print(NULL) + ").");
 		return 0;
 	}
 
@@ -2436,7 +2436,7 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 	// New RULE -- Must be able to see unit to give something to them!
 	if(!u->CanSee(r, t) &&
 			(t->faction->GetAttitude(u->faction->num) < A_FRIENDLY)) {
-		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print() +
+		u->Error(AString("GIVE: Nonexistant target (") + o->target->Print(NULL) +
 				").");
 		return 0;
 	}

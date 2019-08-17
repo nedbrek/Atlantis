@@ -129,7 +129,9 @@ UnitId* ParseUnit(AString *s)
 	}
 
 	// GIVE new n
-	if (*token == "new")
+	const bool rename = *token == "!new";
+	if (rename ||
+		 *token == "new")
 	{
 		delete token;
 
@@ -140,7 +142,7 @@ UnitId* ParseUnit(AString *s)
 		delete token;
 		if (!alias) return NULL;
 
-		return new UnitId(0, alias);
+		return new UnitId(0, alias, 0, rename);
 	}
 
 	// GIVE unitId
@@ -252,6 +254,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			delete token;
 			token = order->gettoken();
 		}
+		else
+			at_value = -1;
 
 		if (token)
 		{
@@ -493,10 +497,19 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 				{
 					if (unit)
 					{
-						if (!pCheck && getatsign)
-							unit->oldorders.Add(new AString(saveorder));
+						Order *o = ProcessOrder(i, unit, order, pCheck, at_value);
 
-						ProcessOrder(i, unit, order, pCheck);
+						if (!pCheck && getatsign)
+						{
+							if (o)
+							{
+								unit->oldorders.Add(o);
+							}
+							else
+							{
+								unit->oldorders.Add(new RawTextOrder(saveorder));
+							}
+						}
 					}
 					else
 					{
@@ -511,7 +524,7 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 			if (!pCheck)
 			{
 				if (getatsign && fac && unit)
-					unit->oldorders.Add(new AString(saveorder));
+					unit->oldorders.Add(new RawTextOrder(saveorder));
 			}
 		}
 
@@ -545,8 +558,8 @@ void Game::ParseOrders(int faction, Aorders *f, OrdersCheck *pCheck)
 	}
 }
 
-void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
-      OrdersCheck *pCheck)
+Order* Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
+      OrdersCheck *pCheck, int at_value)
 {
 	switch (orderNum)
 	{
@@ -706,13 +719,12 @@ void Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_TAX:
 			ProcessTaxOrder(unit, pCheck);
 			break;
-		case O_TEACH:
-			ProcessTeachOrder(unit, o, pCheck);
-			break;
+		case O_TEACH: return ProcessTeachOrder(unit, o, pCheck, at_value);
 		case O_WORK:
 			ProcessWorkOrder(unit, pCheck);
 			break;
 	}
+	return NULL;
 }
 
 void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
@@ -2043,7 +2055,7 @@ void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck)
 	u->monthorders = order;
 }
 
-void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+Order* Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck, int at_value)
 {
 	TeachOrder *order = NULL;
 
@@ -2055,23 +2067,29 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	{
 		order = new TeachOrder;
 	}
+	TeachOrder *ret = NULL;
+	if (at_value)
+	{
+		ret = new TeachOrder;
+		ret->repeat = at_value;
+	}
 
 	int students = 0;
 	UnitId *id = ParseUnit(o);
 	while (id && id->valid())
 	{
 		students++;
-		if (order)
-		{
-			order->targets.Add(id);
-		}
+		if (ret)
+			ret->targets.Add(new UnitId(*id));
+		order->targets.Add(id);
+
 		id = ParseUnit(o);
 	}
 
 	if (!students)
 	{
 		ParseError(pCheck, u, 0, "TEACH: No students given.");
-		return;
+		return NULL;
 	}
 
 	if ((u->monthorders && u->monthorders->type != O_TEACH) ||
@@ -2090,6 +2108,7 @@ void Game::ProcessTeachOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		u->taxing = TAX_NONE;
 
 	u->monthorders = order;
+	return ret;
 }
 
 void Game::ProcessStudyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
