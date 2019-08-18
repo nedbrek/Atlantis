@@ -173,6 +173,7 @@ public:
 		WFLIGHT_UNLIMITED  ///< flying units can end turn over water
 	};
 	int FLIGHT_OVER_WATER; ///< how to handle flight over water
+	int NO_SWIM_TO_SEA;    ///< prevent swimming units from leaving the coast
 
 	int SAFE_START_CITIES; ///< guards in starting cities get amulets of invulnerability
 	int AMT_START_CITY_GUARDS; ///< number of guards in starting cities

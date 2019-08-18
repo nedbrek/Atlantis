@@ -287,17 +287,24 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#move", "move"));
 	f.TagText("LI", f.Link("#name", "name"));
 	f.TagText("LI", f.Link("#noaid", "noaid"));
+
+	// no cross flag
 	int move_over_water = 0;
+	bool swimming_exists = false;
 	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
 		move_over_water = 1;
-	if(!move_over_water) {
-		for(i = 0; i < NITEMS; i++) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(ItemDefs[i].swim > 0) move_over_water = 1;
+	for(i = 0; i < NITEMS; ++i) {
+		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
+		if(ItemDefs[i].swim > 0)
+		{
+			move_over_water = 1;
+			swimming_exists = true;
+			break;
 		}
 	}
 	if(move_over_water)
 		f.TagText("LI", f.Link("#nocross", "nocross"));
+
 	f.TagText("LI", f.Link("#option", "option"));
 	f.TagText("LI", f.Link("#password", "password"));
 	f.TagText("LI", f.Link("#pillage", "pillage"));
@@ -1053,14 +1060,23 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"carefully guarded.";
 	f.Paragraph(temp);
 
+	// normal movement
 	f.LinkRef("movement_normal");
 	f.TagText("H3", "Normal Movement:");
 	temp = "In one month, a unit can issue a single ";
 	temp += f.Link("#move", "MOVE") + " order, using one or more of its "
-		"movement points. There are three modes of travel: walking, riding "
-		"and flying. Walking units have ";
-	temp += NumToWord(Globals->FOOT_SPEED) + " movement point" +
-		(Globals->FOOT_SPEED==1?"":"s") + ", riding units have ";
+		"movement points. There are ";
+	temp += swimming_exists ? "four" : "three";
+	temp += " modes of travel: walking";
+	if (swimming_exists)
+		temp += ", swimming";
+	temp += ", riding, and flying. Walking";
+	if (swimming_exists)
+		temp += " (and swimming)";
+	temp += AString(" units have ") + NumToWord(Globals->FOOT_SPEED) +
+		" movement point" + (Globals->FOOT_SPEED==1?"":"s") +
+		", riding units have ";
+
 	temp += NumToWord(Globals->HORSE_SPEED) + ", and flying units have ";
 	temp += NumToWord(Globals->FLY_SPEED) + ". ";
 	temp += "A unit will automatically use the fastest mode of travel "
@@ -1071,6 +1087,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"details.";
 	f.Paragraph(temp);
 
+	// flying
 	temp = "Flying units are not initially available to starting players. "
 		"A unit can ride provided that the carrying capacity of its "
 		"horses is at least as great as the weight of its people and "
@@ -1163,6 +1180,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		if(Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
 			temp += " However, if the unit ends its turn over a water hex "
 				"that unit will drown.";
+		f.Paragraph(temp);
+	}
+
+	if (Globals->NO_SWIM_TO_SEA)
+	{
+		temp = "A unit with swimming cannot move beyond the first hex offshore"
+		" (simulating moving along the shoreline). Swimming units cannot move"
+		" into the open ocean (ocean hexes surrounded by ocean).";
 		f.Paragraph(temp);
 	}
 
