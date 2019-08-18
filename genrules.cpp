@@ -3094,13 +3094,25 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"bows), and others may allow different skills to be used on "
 		"defense (or offense).";
 	f.Paragraph(temp);
-	temp = "If the skills are equal, then there is a 1:1 (i.e. 50%) "
-		"chance that the attack will succeed.  If the attacker's skill is 1 "
-		"higher then there is a 2:1 (i.e. 66%) chance, if the attacker's "
-		"skill is 2 higher then there is a 4:1 (i.e. 80%) chance, 3 higher "
-		"means an 8:1 (i.e. 88%) chance, and so on. Similarly if the "
-		"defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%) "
-		"chance, etc.";
+	if (Globals->LINEAR_COMBAT) {
+		temp = "If the skills are equal, then there is a 1:1 (i.e. 50%) "
+			"chance that the attack will succeed.  Any difference between skills "
+			"follows a linear scale.  For example, if the attacker's skill is 1 "
+			"higher then there is a 2:1 (i.e. 66%) chance, if the attacker's "
+			"skill is 2 higher then there is a 3:1 (i.e. 75%) chance, 3 higher "
+			"means an 4:1 (i.e. 80%) chance, and so on. Similarly if the "
+			"defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%) "
+			"chance, etc.";
+	}
+	else {
+		temp = "If the skills are equal, then there is a 1:1 (i.e. 50%) "
+			"chance that the attack will succeed.  If the attacker's skill is 1 "
+			"higher then there is a 2:1 (i.e. 66%) chance, if the attacker's "
+			"skill is 2 higher then there is a 4:1 (i.e. 80%) chance, 3 higher "
+			"means an 8:1 (i.e. 88%) chance, and so on. Similarly if the "
+			"defender's skill is 1 higher, then there is only a 1:2 (i.e. 33%) "
+			"chance, etc.";
+	}
 	f.Paragraph(temp);
 	temp = "";
 	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {

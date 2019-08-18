@@ -46,13 +46,21 @@ int pow(int b, int p)
 int Hits(int a, int d)
 {
 	int tohit = 1, tomiss = 1;
-	if (a > d)
-	{
-		tohit = pow(2, a - d);
+
+	if (Globals->LINEAR_COMBAT) {
+		tohit = a;
+		tomiss = d;
 	}
-	else if (d > a)
-	{
-		tomiss = pow(2, d - a);
+	// Default to power of 2 combat
+	else {
+		if (a > d)
+		{
+			tohit = pow(2, a - d);
+		}
+		else if (d > a)
+		{
+			tomiss = pow(2, d - a);
+		}
 	}
 
 	return (getrandom(tohit+tomiss) < tohit) ? 1 : 0;
