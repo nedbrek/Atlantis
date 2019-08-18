@@ -54,9 +54,6 @@ void Battle::FreeRound(Army *att, Army *def, int ass)
 	// update the attacking armies round counter
 	att->round++;
 
-	// save the current number alive
-	const int alv = def->NumAlive();
-
 	// run attacks until done
 	while (att->CanAttack() && def->NumAlive())
 	{
@@ -69,7 +66,7 @@ void Battle::FreeRound(Army *att, Army *def, int ass)
 	// write losses
 	def->Regenerate(this);
 
-	AddLine(*(def->leader->name) + " loses " + (alv - def->NumAlive()) + ".");
+	def->endRound(this);
 	AddLine("");
 
 	att->Reset();
@@ -103,7 +100,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				num  = def->DoAnAttack(pMt->mountSpecial, realtimes,
 				      spd->damage[i].type, pMt->specialLev,
 				      spd->damage[i].flags, spd->damage[i].dclass,
-				      spd->damage[i].effect, 0, &num_killed);
+				      spd->damage[i].effect, 0, &num_killed, a->riding != -1);
 				if (num != -1)
 				{
 					if (tot == -1) tot = num;
@@ -136,6 +133,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		numAttacks = Globals->MAX_ASSASSIN_FREE_ATTACKS;
 	}
 
+	// foreach attack
 	for (int i = 0; i < numAttacks; ++i)
 	{
 		WeaponType *pWep = NULL;
@@ -162,7 +160,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		}
 
 		def->DoAnAttack( 0, 1, attackType, a->askill, flags, attackClass,
-		      0, mountBonus, &num_killed);
+		      0, mountBonus, &num_killed, a->riding != -1);
 
 		if (!def->NumAlive())
 			break;
@@ -226,11 +224,11 @@ void Battle::NormalRound(int round, Army *a, Army *b)
 	a->Regenerate(this);
 	b->Regenerate(this);
 
-	aialive -= aalive;
-	AddLine(*(a->leader->name) + " loses " + aialive + ".");
+	a->endRound(this);
+	b->endRound(this);
 
+	aialive -= aalive;
 	bialive -= balive;
-	AddLine(*(b->leader->name) + " loses " + bialive + ".");
 
 	AddLine("");
 
