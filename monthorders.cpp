@@ -1563,6 +1563,17 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region, Object **obj)
 	}
 }
 
+bool oceanIsCoastal(ARegion *reg)
+{
+	for (unsigned i = 0; i < NDIRS; ++i)
+	{
+		ARegion *nreg = reg->neighbors[i];
+		if (nreg && TerrainDefs[nreg->type].similar_type != R_OCEAN)
+			return true;
+	}
+	return false;
+}
+
 // process MOVE order for 'unit'
 Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *const obj)
 {
@@ -1681,13 +1692,24 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	}
 	//else, unit has sufficient movement points
 
-	if (TerrainDefs[newreg->type].similar_type == R_OCEAN &&
-	    (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)))
+	// check moving into ocean
+	if (TerrainDefs[newreg->type].similar_type == R_OCEAN)
 	{
-		unit->Event(AString("Discovers that ") + newreg->ShortPrint(&regions) + " is " + TerrainDefs[newreg->type].name + ".");
-		delete unit->monthorders;
-		unit->monthorders = NULL;
-		return loc;
+		if (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))
+		{
+			unit->Event(AString("Discovers that ") + newreg->ShortPrint(&regions) + " is " + TerrainDefs[newreg->type].name + ".");
+			delete unit->monthorders;
+			unit->monthorders = NULL;
+			return loc;
+		}
+
+		if (Globals->NO_SWIM_TO_SEA && !oceanIsCoastal(newreg))
+		{
+			unit->Event(AString("Cannot swim out to sea: ") + newreg->ShortPrint(&regions) + ".");
+			delete unit->monthorders;
+			unit->monthorders = NULL;
+			return loc;
+		}
 	}
 
 	if (unit->type == U_WMON && newreg->town && newreg->IsGuarded())
