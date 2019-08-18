@@ -353,6 +353,8 @@ public:
 
 	int DETECT_GATE_NUMBERS; ///< should 'CAST GATE DETECT' show actual gate numbers
 
+	int LINEAR_COMBAT;  ///< should combat be based on linear combat scale (or the default power of 2)
+
 	enum
 	{
 		ARMY_ROUT_FIGURES = 0, ///< rout if half of the total figures die. All figures are treated equally
