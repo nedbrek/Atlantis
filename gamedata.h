@@ -28,6 +28,7 @@
 /// All the items in the game
 enum ItemDef
 {
+	I_FACTIONLEADER,
 	I_LEADERS,
 	I_VIKING,
 	I_BARBARIAN,
@@ -203,6 +204,8 @@ enum ItemDef
 	// Generic processed food
 	I_FOOD,
 	// Additional items for Miskatonic
+	I_PONY,
+	I_MBOAR,
 	// Races
 	I_HIGHELF,
 	I_WOODELF,
@@ -344,6 +347,7 @@ enum ItemDef
 enum ManDef
 {
 	MAN_NONE,
+	MAN_FLEADER,
 	MAN_LEADER,
 	MAN_VIKING,
 	MAN_BARBARIAN,
@@ -609,8 +613,10 @@ enum MountDef
 	MOUNT_NONE,
 	MOUNT_WHORSE,
 	MOUNT_HORSE,
+	MOUNT_PONY,
 	MOUNT_CAMEL,
 	MOUNT_MWOLF,
+	MOUNT_BOAR,
 	MOUNT_MSPIDER,
 	MOUNT_MOLE,
 	NUMMOUNTS

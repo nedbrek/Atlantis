@@ -68,6 +68,14 @@
 
 ItemType id[] =
 {
+	{"faction leader", "faction leaders", "FLEAD",
+	 0,
+	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 10, IT_MAN, 100, 1, MAN_FLEADER, 0,
+	 25,0,0,0,
+	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
+	 -1,0},
 	{"leader", "leaders", "LEAD",
 	 0,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -1338,7 +1346,7 @@ ItemType id[] =
 	 S_MONSTERTRAINING,1,2,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
 	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
 	 10, IT_ADVANCED | IT_MOUNT , 30,1,MOUNT_MWOLF, 0,
-	 17,17,0,0,
+	 19,19,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 I_LASSO,1},
 	{"giant spider","giant spiders","MSPI",
@@ -1438,6 +1446,22 @@ ItemType id[] =
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0},
 	// Additional items for Miskatonic
+	{"pony","ponies","PONY",
+	 0,
+	 S_HORSETRAINING,1,1,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
+	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 25, IT_NORMAL | IT_MOUNT, 30,1,MOUNT_PONY, 0,
+	 40,40,0,0,
+	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
+	 I_LASSO,1},
+	{"giant boar","giant boars","MBOAR",
+	 ItemType::NOMARKET,
+	 S_MONSTERTRAINING,2,2,1, {{-1,0}, {-1,0},{-1,0},{-1,0}},
+	 -1,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
+	 40, IT_ADVANCED | IT_MOUNT , 30,1,MOUNT_BOAR, 0,
+	 55,55,0,0,
+	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
+	 I_LASSO,1},
 	{"high elf","high elves","HELF",
 	 0,
 	 -1,0,0,0, {{-1,0}, {-1,0},{-1,0},{-1,0}},
@@ -2448,7 +2472,6 @@ ItemType id[] =
 	 0,0,0,0,
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0},
-
 };
 ItemType * ItemDefs = id;
 
@@ -2461,7 +2484,8 @@ ManType mt[] = {
 	// 1st skill, 2nd, 3rd, 4th, 5th, 6th, hits, alignment
 	//
 	{0,0,0,0,{-1,-1,-1,-1,-1,-1}, 1, ManType::NEUTRAL},//NONE
-	{-1,5,5,5,{-1,-1,-1,-1,-1,-1}, 10, ManType::NEUTRAL},//LEADER
+	{-1,5,5,5,{-1,-1,-1,-1,-1,-1}, 10, ManType::NEUTRAL},//FLEADER
+	{-1,5,5,5,{-1,-1,-1,-1,-1,-1}, 5, ManType::NEUTRAL},//LEADER
 	{1,3,2,4,{S_SHIPBUILDING,S_SAILING,S_LUMBERJACK,S_COMBAT,-1,-1}, 1, ManType::NEUTRAL},//VIKING
 	{1,3,2,4,{S_MINING,S_HUNTING,S_WEAPONSMITH,S_COMBAT,-1,-1}, 1, ManType::NEUTRAL},//BARBARIAN
 	{1,3,2,4,{S_HORSETRAINING,S_FARMING,S_CARPENTER,S_ENTERTAINMENT,S_COOKING,-1}, 1, ManType::NEUTRAL},//PLAINSMAN
@@ -2484,7 +2508,7 @@ ManType mt[] = {
 	{1,3,2,4,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 1, ManType::NEUTRAL},//MOUNTAINMAN
 	// Additional Races for Miskatonic
 	{3,5,3,4,{S_LONGBOW,S_FARMING,S_HORSETRAINING,S_HEALING,-1,-1}, 2, ManType::GOOD},// HIGHELF
-	{1,5,3,4,{S_LONGBOW,S_LUMBERJACK,S_HUNTING,-1,-1,-1}, 2, ManType::GOOD},// WOODELF
+	{1,5,3,4,{S_LONGBOW,S_LUMBERJACK,S_HUNTING,S_MONSTERTRAINING,-1,-1}, 2, ManType::GOOD},// WOODELF
 	{2,5,3,4,{S_CROSSBOW,S_QUARRYING,S_BUILDING,-1,-1,-1}, 2, ManType::GOOD},// HILLDWARF
 	{2,5,3,4,{S_FARMING,S_RANCHING,-1,-1,-1,-1}, 1, ManType::GOOD},// HALFLING
 	{1,5,2,3,{S_COMBAT,S_RANCHING,S_HORSETRAINING,-1,-1,-1}, 3, ManType::GOOD},// CENTAUR
@@ -2492,11 +2516,11 @@ ManType mt[] = {
 	{2,5,3,4,{S_CARPENTER,S_ENTERTAINMENT,S_BUILDING,-1,-1,-1}, 1, ManType::GOOD},// GNOME
 	{2,5,3,4,{S_LONGBOW,S_WEAPONSMITH,-1,-1,-1,-1}, 2, ManType::GOOD},// GREYELF
 	{2,5,3,4,{S_FARMING,S_CARPENTER,S_HORSETRAINING,S_RIDING,S_SHIPBUILDING,-1}, 2, ManType::NEUTRAL},// HUMAN
-	{1,5,3,4,{S_LUMBERJACK,S_RANCHING,S_HUNTING,S_HERBLORE,-1,-1}, 2, ManType::NEUTRAL},// LIZARDMAN
+	{1,5,3,4,{S_LUMBERJACK,S_FISHING,S_HERBLORE,-1,-1,-1}, 2, ManType::NEUTRAL},// LIZARDMAN
 	{1,5,3,4,{S_COMBAT,S_RANCHING,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::NEUTRAL},// HALFORC
 	{1,5,2,3,{S_COMBAT,S_WEAPONSMITH,-1,-1,-1,-1}, 3, ManType::EVIL},// MINOTAUR
 	{1,5,3,4,{S_COMBAT,S_LUMBERJACK,S_MONSTERTRAINING,-1,-1,-1}, 2, ManType::EVIL},// ORC
-	{2,5,3,4,{S_COMBAT,S_WEAPONSMITH,S_ARMORER,S_BUILDING,-1,-1}, 2, ManType::EVIL},// HOBGOBLIN
+	{2,5,3,4,{S_COMBAT,S_MINING,S_ARMORER,S_BUILDING,-1,-1}, 2, ManType::EVIL},// HOBGOBLIN
 	{1,5,3,4,{S_COMBAT,S_QUARRYING,S_HUNTING,-1,-1,-1}, 2, ManType::EVIL},// GNOLL
 	{1,5,2,3,{S_COMBAT,-1,-1,-1,-1,-1}, 3, ManType::EVIL},// OGRE
 	{1,5,3,4,{S_CROSSBOW,S_MONSTERTRAINING,-1,-1,-1,-1}, 1, ManType::EVIL},// GOBLIN
@@ -3240,10 +3264,10 @@ WeaponType wepd[] = {
 	 4, 0, 0},
 
 	// WEAPON_WIZSTAFF
-	{WeaponType::LONG | WeaponType::ALWAYSREADY,
+	{WeaponType::LONG,
 	 -1, -1,
 	 CRUSHING, ATTACK_COMBAT, 1,
-	 4, 4, 1},
+	 2, 4, 1},
 
 };
 
@@ -3339,7 +3363,7 @@ ArmorType armd[] = {
 	// ARMOR_EAPLATE
 	{ 0, 100, {95, 95, 90, 95, 90, 66, 66, 66}},
 	// ARMOR_WIZROBE
-	{ ArmorType::USEINASSASSINATE, 100, {10, 10, 10, 10, 0, 50, 50, 50}},
+	{ ArmorType::USEINASSASSINATE, 100, {10, 10, 10, 10, 0, 25, 25, 25}},
 };
 
 ArmorType *ArmorDefs = armd;
@@ -3355,9 +3379,13 @@ MountType mountd[] = {
 	{S_RIDING, 3, 5, 3, -1, 0},
 	// MOUNT_HORSE
 	{S_RIDING, 1, 3, 3, -1, 0},
+	// MOUNT_PONY
+	{S_RIDING, 1, 2, 2, -1, 0},
 	// MOUNT_CAMEL
 	{S_RIDING, 1, 2, 2, SPECIAL_CAMEL_FEAR, 3},
 	// MOUNT_MWOLF
+	{S_RIDING, 1, 2, 2, -1, 0},
+	// MOUNT_BOAR
 	{S_RIDING, 1, 3, 3, -1, 0},
 	// MOUNT_SPIDER
 	{S_RIDING, 2, 4, 4, -1, 0},
@@ -4205,7 +4233,7 @@ static TerrainType td[] = {
 	//
 	// name, similar_type, flags,
 	// pop, wages, economy, movepoints,
-	// product array
+	// product array (product, chance, amount)
 	// normal races array
 	// coastal races array
 	// wmonfreq, smallmon, bigmon, humanoid,
@@ -4347,7 +4375,7 @@ static TerrainType td[] = {
 	 //R_CERAN_PLAIN2
 	{"plain", R_PLAIN, TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
 	 750,14,35,1,
-	 {{I_HORSE,100,20},{I_WHORSE,5,5},{I_ROOTSTONE,5,4},{I_WOOD,10,4},
+	 {{I_HORSE,90,20},{I_WHORSE,5,5},{I_ROOTSTONE,5,4},{I_WOOD,10,4},
 	  {-1,0,0},{-1,0,0},{-1,0,0}},
 	 {I_HUMAN,I_HIGHELF,I_GNOME,-1},
 	 {I_HALFLING,-1,-1},
@@ -4356,8 +4384,8 @@ static TerrainType td[] = {
 	 //R_CERAN_PLAIN3
 	{"plain", R_PLAIN, TerrainType::RIDINGMOUNTS | TerrainType::FLYINGMOUNTS,
 	 700,13,30,1,
-	 {{I_HORSE,100,20},{I_WHORSE,5,5},{I_IRON,10,4},{I_MITHRIL,5,3},
-	  {-1,0,0},{-1,0,0},{-1,0,0}},
+	 {{I_PONY,50,20},{I_WHORSE,5,5},{I_IRON,10,4},{I_MITHRIL,5,3},
+	  {I_MWOLF,15,5},{-1,0,0},{-1,0,0}},
 	 {I_HUMAN,I_HIGHELF,I_HALFLING,-1},
 	 {I_GOBLINMAN,I_HOBGOBLIN,-1},
 	 1,I_LION,I_RAT,I_CENTAUR,
@@ -4366,7 +4394,7 @@ static TerrainType td[] = {
 	{"forest", R_FOREST, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_WOOD,100,20},{I_FUR,100,10},{I_HERBS,100,10},{I_IRONWOOD,25,5},
-	  {I_YEW,25,5},{I_MWOLF,10,5},{I_STONE,10,4}},
+	  {I_YEW,25,5},{I_MWOLF,15,5},{I_STONE,10,4}},
 	 {I_WOODELF,I_GOBLINMAN,-1,-1},
 	 {I_HIGHELF,-1,-1},
 	 2,I_WOLF,I_TRENT,I_KOBOLD,
@@ -4375,7 +4403,7 @@ static TerrainType td[] = {
 	{"forest", R_FOREST, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_WOOD,100,20},{I_FUR,100,10},{I_HERBS,100,10},{I_IRONWOOD,25,5},
-	  {I_YEW,25,5},{I_MWOLF,5,5},{-1,0,0}},
+	  {I_YEW,25,5},{I_MWOLF,15,5},{-1,0,0}},
 	 {I_WOODELF,-1,-1,-1},
 	 {I_HIGHELF,-1,-1},
 	 2,I_WOLF,I_TRENT,I_KOBOLD,
@@ -4384,7 +4412,7 @@ static TerrainType td[] = {
 	{"forest", R_FOREST, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_WOOD,100,20},{I_FUR,100,10},{I_HERBS,100,10},{I_IRONWOOD,25,5},
-	  {I_YEW,25,5},{I_MWOLF,10,5},{I_MUSHROOM,10,10}},
+	  {I_YEW,25,5},{I_MBOAR,25,5},{I_MUSHROOM,10,10}},
 	 {I_WOODELF,I_GNOLL,-1,-1},
 	 {I_HIGHELF,I_HUMAN,-1},
 	 8,I_WOLF,I_TRENT,I_KOBOLD,
@@ -4429,7 +4457,7 @@ static TerrainType td[] = {
 	{"mountain", R_MOUNTAIN, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_IRON,100,20},{I_STONE,100,10},{I_MITHRIL,25,5},{I_ROOTSTONE,25,5},
-	  {I_ADMANTIUM,5,5},{I_MWOLF,10,10},{I_WOOD,10,4}},
+	  {I_ADMANTIUM,5,5},{I_PONY,50,15},{I_WOOD,10,4}},
 	 {I_MOUNTAINDWARF,I_ORC,I_OGREMAN,-1},
 	 {I_HOBGOBLIN,-1,-1},
 	 2,I_GBEAR,I_ROC,I_OGRE,
@@ -4438,7 +4466,7 @@ static TerrainType td[] = {
 	{"mountain", R_MOUNTAIN, TerrainType::FLYINGMOUNTS,
 	 500,12,20,2,
 	 {{I_IRON,100,20},{I_STONE,100,10},{I_MITHRIL,25,5},{I_ROOTSTONE,25,5},
-	  {I_ADMANTIUM,5,5},{I_MWOLF,10,10},{-1,0,0}},
+	  {I_ADMANTIUM,5,5},{I_MWOLF,10,10},{I_PONY,30,20}},
 	 {I_MOUNTAINDWARF,I_ORC,-1,-1},
 	 {I_GOBLINMAN,-1,-1},
 	 4,I_GBEAR,I_ROC,I_OGRE,
@@ -4447,8 +4475,8 @@ static TerrainType td[] = {
 	{"hill", R_CERAN_HILL, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_IRON,80,15},{I_STONE,100,30},{I_MITHRIL,10,5},{I_ROOTSTONE,25,5},
-	  {I_HERBS,10,10},{I_MWOLF,15,20},{-1,0,0}},
-	 {I_HOBGOBLIN,I_ORC,I_OGREMAN,-1},
+	  {I_HERBS,10,10},{I_MWOLF,25,20},{I_PONY,30,20}},
+	 {I_HOBGOBLIN,I_ORC,I_OGREMAN,I_HILLDWARF},
 	 {I_GOBLINMAN,I_GNOME,-1},
 	 2,I_GBEAR,I_ROC,I_OGRE,
 	 12,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGETOWER,-1}},
@@ -4456,7 +4484,7 @@ static TerrainType td[] = {
 	{"hill", R_CERAN_HILL, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
 	 {{I_IRON,80,15},{I_STONE,100,30},{I_MITHRIL,10,5},{I_ROOTSTONE,25,5},
-	  {I_HERBS,10,6},{I_MWOLF,10,20},{-1,0,0}},
+	  {I_HERBS,10,6},{I_MWOLF,10,20},{I_MBOAR,20,15}},
 	 {I_HOBGOBLIN,I_ORC,I_GNOME,I_HILLDWARF},
 	 {I_HALFLING,I_HUMAN,-1},
 	 2,I_GBEAR,I_ROC,I_OGRE,

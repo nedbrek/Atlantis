@@ -4017,7 +4017,7 @@ void ARegionList::InitSetupGates(int level)
 
 	ARegionArray *pArr = pRegionArrays[level];
 
-	for (int i = 0; i < pArr->x / 8; ++i)
+	for (int i = 0; i < pArr->x / 4; ++i)
 	{
 		for (int j = 0; j < pArr->y / 16; ++j)
 		{

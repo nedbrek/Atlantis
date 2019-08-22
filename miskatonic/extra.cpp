@@ -46,80 +46,91 @@ int Game::SetupFaction( Faction *pFac )
 	}
 
 	// Setup Faction Leader
-    Unit *leader = GetNewUnit( pFac );
+    Unit *faction_leader = GetNewUnit(pFac);
 
-    leader->SetMen( I_LEADERS, 1 );
-	pFac->DiscoverItem(I_LEADERS, 0, 1);
+    faction_leader->SetMen(I_FACTIONLEADER, 1);
+	pFac->DiscoverItem(I_FACTIONLEADER, 0, 1);
 
 	// Flags
-    leader->reveal = REVEAL_FACTION;
-	leader->SetFlag(FLAG_BEHIND,1);
+    faction_leader->reveal = REVEAL_FACTION;
+	faction_leader->SetFlag(FLAG_BEHIND,1);
 
 	// Skills
-    leader->type = U_MAGE;
-    leader->Study(S_PATTERN, 30);
-    leader->Study(S_SPIRIT, 30);
-	leader->Study(S_FORCE, 30);
-	leader->Study(S_FIRE, 30);
-	leader->Study(S_COMBAT, 30);
-	leader->Study(S_TACTICS, 30);
-	leader->Study(S_GATE_LORE, 30);
+    faction_leader->type = U_MAGE;
+    faction_leader->Study(S_PATTERN, 30);
+    faction_leader->Study(S_SPIRIT, 30);
+	faction_leader->Study(S_FORCE, 30);
+	// faction_leader->Study(S_FIRE, 30);
+	// faction_leader->Study(S_COMBAT, 30);
+	// faction_leader->Study(S_TACTICS, 30);
+	faction_leader->Study(S_GATE_LORE, 30);
 
 	// Set combat spell
-	leader->combat = S_FIRE;
+	// faction_leader->combat = S_FIRE;
 
 	// Special wizard items
-	leader->items.SetNum(I_WIZARDSTAFF, 1);
+	faction_leader->items.SetNum(I_WIZARDSTAFF, 1);
 	pFac->DiscoverItem(I_WIZARDSTAFF, 0, 1);
-	leader->items.SetNum(I_WIZROBE, 1);
+	faction_leader->items.SetNum(I_WIZROBE, 1);
 	pFac->DiscoverItem(I_WIZROBE, 0, 1);
 
 	// Horses too heavy for base GATE LORE skill
 	if (!Globals->NEXUS_NO_EXITS) {
-		leader->items.SetNum(I_HORSE, 1);
+		faction_leader->items.SetNum(I_HORSE, 1);
 		pFac->DiscoverItem(I_HORSE, 0, 1);
 	}
 
 	if(TurnNumber() >= 24) {
-		leader->Study(S_PATTERN, 60);
-		leader->Study(S_SPIRIT, 60);
-		leader->Study(S_FORCE, 90);
-		leader->Study(S_EARTH_LORE, 30);
-		leader->Study(S_STEALTH, 30);
-		leader->Study(S_OBSERVATION, 30);
+		faction_leader->Study(S_PATTERN, 60);
+		faction_leader->Study(S_SPIRIT, 60);
+		faction_leader->Study(S_FORCE, 90);
+		faction_leader->Study(S_EARTH_LORE, 30);
+		faction_leader->Study(S_STEALTH, 30);
+		faction_leader->Study(S_OBSERVATION, 30);
 	}
 	if(TurnNumber() >= 36) {
-		leader->Study(S_TACTICS, 90);
-		leader->Study(S_COMBAT, 60);
+		faction_leader->Study(S_TACTICS, 90);
+		faction_leader->Study(S_COMBAT, 60);
 	}
 
 	if (Globals->UPKEEP_MINIMUM_FOOD > 0)
 	{
 		if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED))
 		{
-			leader->items.SetNum(I_FOOD, 6);
+			faction_leader->items.SetNum(I_FOOD, 6);
 			pFac->DiscoverItem(I_FOOD, 0, 1);
 		}
 		else if (!(ItemDefs[I_FISH].flags & ItemType::DISABLED))
 		{
-			leader->items.SetNum(I_FISH, 6);
+			faction_leader->items.SetNum(I_FISH, 6);
 			pFac->DiscoverItem(I_FISH, 0, 1);
 		}
 		else if (!(ItemDefs[I_LIVESTOCK].flags & ItemType::DISABLED))
 		{
-			leader->items.SetNum(I_LIVESTOCK, 6);
+			faction_leader->items.SetNum(I_LIVESTOCK, 6);
 			pFac->DiscoverItem(I_LIVESTOCK, 0, 1);
 		}
 		else if (!(ItemDefs[I_GRAIN].flags & ItemType::DISABLED))
 		{
-			leader->items.SetNum(I_GRAIN, 2);
+			faction_leader->items.SetNum(I_GRAIN, 2);
 			pFac->DiscoverItem(I_GRAIN, 0, 1);
 		}
-		leader->items.SetNum(I_SILVER, 10);
+		faction_leader->items.SetNum(I_SILVER, 10);
 		pFac->DiscoverItem(I_SILVER, 0, 1);
 	}
 
-	leader->MoveUnit( reg->GetDummy() );
+	faction_leader->MoveUnit(reg->GetDummy());
+
+	Unit *leaders = GetNewUnit( pFac );
+
+    leaders->SetMen(I_LEADERS, 2);
+	pFac->DiscoverItem(I_LEADERS, 0, 1);
+
+	// Flags
+    leaders->reveal = REVEAL_FACTION;
+	leaders->SetFlag(FLAG_BEHIND,1);
+
+	leaders->MoveUnit(reg->GetDummy());
 
     return( 1 );
 }
@@ -301,10 +312,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_ELONGBOW);
 	EnableItem(I_ECROSSBOW);
 	EnableItem(I_EHEAVYCROSSBOW);
-
-	// Flaming Sword
-	EnableItem(I_FSWORD);
-	EnableSkill(S_CREATE_FLAMING_SWORD);
 
 	// Special Leader Items
 	EnableItem(I_WIZARDSTAFF);

@@ -46,17 +46,17 @@ static int aa[] = { 3, 3, 3, 3, 3, 3, 3 };
 int *allowedApprentices = aa;
 int allowedApprenticesSize = sizeof(aa) / sizeof(aa[0]);
 
-static int aw[] = { 100, 100, 100, 100, 100, 100 };
+static int aw[] = { 25, 25, 25, 25, 25, 25 };
 int *allowedTaxes = aw;
 int allowedTaxesSize = sizeof(aw) / sizeof(aw[0]);
 
-static int at[] = { 100, 100, 100, 100, 100, 100 };
+static int at[] = { 25, 25, 25, 25, 25, 25 };
 int *allowedTrades = at;
 int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 19 ),   // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 20 ),   // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -89,8 +89,8 @@ static GameDefs g = {
 	50, /* GUARD_MONEY */
 	4000, /* CITY_POP */
 
-	20, /* WMON_FREQUENCY */
-	10, /* LAIR_FREQUENCY */
+	15, /* WMON_FREQUENCY */
+	5, /* LAIR_FREQUENCY */
 
 	0, /* FACTION_POINTS */
 
@@ -106,7 +106,7 @@ static GameDefs g = {
 	1, // CITY_MONSTERS_EXIST
 	1, // WANDERING_MONSTERS_EXIST
 	1, // LAIR_MONSTERS_EXIST
-	0, // WEATHER_EXISTS
+	1, // WEATHER_EXISTS
 	1, // OPEN_ENDED
 	0, // NEXUS_EXISTS
 	0, // CONQUEST_GAME
@@ -128,7 +128,7 @@ static GameDefs g = {
 
 	1, // DEFAULT_WORK_ORDER
 
-	GameDefs::FACLIM_MAGE_COUNT, // FACTION_LIMIT_TYPE
+	GameDefs::FACLIM_FACTION_TYPES, // FACTION_LIMIT_TYPE
 
 	GameDefs::WFLIGHT_MUST_LAND,	// FLIGHT_OVER_WATER
 	1, // NO_SWIM_TO_SEA
@@ -147,12 +147,12 @@ static GameDefs g = {
 	1, // NEXUS_NO_EXITS
 	1,	// BATTLE_FACTION_INFO
 	0,	// ALLOW_WITHDRAW
-	2500,	// CITY_RENAME_COST
+	5000,	// CITY_RENAME_COST
 	1,	// TAX_PILLAGE_MONTH_LONG
 	0,	// MULTI_HEX_NEXUS
 	1,	// UNDERWORLD_LEVELS
 	1,	// UNDERDEEP_LEVELS
-	0,	// ABYSS_LEVEL
+	1,	// ABYSS_LEVEL
 	80,	// TOWN_PROBABILITY
 	35,	// UNDERWORLD_TOWN_PROBABILITY
 	75,	// TOWN_SPREAD
@@ -178,9 +178,9 @@ static GameDefs g = {
 	1,	// PROPORTIONAL_AMTS_USAGE
 	1,  // USE_WEAPON_ARMOR_COMMAND
 	1,  // WMONSTER_SPOILS_RECOVERY
-	3,  // MONSTER_NO_SPOILS
-	9,  // MONSTER_SPOILS_RECOVERY
-	2,  // MAX_ASSASSIN_FREE_ATTACKS
+	4,  // MONSTER_NO_SPOILS
+	12, // MONSTER_SPOILS_RECOVERY
+	1,  // MAX_ASSASSIN_FREE_ATTACKS
 	1,  // RELEASE_MONSTERS
 	1,  // CHECK_MONSTER_CONTROL_MID_TURN
 	0,  // DETECT_GATE_NUMBERS
