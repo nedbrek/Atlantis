@@ -1623,6 +1623,7 @@ int Unit::MaintCost()
 
 	// handle leaders
 	int leaders = GetMen(I_LEADERS);
+	leaders += GetMen(I_FACTIONLEADER);
 	if (leaders < 0)
 		leaders = 0;
 
@@ -1669,7 +1670,7 @@ int Unit::MaintCost()
 		{
 			if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 
-			if (i == I_LEADERS) { continue; }
+			if (i == I_LEADERS || i == I_FACTIONLEADER) { continue; }
 
 			const int men_in_unit = GetMen(i);
 
@@ -1691,6 +1692,9 @@ void Unit::Short(int needed, int hunger)
 {
 	if (faction->IsNPC())
 		return; // Don't starve monsters and the city guard!
+
+	if (GetMen(I_FACTIONLEADER))
+		return; // FACTION LEADER can't starve
 
 	switch (Globals->SKILL_STARVATION)
 	{
