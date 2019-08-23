@@ -274,13 +274,13 @@ AString* ShowSkill::Report(Faction *f)
 					"RANDOM UNITS <unit> ... UNITS is followed by a list "
 					"of units to follow the mage through the Gate (the mage "
 					"always jumps through the Gate). At level 1, the mage "
-					"may carry 15 weight units through the Gate (including "
+					"may carry 35 weight units through the Gate (including "
 					"the weight of the mage).";
 			} else if (level == 2) {
 				*str += "A mage with Gate Lore skill 2 can detect Gates in "
 					"adjacent regions. The mage should use the syntax CAST "
 					"Gate_Lore DETECT in order to detect these nearby Gates. "
-					"Also, at level 2 Gate Lore, the mage may carry 100 "
+					"Also, at level 2 Gate Lore, the mage may carry 150 "
 					"weight units through a Gate when doing a random jump.";
 			} else if(level == 3) {
 				*str += "A mage with Gate Lore skill 3 and higher can step "

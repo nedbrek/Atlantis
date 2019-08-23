@@ -1529,10 +1529,10 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 	if (order->gate != -1) level -= 2;
 	switch (level) {
 		case 1:
-			maxweight = 15;
+			maxweight = 35;
 			break;
 		case 2:
-			maxweight = 100;
+			maxweight = 150;
 			break;
 		case 3:
 		case 4:

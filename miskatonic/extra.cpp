@@ -56,9 +56,9 @@ int Game::SetupFaction( Faction *pFac )
 	faction_leader->SetFlag(FLAG_BEHIND,1);
 
 	// Skills
-    faction_leader->type = U_MAGE;
-    faction_leader->Study(S_PATTERN, 30);
-    faction_leader->Study(S_SPIRIT, 30);
+	faction_leader->type = U_MAGE;
+	faction_leader->Study(S_PATTERN, 30);
+	faction_leader->Study(S_SPIRIT, 30);
 	faction_leader->Study(S_FORCE, 30);
 	// faction_leader->Study(S_FIRE, 30);
 	// faction_leader->Study(S_COMBAT, 30);
