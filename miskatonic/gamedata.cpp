@@ -4051,7 +4051,7 @@ static ObjectType ot[] =
 	{"Sacred Grove",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_YEW,30,S_LUMBERJACK,5,
+	 I_YEW,10,S_LUMBERJACK,5,
 	 15,2,2,
 	 -1,I_YEW},
 	// JT
@@ -4207,7 +4207,7 @@ static ObjectType ot[] =
 	{"Oasis",
 	 ObjectType::DISABLED | ObjectType::CANENTER | ObjectType::CANMODIFY,
 	 0,0,0,0,
-	 I_YEW,10,S_CAMELTRAINING,3,
+	 I_STONE,10,S_CAMELTRAINING,3,
 	 10,2,2,
 	 -1,I_CAMEL},
 	{"Gem Appraiser",
