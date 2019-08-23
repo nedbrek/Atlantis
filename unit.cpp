@@ -1465,7 +1465,7 @@ int Unit::Practise(int sk)
 
 int Unit::IsLeader()
 {
-	return GetMen(I_LEADERS) ? 1 : 0;
+	return GetMen(I_LEADERS) + GetMen(I_FACTIONLEADER) ? 1 : 0;
 }
 
 int Unit::IsNormal()
