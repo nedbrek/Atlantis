@@ -667,8 +667,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"different strengths and weaknesses will have all the "
 			"weaknesses, and none of the strengths of either race.";
 
-		temp += "Races are categorized as good, neutral, or evil. "
-		    "Your faction may not mix good and evil units.";
+		temp += "Races are categorized as good, neutral, or evil. Your faction"
+		    " may not mix good and evil units. You must DECLARE";
+		temp += " your alignment before buying men that are good or evil.";
 	}
 	f.Paragraph(temp);
 
@@ -4116,11 +4117,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H4", "DECLARE [faction] [attitude]");
 	f.TagText("H4", "DECLARE [faction]");
 	f.TagText("H4", "DECLARE DEFAULT [attitude]");
+	f.TagText("H4", "DECLARE ALIGNMENT [good|evil]");
 	temp = "The first form of the DECLARE order sets the attitude of your "
 		"faction towards the given faction.  The second form cancels any "
 		"attitude towards the given faction (so your faction's attitude "
 		"towards that faction will be its default attitude).  The third "
 		"form sets your faction's default attitude.";
+	f.Paragraph(temp);
+	temp = "The fourth form forces your alignment to the given state. This is "
+	    "necessary before you buy men of that particular alignment. Once set, "
+		 "it cannot be changed.";
 	f.Paragraph(temp);
 	f.Paragraph("Examples:");
 	temp = "Declare your faction to be hostile to faction 15.";

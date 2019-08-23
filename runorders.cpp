@@ -35,9 +35,6 @@
 ///@return true if the man type given by 'manIdx' is compatible with faction alignment 'a'
 bool isAlignCompat(int manIdx, Faction::Alignments a)
 {
-	if (a == Faction::ALL_NEUTRAL)
-		return true;
-
 	const ManType::Alignment ma = ManDefs[manIdx].align;
 	if (ma == ManType::NEUTRAL)
 		return true;
@@ -1540,7 +1537,7 @@ int Game::GetBuyAmount(ARegion * r,Market * m)
 
 						if (!isAlignCompat(ItemDefs[o->item].index, u->faction->alignments_))
 						{
-							u->Error("BUY: Can't mix good and evil men faction-wide.");
+							u->Error("BUY: Can only buy units matching your alignment.");
 							o->num = 0;
 						}
 					}
@@ -1628,17 +1625,6 @@ void Game::DoBuy(ARegion * r,Market * m)
 					{
 						// recruiting; must dilute skills
 						u->AdjustSkills();
-
-						// adjust faction alignment
-						const int mt = ItemDefs[o->item].index;
-						if (ManDefs[mt].align != ManType::NEUTRAL)
-						{
-							if (u->faction->alignments_ == Faction::ALL_NEUTRAL)
-							{
-								u->faction->alignments_ = Faction::Alignments(ManDefs[mt].align);
-							}
-							//else should be compatible
-						}
 					}
 
 					u->items.SetNum(o->item,u->items.GetNum(o->item) + temp);

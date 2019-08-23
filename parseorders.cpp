@@ -29,6 +29,19 @@
 #include "gamedata.h"
 
 //----------------------------------------------------------------------------
+Faction::Alignments parseAlignment(const AString &str)
+{
+	if (str == "good")
+		return Faction::SOME_GOOD;
+	if (str == "evil")
+		return Faction::SOME_EVIL;
+	if (str == "neutral")
+		return Faction::ALL_NEUTRAL;
+
+	return Faction::ALIGN_ERROR;
+}
+
+//----------------------------------------------------------------------------
 OrdersCheck::OrdersCheck()
 : dummyOrder(NORDERS)
 {
@@ -2164,6 +2177,33 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (!token)
 	{
 		ParseError(pCheck, 0, f, "DECLARE: No faction given.");
+		return;
+	}
+
+	if (*token == "alignment")
+	{
+		delete token;
+
+		if (f->alignments_ != Faction::ALL_NEUTRAL)
+		{
+			f->Error("DECLARE ALIGNMENT: Your alignment is already set.");
+			return;
+		}
+
+		token = o->gettoken();
+		const Faction::Alignments alignment = parseAlignment(*token);
+
+		if (alignment == Faction::ALIGN_ERROR)
+		{
+			f->Error(AString("DECLARE ALIGNMENT: Invalid value: '") + *token + "'.");
+			delete token;
+			return;
+		}
+		delete token;
+
+		if (!pCheck)
+			f->alignments_ = alignment;
+
 		return;
 	}
 

@@ -119,7 +119,8 @@ public:
 	 {
 		 ALL_NEUTRAL,
 		 SOME_EVIL,
-		 SOME_GOOD
+		 SOME_GOOD,
+		 ALIGN_ERROR
 	 };
 
 public:
