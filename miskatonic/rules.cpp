@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 22 ),   // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 23 ),   // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -106,7 +106,7 @@ static GameDefs g = {
 	1, // CITY_MONSTERS_EXIST
 	1, // WANDERING_MONSTERS_EXIST
 	1, // LAIR_MONSTERS_EXIST
-	1, // WEATHER_EXISTS
+	0, // WEATHER_EXISTS
 	1, // OPEN_ENDED
 	0, // NEXUS_EXISTS
 	0, // CONQUEST_GAME
