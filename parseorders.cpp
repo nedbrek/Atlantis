@@ -2183,6 +2183,8 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	if (*token == "alignment")
 	{
 		delete token;
+		if (!f) // check has no faction
+			return;
 
 		if (f->alignments_ != Faction::ALL_NEUTRAL)
 		{
