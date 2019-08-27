@@ -72,10 +72,6 @@ void Production::Readin(Ainfile *f)
 	skill = f->GetInt();
 	level = f->GetInt();
 	productivity = f->GetInt();
-	if (itemtype != I_SILVER)
-	{
-		skill = ItemDefs[itemtype].pSkill;
-	}
 }
 
 AString Production::WriteReport()

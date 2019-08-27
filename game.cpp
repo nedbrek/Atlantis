@@ -314,6 +314,12 @@ int Game::NewGame(int seed)
     return( 1 );
 }
 
+void adjustItemId(int &start, int amt, int min_val)
+{
+	if (start > min_val)
+		start += amt;
+}
+
 int Game::OpenGame()
 {
 	//
@@ -343,7 +349,7 @@ int Game::OpenGame()
 	}
 	delete s2;
 
-	ATL_VER eVersion = f.GetInt();
+	const ATL_VER eVersion = f.GetInt();
 	Awrite(AString("Saved Game Engine Version: ") + ATL_VER_STRING(eVersion));
 	if(ATL_VER_MAJOR(eVersion) != ATL_VER_MAJOR(CURRENT_ATL_VER) ||
 			ATL_VER_MINOR(eVersion) != ATL_VER_MINOR(CURRENT_ATL_VER)) {
@@ -449,6 +455,88 @@ int Game::OpenGame()
 	SetupUnitNums();
 
 	f.Close();
+
+	// fixup for adding FLEAD and 2 items after I_FOOD
+	if (eVersion < MAKE_ATL_VER(4, 2, 49))
+	{
+		// adjust show list in factions
+		{
+		forlist (&factions)
+		{
+			Faction *f = (Faction*)elem;
+			forlist (&f->items)
+			{
+				Item *item = (Item*)elem;
+				adjustItemId(item->type, 1, -1);
+				adjustItemId(item->type, 2, I_FOOD);
+			}
+		}
+		}
+
+		// in regions: adjust item ids in production, markets, and units
+		forlist(&regions)
+		{
+			ARegion *r = (ARegion*)elem;
+
+			adjustItemId(r->race, 1, -1);
+			adjustItemId(r->race, 2, I_FOOD);
+
+			{
+			forlist((&r->products))
+			{
+				Production *p = (Production*)elem;
+				adjustItemId(p->itemtype, 1, -1);
+				adjustItemId(p->itemtype, 2, I_FOOD);
+			}
+			}
+
+			{
+			forlist((&r->markets))
+			{
+				Market *m = (Market*)elem;
+				adjustItemId(m->item, 1, -1);
+				adjustItemId(m->item, 2, I_FOOD);
+			}
+			}
+
+			forlist(&r->objects)
+			{
+				Object *o = (Object*)elem;
+				forlist(&o->units)
+				{
+					Unit *u = (Unit*)elem;
+					forlist(&u->items)
+					{
+						Item *item = (Item*)elem;
+						adjustItemId(item->type, 1, -1);
+						adjustItemId(item->type, 2, I_FOOD);
+					}
+
+					if (u->readyItem != -1)
+					{
+						adjustItemId(u->readyItem, 1, -1);
+						adjustItemId(u->readyItem, 2, I_FOOD);
+					}
+
+					for (unsigned i = 0; i < MAX_READY; ++i)
+					{
+						if (u->readyWeapon[i] != -1)
+						{
+							adjustItemId(u->readyWeapon[i], 1, -1);
+							adjustItemId(u->readyWeapon[i], 2, I_FOOD);
+						}
+
+						if (u->readyArmor[i] != -1)
+						{
+							adjustItemId(u->readyArmor[i], 1, -1);
+							adjustItemId(u->readyArmor[i], 2, I_FOOD);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return( 1 );
 }
 
@@ -2370,7 +2458,7 @@ int Game::GetAvgMaintPerMan()
 	{
 		if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 		if (ItemDefs[i].flags & ItemType::DISABLED) { continue; }
-		if (i == I_LEADERS) { continue; }
+		if (i == I_LEADERS || i == I_FACTIONLEADER) { continue; }
 
 		man_count++;
 		hits_sum += ManDefs[ItemDefs[i].index].hits;
