@@ -768,7 +768,6 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 {
 	if (o->item == I_SILVER)
 	{
-		u->Error("Can't do that in this region.");
 		return true;
 	}
 
