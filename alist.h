@@ -31,9 +31,10 @@
 class AListElem
 {
 public:
+	/// destructor
 	virtual ~AListElem();
 
-	AListElem *next;
+	AListElem *next; ///< next element in the list
 };
 
 /**
@@ -42,7 +43,9 @@ public:
 class AList
 {
 public:
+	/// constructor
 	AList();
+	/// destructor
 	~AList();
 
 	/// delete all elements
