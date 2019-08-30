@@ -205,6 +205,7 @@ public: // data
 	int hitstotal; ///< Number of hits at start of battle
 
 	int kills_from[6];
+	int hits_from[6];
 
 private:
 	void DoHealLevel(Battle *b, int type, int useItems);
