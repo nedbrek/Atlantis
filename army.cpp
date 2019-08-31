@@ -595,12 +595,11 @@ void Soldier::Dead()
 //----------------------------------------------------------------------------
 Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 {
-	kills_from[0] = 0;
-	kills_from[1] = 0;
-	kills_from[2] = 0;
-	kills_from[3] = 0;
-	kills_from[4] = 0;
-	kills_from[5] = 0;
+	for (unsigned i = 0; i < 6; ++i)
+	{
+		kills_from[i] = 0;
+		hits_from[i] = 0;
+	}
 
 	int tacspell = 0;
 	Unit *tactitian = ldr;
@@ -732,10 +731,14 @@ void Army::endRound(Battle *b)
 	};
 	for (unsigned i = 0; i < 6; ++i)
 	{
-		if (kills_from[i])
+		if (hits_from[i] || kills_from[i])
 		{
-			b->AddLine(*(leader->name) + " loses " + kills_from[i] + " to " + attack_type_str[i] + " attacks.");
-			had_losses = true;
+			b->AddLine(*(leader->name) + " takes " + hits_from[i] + " hits from " +
+			    attack_type_str[i] + " attacks, resulting in " + kills_from[i] + " losses."
+			);
+			if (kills_from[i])
+				had_losses = true;
+			hits_from[i] = 0;
 			kills_from[i] = 0;
 		}
 	}
@@ -1455,6 +1458,7 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 
 			// 8. seeya!
 			const bool died = DamageSoldier(tarnum);
+			++hits_from[attack_bin];
 			if (died)
 			{
 				++*num_killed;
