@@ -733,7 +733,7 @@ void Army::endRound(Battle *b)
 	{
 		if (hits_from[i] || kills_from[i])
 		{
-			b->AddLine(*(leader->name) + " takes " + hits_from[i] + " hits from " +
+			b->AddLine(*(leader->faction->name) + " takes " + hits_from[i] + " hits from " +
 			    attack_type_str[i] + " attacks, resulting in " + kills_from[i] + " losses."
 			);
 			if (kills_from[i])
@@ -744,45 +744,37 @@ void Army::endRound(Battle *b)
 	}
 
 	if (!had_losses)
-		b->AddLine(*(leader->name) + " loses 0.");
+		b->AddLine(*(leader->faction->name) + " loses 0.");
 }
 
 void Army::WriteLosses(Battle *b)
 {
-	b->AddLine(*(leader->name) + " loses " + (count - NumAlive()) + ".");
+	b->AddLine(*(leader->faction->name) + " loses " + (count - NumAlive()) + ".");
 
-	if (notbehind != count)
+	if (notbehind == count)
+		return; // no damage
+
+	AList units; // tmp unit list
+
+	for (int i = notbehind; i < count; ++i)
 	{
-		AList units; // tmp unit list
-		for (int i = notbehind; i < count; ++i)
+		if (!GetUnitList(&units, soldiers[i]->unit))
 		{
-			if (!GetUnitList(&units, soldiers[i]->unit))
-			{
-				UnitPtr *u = new UnitPtr;
-				u->ptr = soldiers[i]->unit;
-				units.Add(u);
-			}
+			UnitPtr *u = new UnitPtr;
+			u->ptr = soldiers[i]->unit;
+			units.Add(u);
 		}
-
-		bool comma = false;
-		AString damaged;
-		forlist(&units)
-		{
-			UnitPtr *u = (UnitPtr*)elem;
-			if (comma)
-			{
-				damaged += AString(", ") + AString(u->ptr->num);
-			}
-			else
-			{
-				damaged = AString("Damaged units: ") + AString(u->ptr->num);
-				comma = true;
-			}
-		}
-
-		units.DeleteAll();
-		b->AddLine(damaged + ".");
 	}
+
+	b->AddLine("Damaged units:");
+	forlist(&units)
+	{
+		UnitPtr *u = (UnitPtr*)elem;
+		b->AddLine(AString("   ") + *u->ptr->name);
+	}
+
+
+	units.DeleteAll();
 }
 
 void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
