@@ -50,6 +50,18 @@ int Hits(int a, int d)
 	if (Globals->LINEAR_COMBAT) {
 		tohit = a;
 		tomiss = d;
+
+		// make sure values are at least 1
+		if (tohit < 1)
+		{
+			tomiss += abs(tohit) + 1;
+			tohit = 1;
+		}
+		if (tomiss < 1)
+		{
+			tohit += abs(tomiss) + 1;
+			tomiss = 1;
+		}
 	}
 	// Default to power of 2 combat
 	else {
