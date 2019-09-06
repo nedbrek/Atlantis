@@ -31,6 +31,7 @@
 #include "gamedefs.h"
 #include "object.h"
 #include "unit.h"
+#include <cstdlib>
 
 //----------------------------------------------------------------------------
 int pow(int b, int p)
