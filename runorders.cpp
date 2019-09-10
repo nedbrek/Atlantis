@@ -1606,13 +1606,20 @@ void Game::DoBuy(ARegion * r,Market * m)
 				BuyOrder * o = (BuyOrder *) elem;
 
 				if (o->item == m->item) {
-					int temp = 0;
-					if (m->amount == -1) {
-						// unlimited market
-						temp = o->num;
-					} else {
+					const int max_money = (o->num == -1) ? -1 : o->num * m->price;
+					const int unit_money = u->canConsume(I_SILVER, max_money);
+
+					int temp = o->num;
+					if (temp * m->price > unit_money)
+					{
+						temp = unit_money / m->price;
+					}
+
+					// if not unlimited market
+					if (m->amount != -1)
+					{
 						if (attempted) {
-							temp = (m->amount * o->num +
+							temp = (m->amount * temp +
 									getrandom(attempted)) / attempted;
 							if (temp < 0) temp = 0;
 						}
@@ -1626,8 +1633,8 @@ void Game::DoBuy(ARegion * r,Market * m)
 						// recruiting; must dilute skills
 						u->AdjustSkills();
 					}
-
 					u->items.SetNum(o->item,u->items.GetNum(o->item) + temp);
+
 					u->consume(I_SILVER, temp * m->price);
 
 					u->Event(AString("Buys ") + ItemString(o->item,temp)
