@@ -775,7 +775,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	const int input = ItemDefs[o->item].pInput[0].item;
 	if (input == -1)
 	{
-		u->Error(AString("PRODUCE: ") + item.abr + ": can't use multiple PRODUCE commands with raw materials.");
+		u->Error(AString("PRODUCE: ") + item.abr + ": not present in this region.");
 
 		return true;
 	}
@@ -1040,6 +1040,7 @@ void Game::RunProduceOrders(ARegion *r)
 					{
 						// normal PRODUCE order
 						ProduceOrder *o = (ProduceOrder*)u->monthorders;
+
 						const bool ret = RunUnitProduce(r, u, o, &pi);
 						if (ret)
 						{
@@ -1054,6 +1055,20 @@ void Game::RunProduceOrders(ARegion *r)
 						{
 							// peek at first order
 							ProduceOrder *o = &q->orders_[0];
+							const ItemType &item = ItemDefs[o->item];
+							if (item.pInput[0].item == -1)
+							{
+								u->Error(AString("PRODUCE: ") + item.abr + ": can't use multiple PRODUCE commands with raw materials.");
+								q->orders_.pop_front();
+								// if all done
+								if (q->orders_.empty())
+								{
+									delete u->monthorders;
+									u->monthorders = NULL;
+									done = true;
+								}
+								continue;
+							}
 
 							// run it
 							const bool ret = RunUnitProduce(r, u, o, &pi);
