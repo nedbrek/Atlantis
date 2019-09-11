@@ -1688,6 +1688,17 @@ int Unit::MaintCost()
 	return unit_maint_cost;
 }
 
+int rangeCheck(const std::map<int, int> &m, int v)
+{
+	for (std::map<int, int>::const_iterator i = m.begin(); i != m.end(); ++i)
+	{
+		v -= i->second;
+		if (v < 0)
+			return i->first;
+	}
+	return -1;
+}
+
 void Unit::Short(int needed, int hunger)
 {
 	if (faction->IsNPC())
@@ -1717,52 +1728,81 @@ void Unit::Short(int needed, int hunger)
 	if (needed < 1 && hunger < 1)
 		return;
 
-	int n = 0;
+	int n = 0; // number starved
 
-	for (int i = 0; i <= NITEMS; ++i)
+	// find all the men
+	std::map<int, int> man_map; // item type to count
+	int num_men = 0;
+
+	forlist(&items)
 	{
-		if (!(ItemDefs[ i ].type & IT_MAN))
+		const Item *i = (const Item*)elem;
+		if (i->type == I_LEADERS)
+			continue; // treat leaders separately
+
+		const ItemType &id = ItemDefs[i->type];
+		if ((id.type & IT_MAN) == 0)
+			continue; // not a man
+
+		num_men += i->num;
+		man_map[i->type] = i->num;
+	}
+
+	// while there are men to starve and maintenance needed
+	while (num_men && (needed || hunger))
+	{
+		// pick a man at random
+		const int tgt = getrandom(num_men);
+
+		// find man type from map
+		const int tgt_type = rangeCheck(man_map, tgt);
+		const ItemType &id = ItemDefs[tgt_type];
+
+		// see if he starves
+		if (getrandom(100) < Globals->STARVE_PERCENT)
 		{
-			// only men need sustenance
-			continue;
+			// argh!
+			SetMen(tgt_type, GetMen(tgt_type) - 1);
+			++n; // num starved
+
+			// subtract man
+			--num_men;
+			--man_map[tgt_type];
 		}
 
-		if (i == I_LEADERS)
+		// subtract support
+		int min_cost = Globals->MAINTENANCE_COST;
+		if (Globals->MAINT_COST_PER_HIT)
 		{
-			// don't starve leaders just yet
-			continue;
+			const int hits = ManDefs[id.index].hits;
+			min_cost *= hits;
 		}
 
-		while (GetMen(i))
+		// if all men pay for skills
+		if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL)
 		{
-			if (getrandom(100) < Globals->STARVE_PERCENT)
-			{
-				SetMen(i, GetMen(i) - 1);
-				++n;
-			}
+			const int levels = SkillLevels();
+			int cost = levels * Globals->MAINTENANCE_MULTIPLIER;
+			if (cost < min_cost)
+				cost = min_cost;
 
-			if (Globals->MULTIPLIER_USE == GameDefs::MULT_ALL)
-			{
-				const int levels = SkillLevels();
-				i = levels * Globals->MAINTENANCE_MULTIPLIER;
-				if (i < Globals->MAINTENANCE_COST)
-					i = Globals->MAINTENANCE_COST;
+			needed -= cost;
+		}
+		else
+			needed -= min_cost;
 
-				needed -= i;
-			}
-			else
-				needed -= Globals->MAINTENANCE_COST;
-
+		if (hunger > 0)
 			hunger -= Globals->UPKEEP_MINIMUM_FOOD;
+	}
 
-			if (needed < 1 && hunger < 1)
-			{
-				if (n)
-					Error(AString(n) + " starve to death.");
+	if (needed < 1 && hunger < 1)
+	{
+		if (n > 1)
+			Error(AString(n) + " men desert due to lack of supplies.");
+		if (n == 1)
+			Error(AString(n) + " man deserts due to lack of supplies.");
 
-				return;
-			}
-		}
+		return;
 	}
 
 	while (GetMen(I_LEADERS))
@@ -1787,8 +1827,11 @@ void Unit::Short(int needed, int hunger)
 		hunger -= Globals->UPKEEP_MINIMUM_FOOD;
 		if (needed < 1 && hunger < 1)
 		{
-			if (n)
-				Error(AString(n) + " starve to death.");
+			if (n > 1)
+				Error(AString(n) + " men desert due to lack of supplies.");
+			if (n == 1)
+				Error(AString(n) + " man deserts due to lack of supplies.");
+
 			return;
 		}
 	}
