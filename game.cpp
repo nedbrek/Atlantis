@@ -1608,23 +1608,31 @@ void Game::ReadOrders()
 
 void Game::MakeFactionReportLists()
 {
+	// factions aware of the region
 	FactionVector vector(factionseq);
 
+	//foreach region
 	forlist(&regions) {
-		vector.ClearVector();
+		ARegion *reg = (ARegion*)elem;
 
-		ARegion *reg = (ARegion *) elem;
+		vector.ClearVector(); // reset the vector
+
+		// farsight
 		forlist(&reg->farsees) {
 			Faction *fac = ((Farsight *) elem)->faction;
 			vector.SetFaction(fac->num, fac);
 		}
+
 		{
+			// units passing through
 			forlist(&reg->passers) {
 				Faction *fac = ((Farsight *)elem)->faction;
 				vector.SetFaction(fac->num, fac);
 			}
 		}
+
 		{
+			// units present
 			forlist(&reg->objects) {
 				Object *obj = (Object *) elem;
 
@@ -1635,11 +1643,14 @@ void Game::MakeFactionReportLists()
 			}
 		}
 
-		for (int i=0; i<vector.vectorsize; i++) {
-			if (vector.GetFaction(i)) {
-				ARegionPtr *ptr = new ARegionPtr;
-				ptr->ptr = reg;
-				vector.GetFaction(i)->present_regions.Add(ptr);
+		for (int i = 0; i < vector.vectorsize; ++i)
+		{
+			Faction *fp = vector.GetFaction(i);
+			if (fp) {
+				// why do regions have a race with zero pop?
+				if (reg->race != -1 && reg->population > 0)
+					fp->DiscoverItem(reg->race, 0, 1);
+				fp->present_regions.Add(new ARegionPtr(reg));
 			}
 		}
 	}
