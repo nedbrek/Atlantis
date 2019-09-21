@@ -719,6 +719,11 @@ finished_army:
 
 Army::~Army()
 {
+	for (int i = 0; i < count; ++i)
+	{
+		delete soldiers[i];
+		soldiers[i] = NULL;
+	}
 	delete[] soldiers;
 }
 
@@ -762,32 +767,32 @@ void Army::endRound(Battle *b)
 
 void Army::WriteLosses(Battle *b)
 {
-	b->AddLine(*(leader->faction->name) + " loses " + (count - NumAlive()) + ".");
+	const int num_lost = count - NumAlive();
+	b->AddLine(*(leader->faction->name) + " loses " + num_lost + ".");
 
-	if (notbehind == count)
-		return; // no damage
+	if (num_lost == 0)
+		return; // no losses
 
-	AList units; // tmp unit list
+	AList damaged_units; // tmp unit list
 
 	for (int i = notbehind; i < count; ++i)
 	{
-		if (!GetUnitList(&units, soldiers[i]->unit))
+		if (!GetUnitList(&damaged_units, soldiers[i]->unit))
 		{
 			UnitPtr *u = new UnitPtr;
 			u->ptr = soldiers[i]->unit;
-			units.Add(u);
+			damaged_units.Add(u);
 		}
 	}
 
 	b->AddLine("Damaged units:");
-	forlist(&units)
+	forlist(&damaged_units)
 	{
 		UnitPtr *u = (UnitPtr*)elem;
 		b->AddLine(AString("   ") + *u->ptr->name);
 	}
 
-
-	units.DeleteAll();
+	damaged_units.DeleteAll();
 }
 
 void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
@@ -892,8 +897,6 @@ void Army::Regenerate(Battle *b)
 
 void Army::Lose(Battle *b, ItemList *spoils)
 {
-	WriteLosses(b);
-
 	for (int i = 0; i < count; ++i)
 	{
 		Soldier *&s = soldiers[i];
@@ -908,15 +911,13 @@ void Army::Lose(Battle *b, ItemList *spoils)
 
 			s->Dead();
 		}
-		delete s;
-		s = NULL;
 	}
+
+	WriteLosses(b);
 }
 
 void Army::Tie(Battle *b)
 {
-	WriteLosses(b);
-
 	for (int x = 0; x < count; ++x)
 	{
 		Soldier *&s = soldiers[x];
@@ -928,9 +929,9 @@ void Army::Tie(Battle *b)
 		{
 			s->Dead();
 		}
-		delete s;
-		s = NULL;
 	}
+
+	WriteLosses(b);
 }
 
 int Army::CanBeHealed()
@@ -1020,12 +1021,23 @@ void Army::DoHealLevel(Battle *b, int type, int useItems)
 void Army::Win(Battle *b, ItemList *spoils)
 {
 	DoHeal(b);
-	WriteLosses(b);
 
 	// check for casualties
 	const int na = NumAlive();
 
 	const int wintype = (count - na) ? WIN_DEAD : WIN_NO_DEAD;
+
+	// return soldiers to units
+	for (int x = 0; x < count; ++x)
+	{
+		Soldier *&s = soldiers[x];
+		if (x < NumAlive())
+			s->Alive(wintype);
+		else
+			s->Dead();
+	}
+
+	WriteLosses(b);
 
 	// divide spoils
 	AList units; // avoid loop overhead
@@ -1096,19 +1108,6 @@ void Army::Win(Battle *b, ItemList *spoils)
 		}
 
 		units.deleteAll();
-	}
-
-	// return soldiers to units
-	for (int x = 0; x < count; ++x)
-	{
-		Soldier *&s = soldiers[x];
-		if (x < NumAlive())
-			s->Alive(wintype);
-		else
-			s->Dead();
-
-		delete s;
-		s = NULL;
 	}
 }
 
