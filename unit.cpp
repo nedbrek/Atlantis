@@ -459,24 +459,42 @@ int Unit::CanGetSpoil(const Item *i)
 	if (!i)
 		return 0;
 
-	const int weight = ItemDefs[i->type].weight;
-	if (!weight)
+	const int item_weight = ItemDefs[i->type].weight;
+	if (!item_weight)
 		return 1; // any unit can carry 0 weight spoils
 
 	// unit is avoiding spoils
 	if (flags & FLAG_NOSPOILS) return 0;
 
-	// check spoils flags
-	// (only pick up items with their own carrying capacity)
-	const int fly  = ItemDefs[i->type].fly;
-	const int ride = ItemDefs[i->type].ride;
-	const int walk = ItemDefs[i->type].walk;
+	// go from most limiting to least
+	const bool want_fly = (flags & FLAG_FLYSPOILS );
+	const bool want_ride = (flags & FLAG_RIDESPOILS);
+	const bool want_walk = (flags & FLAG_WALKSPOILS);
+	if (!want_fly && !want_ride && !want_walk)
+		return 1; // no restrictions
 
-	if ((flags & FLAG_FLYSPOILS ) && fly  < weight) return 0; // only flying
-	if ((flags & FLAG_WALKSPOILS) && walk < weight) return 0; // only walking
-	if ((flags & FLAG_RIDESPOILS) && ride < weight) return 0; // only riding
+	const int total_weight = item_weight + Weight();
+	if (want_fly)
+	{
+		const int fly = ItemDefs[i->type].fly;
+		if (fly + FlyingCapacity() < total_weight)
+			return 0;
+	}
+	if (want_ride)
+	{
+		const int ride = ItemDefs[i->type].ride;
+		if (ride + RidingCapacity() < total_weight)
+			return 0;
+	}
+	if (want_walk)
+	{
+		const int walk = ItemDefs[i->type].walk;
+		if (walk + WalkingCapacity() < total_weight)
+			return 0;
+	}
+	// TODO SWIM spoils
 
-	return 1; // all spoils
+	return 1; // passed all checks
 }
 
 AString Unit::SpoilsReport()

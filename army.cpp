@@ -1039,75 +1039,44 @@ void Army::Win(Battle *b, ItemList *spoils)
 
 	WriteLosses(b);
 
+	if (na == 0)
+		return; // not sure how you win with 0 alive
+
 	// divide spoils
-	AList units; // avoid loop overhead
+	// TODO: special case I_SILV?
 	forlist(spoils)
 	{
-		Item *i = (Item*)elem;
-		if (!i || !na)
+		const Item *i = (Item*)elem;
+		if (!i)
 			continue;
 
-		// make a list of units who can get this type of spoil
-		for (int x = 0; x < na; ++x)
+		int num_items = i->num;
+
+		bool done = false;
+		int offset = 0;
+		while (!done)
 		{
-			Unit *u = soldiers[x]->unit;
-			if (u->CanGetSpoil(i))
+			done = true; // last time through the loop
+			int x = 0;
+			for (; num_items && x < na; ++x)
 			{
-				UnitPtr *up = new UnitPtr;
-				up->ptr = u;
-				units.Add(up);
+				// give it to next soldier in line
+				Unit *u = soldiers[(x + offset) % na]->unit;
+
+				// check for spoils flags
+				if (!u->CanGetSpoil(i))
+					continue; // try someone else
+
+				// ok add one
+				u->items.SetNum(i->type, u->items.GetNum(i->type)+1);
+				u->faction->DiscoverItem(i->type, 0, 1);
+				--num_items;
+				done = false; // keep going
 			}
+
+			// adjust the next soldier to get spoils
+			offset = x == na ? 0 : x;
 		}
-
-		const int ns = units.Num();
-		if (ns == 0)
-			continue;
-
-		// first divide spoils equally
-		int n = i->num / ns;
-		if (n >= 1)
-		{
-			forlist(&units)
-			{
-				UnitPtr *up = (UnitPtr*)elem;
-				up->ptr->items.SetNum(i->type,
-				         up->ptr->items.GetNum(i->type)+n);
-				up->ptr->faction->DiscoverItem(i->type, 0, 1);
-			}
-		}
-
-		// then allocate the remainder
-		n = i->num % ns;
-		if (n)
-		{
-			// foreach remaining item
-			for (int x = 0; x < n; ++x)
-			{
-				// give it to a random soldier
-				int t = getrandom(ns);
-
-				UnitPtr *up = (UnitPtr*)units.First();
-				if (up)
-				{
-					while (t > 0)
-					{
-						UnitPtr *p = (UnitPtr*)units.Next(up);
-						if (!p)
-							break;
-
-						up = p;
-						--t;
-					}
-
-					up->ptr->items.SetNum(i->type,
-					      up->ptr->items.GetNum(i->type)+1);
-
-					up->ptr->faction->DiscoverItem(i->type, 0, 1);
-				}
-			}
-		}
-
-		units.deleteAll();
 	}
 }
 
