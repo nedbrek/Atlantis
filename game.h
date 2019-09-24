@@ -41,12 +41,12 @@ class Game;
 #include "object.h"
 #include "orders.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 65 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 66 )
 
 class OrdersCheck
 {
 public:
-    OrdersCheck();
+    OrdersCheck(Game &g);
 
     Aoutfile *pCheckFile;
     Unit dummyUnit;
@@ -85,6 +85,7 @@ public:
 	int GenRules(const AString &, const AString &, const AString &);
 	int DoOrdersCheck( const AString &strOrders, const AString &strCheck );
 
+	 Faction* getFaction(int n);
     Faction *AddFaction(int setup=1);
 
     //

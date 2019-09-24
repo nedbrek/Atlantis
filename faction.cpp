@@ -652,7 +652,8 @@ void Attitude::Readin( Ainfile *f, ATL_VER v )
 	attitude = f->GetInt();
 }
 
-Faction::Faction()
+Faction::Faction(Game &g)
+: game_(g)
 {
 	exists = 1;
 	name = 0;
@@ -672,7 +673,8 @@ Faction::Faction()
 	alignments_ = ALL_NEUTRAL;
 }
 
-Faction::Faction(int n)
+Faction::Faction(Game &g, int n)
+: game_(g)
 {
 	exists = 1;
 	num = n;
@@ -1218,13 +1220,26 @@ void Faction::RemoveAttitude(int f)
 
 int Faction::GetAttitude(int n)
 {
-	if (n == num) return A_ALLY;
-	forlist((&attitudes)) {
+	// self
+	if (n == num)
+		return A_ALLY;
+
+	// alignment check
+	int max_relation = A_ALLY;
+	if (Globals->ALIGN_RESTRICT_RELATIONS && alignments_ != ALL_NEUTRAL)
+	{
+		Faction *t = game_.getFaction(n);
+		if (t->alignments_ != ALL_NEUTRAL && alignments_ != t->alignments_)
+			max_relation = A_UNFRIENDLY;
+	}
+
+	forlist((&attitudes))
+	{
 		Attitude *a = (Attitude *) elem;
 		if (a->factionnum == n)
-			return a->attitude;
+			return std::min(max_relation, a->attitude);
 	}
-	return defaultattitude;
+	return std::min(max_relation, defaultattitude);
 }
 
 void Faction::SetAttitude(int num,int att)

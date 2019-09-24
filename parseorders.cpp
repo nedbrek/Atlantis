@@ -42,8 +42,9 @@ Faction::Alignments parseAlignment(const AString &str)
 }
 
 //----------------------------------------------------------------------------
-OrdersCheck::OrdersCheck()
-: dummyOrder(NORDERS)
+OrdersCheck::OrdersCheck(Game &g)
+: dummyFaction(g)
+, dummyOrder(NORDERS)
 {
 	pCheckFile = NULL;
 	numshows = 0;
