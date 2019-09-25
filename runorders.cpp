@@ -2223,6 +2223,18 @@ void Game::DoExchangeOrder(ARegion * r,Unit * u,ExchangeOrder * o)
 		return;
 	}
 
+	// check for give across factions
+	if (Globals->ALIGN_RESTRICT_RELATIONS && u->faction != t->faction &&
+	    u->faction->alignments_ != Faction::ALL_NEUTRAL &&
+	    t->faction->alignments_ != Faction::ALL_NEUTRAL)
+	{
+		if (u->faction->alignments_ != t->faction->alignments_)
+		{
+			u->Error("EXCHANGE: Cannot give across alignments.");
+			return;
+		}
+	}
+
 	// Check each Item can be given
 	if( ItemDefs[ o->giveItem].flags & ItemType::CANTGIVE ) {
 		u->Error(AString("EXCHANGE: Can't trade ") +
@@ -2424,6 +2436,18 @@ int Game::DoGiveOrder(ARegion * r,Unit * u,GiveOrder * o)
 		u->Error(AString("GIVE: Attempt to give ")+ItemString(o->item,amt)+
 				" to self.");
 		return 0;
+	}
+
+	// check for give across factions
+	if (Globals->ALIGN_RESTRICT_RELATIONS && u->faction != t->faction &&
+	    u->faction->alignments_ != Faction::ALL_NEUTRAL &&
+	    t->faction->alignments_ != Faction::ALL_NEUTRAL)
+	{
+		if (u->faction->alignments_ != t->faction->alignments_)
+		{
+			u->Error("GIVE: Cannot give across alignments.");
+			return 0;
+		}
 	}
 
 	// New RULE -- Must be able to see unit to give something to them!

@@ -124,8 +124,8 @@ public:
 	 };
 
 public:
-    Faction();
-    Faction(int);
+    explicit Faction(Game &g);
+    Faction(Game &g, int);
     ~Faction();
     
     void Readin( Ainfile *, ATL_VER version );
@@ -161,6 +161,8 @@ public:
 
 	void DiscoverItem(int item, int force, int full);
 
+public: // data
+	Game &game_; ///< back pointer to game
     int num;
 
     //

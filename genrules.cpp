@@ -428,7 +428,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"wiped out, you can rejoin the game with a new starting "
 		"character.)";
 	f.Paragraph(temp);
-	Faction fac;
+	Faction fac(*this);
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
 		temp = "A faction has one pre-set limit; it may not contain more than ";
 		temp += AString(AllowedMages(&fac)) + " mages";

@@ -432,7 +432,7 @@ int Game::OpenGame()
 	int i = f.GetInt();
 
 	for (int j=0; j<i; j++) {
-		Faction * temp = new Faction;
+		Faction * temp = new Faction(*this);
 		temp->Readin( &f, eVersion );
 		factions.Add(temp);
 	}
@@ -1175,7 +1175,7 @@ int Game::DoOrdersCheck( const AString &strOrders, const AString &strCheck )
         return( 0 );
     }
 
-    OrdersCheck check;
+    OrdersCheck check(*this);
     check.pCheckFile = &checkFile;
 
     ParseOrders( 0, &ordersFile, &check );
@@ -1697,12 +1697,23 @@ void Game::DeleteDeadFactions()
     }
 }
 
+Faction* Game::getFaction(int n)
+{
+	forlist(&factions)
+	{
+		Faction *fac = (Faction*)elem;
+		if (fac->num == n)
+			return fac;
+	}
+	return NULL;
+}
+
 Faction *Game::AddFaction(int setup)
 {
 	//
 	// set up faction
 	//
-	Faction *temp = new Faction(factionseq);
+	Faction *temp = new Faction(*this, factionseq);
 	AString x("NoAddress");
 	temp->SetAddress(x);
 	temp->lastorders = TurnNumber();
@@ -2295,7 +2306,7 @@ void Game::CreateNPCFactions()
 	Faction *f;
 	AString *temp;
 	if(Globals->CITY_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
+		f = new Faction(*this, factionseq++);
 		guardfaction = f->num;
 		temp = new AString("The Guardsmen");
 		f->SetName(temp);
@@ -2306,7 +2317,7 @@ void Game::CreateNPCFactions()
 	// Only create the monster faction if wandering monsters or lair
 	// monsters exist.
 	if(Globals->LAIR_MONSTERS_EXIST || Globals->WANDERING_MONSTERS_EXIST) {
-		f = new Faction(factionseq++);
+		f = new Faction(*this, factionseq++);
 		monfaction = f->num;
 		temp = new AString("Creatures");
 		f->SetName(temp);

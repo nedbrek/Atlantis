@@ -137,6 +137,7 @@ public:
 	int OPEN_ENDED; ///< 0: check victory conditions, 1: game ends when players quit
 	int NEXUS_EXISTS; ///< start players in the nexus
 	int CONQUEST_GAME; ///< special combat oriented rules
+	int ALIGN_RESTRICT_RELATIONS; ///< restrict relations between good and evil
 
 	//---some economic controls
 	int RANDOM_ECONOMY; ///< economic settings in towns are randomized
