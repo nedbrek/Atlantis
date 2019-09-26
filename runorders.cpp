@@ -678,6 +678,11 @@ void Game::RunFindUnit(Unit * u)
 	int all = 0;
 	Faction *fac;
 	forlist(&u->findorders) {
+        if (Globals->DISABLE_FIND_EMAIL_COMMAND) {
+            u->Error("FIND: This command has been disabled.");
+            break;
+        }
+
 		FindOrder * f = (FindOrder *) elem;
 		if(f->find == 0) all = 1;
 		if(!all) {
