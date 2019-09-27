@@ -1498,6 +1498,9 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 		return;
 	}
 
+    // Mage cannot instantly guard the destination
+    u->guard = GUARD_NONE;
+
 	u->Event(AString("Teleports to ") + tar->Print(&regions) + ".");
 	u->MoveUnit(tar->GetDummy());
 }
@@ -1611,6 +1614,9 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 						comma = 1;
 					}
 
+                    // Unit cannot instantly guard the destination
+                    loc->unit->guard = GUARD_NONE;
+
 					loc->unit->Event(AString("Is teleported through a ") +
 							"Gate to " + tar->Print(&regions) + " by " +
 							*u->name + ".");
@@ -1623,6 +1629,9 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 			}
 		}
 	}
+
+    // Mage cannot instantly guard the destination
+    u->guard = GUARD_NONE;
 
 	u->Event(AString("Jumps through a Gate to ") +
 			tar->Print( &regions ) + ".");
@@ -1714,6 +1723,8 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 						tar->region->Print( &regions ) +
 						" by " + *u->name + ".");
 
+                // Unit cannot instantly guard the destination
+                loc->unit->guard = GUARD_NONE;
 				loc->unit->MoveUnit( tar->obj );
 
 				if (loc->unit != u)
