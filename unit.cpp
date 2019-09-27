@@ -1967,9 +1967,9 @@ int Unit::CanFly(int weight)
 	return (FlyingCapacity() >= weight) ? 1 : 0;
 }
 
-int Unit::CanReallySwim()
+int Unit::CanReallySwim(int weight)
 {
-	return (SwimmingCapacity() >= items.Weight()) ? 1 : 0;
+	return (SwimmingCapacity() >= items.Weight() + weight) ? 1 : 0;
 }
 
 int Unit::CanSwim()

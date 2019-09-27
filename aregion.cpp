@@ -1536,12 +1536,10 @@ void ARegion::SetLoc(int x, int y, int z)
 	zloc = z;
 }
 
-void ARegion::Kill(Unit *u)
+Unit* findReceiver(ARegion *r, Unit *u, Item *ip, bool in_ocean)
 {
-	Unit *first = NULL; // first unit from same faction (not 'u')
-
 	//foreach object
-	forlist((&objects))
+	forlist((&r->objects))
 	{
 		Object *obj = (Object*)elem;
 		if (!obj)
@@ -1550,28 +1548,40 @@ void ARegion::Kill(Unit *u)
 		//foreach unit in the object
 		forlist((&obj->units))
 		{
-			if (((Unit*)elem)->faction->num == u->faction->num &&
-			    ((Unit*)elem) != u)
+			Unit *ru = (Unit*)elem;
+			if (ru->faction->num != u->faction->num)
+				continue; // must be same faction
+
+			if (ru == u)
+				continue; // don't give to self
+
+			if (!ru->IsAlive())
+				continue;
+
+			if (!ru->CanGetSpoil(ip))
+				continue; // don't want it
+
+			// check for swimmer drowning
+			if (in_ocean && ru->object->type == O_DUMMY)
 			{
-				first = (Unit*)elem;
-				break;
+				const int wt = ItemDefs[ip->type].weight; 
+				if (!ru->CanReallySwim(wt))
+					continue;
 			}
+
+			// ok
+			return ru;
 		}
-
-		if (first)
-			break;
 	}
 
-	// give u's stuff to first
-	if (!first)
-	{
-		// nobody else here
-		u->MoveUnit(0); // exit any building
-		hell.Add(u);
-		return;
-	}
+	// couldn't find anyone
+	return NULL;
+}
 
-	{ // macro protect
+void ARegion::Kill(Unit *u)
+{
+	const bool in_ocean = TerrainDefs[type].similar_type == R_OCEAN;
+
 	forlist(&u->items)
 	{
 		Item *i = (Item*)elem;
@@ -1579,25 +1589,33 @@ void ARegion::Kill(Unit *u)
 		if (IsSoldier(i->type))
 			continue; // don't give men
 
-		// If we're in ocean and not in a structure, make sure that the
-		// first unit can actually hold the stuff and not drown.
-		// If the items would cause them to drown then they will drop them
-		first->items.SetNum(i->type, first->items.GetNum(i->type) + i->num);
+		const int wt = ItemDefs[i->type].weight; 
+		int num_items = i->num;
 
-		if (TerrainDefs[type].similar_type == R_OCEAN)
+		Unit *recv_u = findReceiver(this, u, i, in_ocean);
+		if (!recv_u)
 		{
-			if (first->object->type == O_DUMMY)
-			{
-				if (!first->CanReallySwim())
-				{
-					// drop items
-					first->items.SetNum(i->type, first->items.GetNum(i->type) - i->num);
-				}
-			}
+			u->items.SetNum(i->type, 0);
+			continue;
+		}
+
+		// give all weightless items
+		if (wt == 0)
+		{
+			recv_u->items.SetNum(i->type, recv_u->items.GetNum(i->type) + num_items);
+			u->items.SetNum(i->type, 0);
+			continue;
+		}
+
+		// keep giving items one at a time
+		while (num_items > 0 && recv_u)
+		{
+			recv_u->items.SetNum(i->type, recv_u->items.GetNum(i->type) + 1);
+			recv_u = findReceiver(this, u, i, in_ocean);
+			--num_items;
 		}
 
 		u->items.SetNum(i->type, 0);
-	}
 	}
 
 	u->MoveUnit(0); // exit any building
