@@ -439,6 +439,9 @@ public:
 
 	/// If we are preventing sail through, should we also prevent the 'easy portage' that the above allows by default?
 	int ALLOW_TRIVIAL_PORTAGE;
+
+    /// Disable command FIND to allow players to be anonymous, communication is handled elsewhere, etc
+    int DISABLE_FIND_EMAIL_COMMAND;
 };
 
 extern GameDefs *Globals;

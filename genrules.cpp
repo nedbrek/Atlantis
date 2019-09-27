@@ -277,7 +277,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", f.Link("#exchange", "exchange"));
 	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 		f.TagText("LI", f.Link("#faction", "faction"));
-	f.TagText("LI", f.Link("#find", "find"));
+    if (!Globals->DISABLE_FIND_EMAIL_COMMAND) {
+	    f.TagText("LI", f.Link("#find", "find"));
+    }
 	f.TagText("LI", f.Link("#forget", "forget"));
 	f.TagText("LI", f.Link("#form", "form"));
 	f.TagText("LI", f.Link("#give", "give"));
@@ -4264,17 +4266,19 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	f.ClassTagText("DIV", "rule", "");
-	f.LinkRef("find");
-	f.TagText("H4", "FIND [faction]");
-	f.TagText("H4", "FIND ALL");
-	temp = "Find the email address of the specified faction or of all "
-		"factions.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Find the email address of faction 4.";
-	temp2 = "FIND 4";
-	f.CommandExample(temp, temp2);
+    if (!Globals->DISABLE_FIND_EMAIL_COMMAND) {
+        f.ClassTagText("DIV", "rule", "");
+        f.LinkRef("find");
+        f.TagText("H4", "FIND [faction]");
+        f.TagText("H4", "FIND ALL");
+        temp = "Find the email address of the specified faction or of all "
+            "factions.";
+        f.Paragraph(temp);
+        f.Paragraph("Example:");
+        temp = "Find the email address of faction 4.";
+        temp2 = "FIND 4";
+        f.CommandExample(temp, temp2);
+    }
 
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("forget");
@@ -5206,8 +5210,10 @@ int Game::GenRules(const AString &rules, const AString &css,
 		temp += f.Link("#weapon", "WEAPON");
 	}
 	temp += " orders are processed.";
-	f.TagText("LI", temp);
-	temp = f.Link("#find", "FIND") + " orders are processed.";
+    if (!Globals->DISABLE_FIND_EMAIL_COMMAND) {
+	    f.TagText("LI", temp);
+	    temp = f.Link("#find", "FIND") + " orders are processed.";
+    }
 	f.TagText("LI", temp);
 	temp = f.Link("#leave", "LEAVE") + " orders are processed.";
 	f.TagText("LI", temp);

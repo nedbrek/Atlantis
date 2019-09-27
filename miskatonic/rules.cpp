@@ -198,6 +198,7 @@ static GameDefs g = {
 	50,	// UPKEEP_FOOD_VALUE
 	1,	// PREVENT_SAIL_THROUGH
 	0,	// ALLOW_TRIVIAL_PORTAGE
+    1,  // DISABLE_FIND_EMAIL_COMMAND
 };
 
 GameDefs * Globals = &g;
