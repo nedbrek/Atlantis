@@ -27,11 +27,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
-extern "C" {
-#include "i_rand.h"
-}
-
-static randctx isaac_ctx;
 
 char buf[256];
 
@@ -53,6 +48,7 @@ static void morewait()
 
 void initIO()
 {
+    // I am unsure of why this is hard-coded.
 	seedrandom( 1783 );
 }
 
@@ -69,32 +65,24 @@ int getrandom(int range)
 	if (neg)
 		range = -range;
 
-	unsigned long i = isaac_rand( &isaac_ctx );
-	i %= range;
+	int random = rand() % range;
 
-	int ret = 0;
 	if (neg)
-		ret = (int)(i * -1);
-	else
-		ret = (int)i;
+		random = (int)(random * -1);
 
-	return ret;
+	return random;
 }
 
 void seedrandom(int num)
 {
-	isaac_ctx.randa = isaac_ctx.randb = isaac_ctx.randc = (ub4)0;
-
-	for (ub4 i = 0; i < RANDSIZ; ++i)
-	{
-		isaac_ctx.randrsl[i] = (ub4)num + i;
-	}
-	randinit( &isaac_ctx, TRUE );
+    // Now to do this directly.
+    srand((unsigned int)num);
 }
 
 void seedrandomrandom()
 {
-	seedrandom( time(0) );
+	time_t now = clock();
+    seedrandom((unsigned int)now);
 }
 
 int Agetint()
