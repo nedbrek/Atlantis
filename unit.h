@@ -327,7 +327,7 @@ public:
 	int CanWalk(int weight);
 	int CanFly();
 	int CanSwim();
-	int CanReallySwim();
+	int CanReallySwim(int weight = 0);
 
 	///@return highest move possible
 	int MoveType();
