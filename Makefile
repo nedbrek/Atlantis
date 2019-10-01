@@ -1,7 +1,7 @@
 .PHONY: all clean lib
 
 CFLAGS := -g -I. -I.. -Wall -MP -MMD
-CXXFLAGS := $(CFLAGS)
+CXXFLAGS := $(CFLAGS) -std=c++11
 
 CXXBUILD = $(CXX) $(CXXFLAGS) -MF $(patsubst %.cpp,dep/%.d,$<) -c -o $@ $<
 
