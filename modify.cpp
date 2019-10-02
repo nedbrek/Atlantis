@@ -28,7 +28,10 @@
 // 2001/Jul/08 Joseph Traub    Moved functions t here from game.cpp
 //
 #include "game.h"
+#include "items.h"
 #include "gamedata.h"
+#include "object.h"
+#include "skills.h"
 
 void Game::EnableSkill(int sk)
 {

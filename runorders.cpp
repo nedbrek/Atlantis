@@ -29,7 +29,10 @@
 // 2001/Feb/21 Joseph Traub    Added FACLIM_UNLIMITED
 //
 #include "game.h"
+#include "faction.h"
 #include "gamedata.h"
+#include "object.h"
+#include "orders.h"
 
 //----------------------------------------------------------------------------
 ///@return true if the man type given by 'manIdx' is compatible with faction alignment 'a'

@@ -23,10 +23,12 @@
 //
 // END A3HEADER
 #include "game.h"
+#include "faction.h"
 #include "gameio.h"
 #include "orders.h"
 #include "skills.h"
 #include "gamedata.h"
+#include "object.h"
 
 //----------------------------------------------------------------------------
 Faction::Alignments parseAlignment(const AString &str)
@@ -41,7 +43,24 @@ Faction::Alignments parseAlignment(const AString &str)
 	return Faction::ALIGN_ERROR;
 }
 
-//----------------------------------------------------------------------------
+/// Check syntax of user orders
+class OrdersCheck
+{
+public:
+	/// constructor
+	OrdersCheck(Game &g);
+
+	/// register an error
+	void Error(const AString &error);
+
+public: // data
+	Aoutfile *pCheckFile;
+	Unit dummyUnit;
+	Faction dummyFaction;
+	Order dummyOrder;
+	int numshows;
+};
+
 OrdersCheck::OrdersCheck(Game &g)
 : dummyFaction(g)
 , dummyOrder(NORDERS)
@@ -62,6 +81,33 @@ void OrdersCheck::Error(const AString &strError)
 }
 
 //----------------------------------------------------------------------------
+int Game::DoOrdersCheck(const AString &strOrders, const AString &strCheck)
+{
+	Aorders ordersFile;
+	if (ordersFile.OpenByName(strOrders) == -1)
+	{
+		Awrite("No such orders file!");
+		return 0;
+	}
+
+	Aoutfile checkFile;
+	if (checkFile.OpenByName(strCheck) == -1)
+	{
+		Awrite("Couldn't open the orders check file!");
+		return 0;
+	}
+
+	OrdersCheck check(*this);
+	check.pCheckFile = &checkFile;
+
+	ParseOrders(0, &ordersFile, &check);
+
+	ordersFile.Close();
+	checkFile.Close();
+
+	return 1;
+}
+
 int Game::ParseDir(AString *token)
 {
 	for (int i = 0; i < NDIRS; ++i)
@@ -1497,9 +1543,6 @@ void Game::ProcessRestartOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			pFac->SetAddress(*(u->faction->address));
 			AString *pass = new AString(*(u->faction->password));
 			pFac->password = pass;
-			AString *facstr = new AString(AString("Restarting ")
-			      + *(pFac->address) + ".");
-			newfactions.Add(facstr);
 		}
 	}
 }

@@ -22,12 +22,17 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-
-#include <time.h>
-
 #include "game.h"
+#include "faction.h"
+#include "items.h"
+#include "skills.h"
 #include "gamedata.h"
 #include "fileio.h"
+#include "object.h"
+#include "astring.h"
+#include "gameio.h"
+
+#include <time.h>
 
 AString NumToWord(int n)
 {

@@ -31,6 +31,8 @@
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"
+#include "gameio.h"
+#include "astring.h"
 
 void usage()
 {

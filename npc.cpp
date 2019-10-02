@@ -23,7 +23,11 @@
 //
 // END A3HEADER
 #include "game.h"
+#include "faction.h"
+#include "items.h"
 #include "gamedata.h"
+#include "object.h"
+#include "gameio.h"
 
 void Game::CreateCityMons()
 {

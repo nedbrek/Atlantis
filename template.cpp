@@ -29,7 +29,13 @@
 //                            Added this file.
 // 2001/Feb/18 Joseph Traub   Added support for Conquest map types
 #include "game.h"
+#include "unit.h"
+#include "items.h"
 #include "gamedata.h"
+#include "object.h"
+#include "astring.h"
+#include "fileio.h"
+
 #include <stdio.h>
 #ifdef WIN32
 #include <memory.h>
