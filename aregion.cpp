@@ -25,6 +25,12 @@
 #include "aregion.h"
 #include "game.h"
 #include "gamedata.h"
+#include "object.h"
+#include "orders.h"
+#include "unit.h"
+#include "faction.h"
+#include "fileio.h"
+#include "gameio.h"
 #include <stdio.h>
 #include <string.h>
 

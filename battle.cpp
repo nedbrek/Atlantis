@@ -23,10 +23,14 @@
 //
 // END A3HEADER
 #include "battle.h"
+#include "faction.h"
 #include "game.h"
 #include "army.h"
 #include "gamedata.h"
 #include "gamedefs.h"
+#include "object.h"
+#include "orders.h"
+#include "unit.h"
 
 //----------------------------------------------------------------------------
 Battle::Battle()

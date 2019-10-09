@@ -134,7 +134,7 @@ public:
     
     void SetName(AString *);
     void SetNameNoChange( AString *str );
-    void SetAddress( AString &strNewAddress );
+    void SetAddress(const AString &strNewAddress);
     
     void CheckExist(ARegionList *);
     void Error(const AString &);

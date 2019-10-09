@@ -34,8 +34,10 @@
 //                             else your city guard and monster facs lose
 //                             their NPC status in UNLIMITED
 //
+#include "faction.h"
 #include "gamedata.h"
 #include "game.h"
+#include "object.h"
 #include <stdlib.h>
 
 const char *as[] = {
@@ -808,7 +810,7 @@ void Faction::SetNameNoChange( AString *s )
 	}
 }
 
-void Faction::SetAddress( AString &strNewAddress )
+void Faction::SetAddress(const AString &strNewAddress)
 {
 	delete address;
 	address = new AString( strNewAddress );
@@ -844,7 +846,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 {
 	if (IsNPC() && num == 1)
 	{
-		if(Globals->GM_REPORT || (pGame->month == 0 && pGame->year == 1)) {
+		if(Globals->GM_REPORT || (pGame->currentMonth() == 0 && pGame->currentYear() == 1)) {
 			int i, j;
 			// Put all skills, items and objects in the GM report
 			shows.DeleteAll();
@@ -902,7 +904,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			}
 
 			present_regions.DeleteAll();
-			forlist(&(pGame->regions)) {
+			forlist(&(pGame->getRegions())) {
 				ARegion *reg = (ARegion *)elem;
 				ARegionPtr *ptr = new ARegionPtr;
 				ptr->ptr = reg;
@@ -911,8 +913,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			{
 				forlist(&present_regions) {
 					((ARegionPtr*)elem)->ptr->WriteReport(f, this,
-														  pGame->month,
-														  &(pGame->regions));
+														  pGame->currentMonth(),
+														  &(pGame->getRegions()));
 				}
 			}
 			present_regions.DeleteAll();
@@ -930,7 +932,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
 		f->PutStr(*name + " (" + FactionTypeStr() + ")");
 	}
-	f->PutStr(AString(MonthNames[ pGame->month ]) + ", Year " + pGame->year );
+	f->PutStr(AString(MonthNames[ pGame->currentMonth() ]) + ", Year " + pGame->currentYear() );
 	f->EndLine();
 
 	f->PutStr( AString( "Atlantis Engine Version: " ) +
@@ -1095,8 +1097,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			Attitude * a = (Attitude *) elem;
 			if (a->attitude == i) {
 				if (j) temp += ", ";
-				temp += *( GetFaction( &( pGame->factions ),
-							a->factionnum)->name);
+				temp += *( pGame->getFaction(a->factionnum)->name);
 				j = 1;
 			}
 		}
@@ -1111,8 +1112,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	f->PutStr("");
 
 	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->month,
-												 &( pGame->regions ));
+		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->currentMonth(),
+												 &( pGame->getRegions() ));
 	}
 
 	if (temformat != TEMPLATE_OFF) {
@@ -1140,8 +1141,8 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		forlist((&present_regions)) {
 			// DK
 			((ARegionPtr *) elem)->ptr->WriteTemplate( f, this,
-													   &( pGame->regions ),
-													   pGame->month );
+													   &( pGame->getRegions() ),
+													   pGame->currentMonth() );
 		}
 	} else {
 		f->PutStr("");
