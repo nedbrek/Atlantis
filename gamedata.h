@@ -836,6 +836,7 @@ enum ObjectDef
 	O_OASIS,
 	O_GEMAPPRAISER,
 	O_HPTOWER,
+    O_MCITADEL,
 	NOBJECTS
 };
 

@@ -4222,6 +4222,12 @@ static ObjectType ot[] =
 	 I_IRONWOOD,25,-1,0,
 	 25,2,3,
 	 -1,-1},
+	{"Magical Citadel",
+	 ObjectType::NEVERDECAY | ObjectType::CANENTER | ObjectType::CANMODIFY,
+	 1875,0,0,110,
+	 I_ROOTSTONE,640,S_BUILDING,5,
+	 0,0,0,
+	 -1,-1},
 };
 
 ObjectType *const ObjectDefs = ot;
