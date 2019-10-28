@@ -1022,11 +1022,14 @@ int Unit::canConsume(int itemId, int hint)
 		}
 	}
 
-	return num_items;;
+	return num_items;
 }
 
 void Unit::consume(int itemId, int num)
 {
+	if (num == 0)
+		return; // done
+
 	if (num < 0)
 	{
 		std::cerr << "Error in logic, tried to consume negative quantity" << std::endl;
