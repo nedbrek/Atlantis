@@ -1721,7 +1721,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 			return loc;
 		}
 
-		if (Globals->NO_SWIM_TO_SEA && !oceanIsCoastal(newreg))
+		if (Globals->NO_SWIM_TO_SEA && !oceanIsCoastal(newreg) && !unit->CanFly())
 		{
 			unit->Event(AString("Cannot swim out to sea: ") + newreg->ShortPrint(&regions) + ".");
 			delete unit->monthorders;
