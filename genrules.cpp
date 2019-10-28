@@ -2388,7 +2388,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if(!(ItemDefs[I_WOOD].flags & ItemType::DISABLED) &&
 			!(ItemDefs[I_STONE].flags & ItemType::DISABLED)) {
 		temp += "You can use two different materials (wood or stone) to "
-			"construct most trade structures. ";
+			"construct most trade structures. You can use any mix (e.g. 9 wood and 1 stone). ";
 	}
 	temp += "It is possible that there are structures not listed above "
 		"which require either advanced resources to build or which "

@@ -640,15 +640,48 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 	//--- move unit into object under construction
 	u->MoveUnit(obj);
 
+	// if we can use wood or stone
 	if (it == I_WOOD_OR_STONE)
 	{
-		// use stone first
+		//--- check unit items
+		const int unit_amt_stone = u->items.GetNum(I_STONE);
+		// if unit has enough stone itself
+		if (unit_amt_stone >= num)
+		{
+			// use it
+			u->items.SetNum(I_STONE, unit_amt_stone - num);
+			num = 0;
+		}
+		else // use all stone
+		{
+			u->items.SetNum(I_STONE, 0);
+			num -= unit_amt_stone;
+		}
+
+		// do local wood next
+		const int unit_amt_wood = u->items.GetNum(I_WOOD);
+
+		// if unit has enough wood itself
+		if (unit_amt_wood >= num)
+		{
+			// use it
+			u->items.SetNum(I_WOOD, unit_amt_wood - num);
+			num = 0;
+		}
+		else // use all wood
+		{
+			u->items.SetNum(I_WOOD, 0);
+			num -= unit_amt_wood;
+		}
+
+		//--- otherwise, use all stone first
 		const int amt_stone = u->canConsume(I_STONE, num);
 		if (num > amt_stone)
 		{
-			// use all the stone we have
+			// use all the stone we can get
 			num -= amt_stone;
 			u->consume(I_STONE, amt_stone);
+			// then wood
 			u->consume(I_WOOD, num);
 		}
 		else
@@ -656,7 +689,7 @@ void Game::Run1BuildOrder(ARegion *r, Object *obj, Unit *u)
 			u->consume(I_STONE, num);
 		}
 	}
-	else
+	else // just use the item
 	{
 		u->consume(it, num);
 	}
