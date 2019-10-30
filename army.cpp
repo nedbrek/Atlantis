@@ -774,25 +774,54 @@ void Army::WriteLosses(Battle *b)
 		return; // no losses
 
 	AList damaged_units; // tmp unit list
+	AList destroyed_units; // tmp unit list
 
 	for (int i = notbehind; i < count; ++i)
 	{
-		if (!GetUnitList(&damaged_units, soldiers[i]->unit))
+		Unit *u = soldiers[i]->unit;
+		if (u->IsAlive())
 		{
-			UnitPtr *u = new UnitPtr;
-			u->ptr = soldiers[i]->unit;
-			damaged_units.Add(u);
+			if (!GetUnitList(&damaged_units, u))
+			{
+				UnitPtr *u = new UnitPtr;
+				u->ptr = soldiers[i]->unit;
+				damaged_units.Add(u);
+			}
+		}
+		else
+		{
+			if (!GetUnitList(&destroyed_units, u))
+			{
+				UnitPtr *u = new UnitPtr;
+				u->ptr = soldiers[i]->unit;
+				destroyed_units.Add(u);
+			}
 		}
 	}
 
-	b->AddLine("Damaged units:");
-	forlist(&damaged_units)
+	if (damaged_units.size() > 0)
 	{
-		UnitPtr *u = (UnitPtr*)elem;
-		b->AddLine(AString("   ") + *u->ptr->name);
+		b->AddLine("Damaged units:");
+		forlist(&damaged_units)
+		{
+			UnitPtr *u = (UnitPtr*)elem;
+			b->AddLine(AString("   ") + *u->ptr->name);
+		}
+
+		damaged_units.DeleteAll();
 	}
 
-	damaged_units.DeleteAll();
+	if (destroyed_units.size() > 0)
+	{
+		b->AddLine("Destroyed units:");
+		forlist(&destroyed_units)
+		{
+			UnitPtr *u = (UnitPtr*)elem;
+			b->AddLine(AString("   ") + *u->ptr->name);
+		}
+
+		destroyed_units.DeleteAll();
+	}
 }
 
 void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
