@@ -29,6 +29,7 @@
 #include "skills.h"
 #include "gamedata.h"
 #include "object.h"
+#include <memory>
 
 //----------------------------------------------------------------------------
 Faction::Alignments parseAlignment(const AString &str)
@@ -2569,6 +2570,50 @@ void Game::ProcessExchangeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	}
 }
 
+int Game::parseExcept(const int item, const int amt, AString *o, Unit *unit, OrdersCheck *pCheck)
+{
+	if (amt != -2)
+	{
+		ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with ALL");
+		return -1;
+	}
+
+	if (item < 0)
+	{
+		ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with specific items.");
+		return -1;
+	}
+
+	AString *token = o->gettoken();
+	if (!token)
+	{
+		ParseError(pCheck, unit, 0, "GIVE: EXCEPT requires a value.");
+		return -1;
+	}
+
+	const int excpt = token->value();
+	delete token;
+	if (excpt <= 0)
+	{
+		ParseError(pCheck, unit, 0, "GIVE: Invalid EXCEPT value.");
+		return -1;
+	}
+
+	return excpt;
+}
+
+MoveType parseMoveType(const AString &token)
+{
+	if (token == "none") return M_NONE;
+	else if (token == "walk") return M_WALK;
+	else if (token == "ride") return M_RIDE;
+	else if (token == "fly") return M_FLY;
+	else if (token == "sail") return M_SAIL;
+	else if (token == "swim") return M_SWIM;
+
+	return M_MAX;
+}
+
 void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *t = ParseUnit(o);
@@ -2584,7 +2629,8 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		ParseError(pCheck, unit, 0, "GIVE: No amount given.");
 		return;
 	}
-	int amt;
+
+	int amt = 0;
 	if (*token == "unit")
 	{
 		amt = -1;
@@ -2600,146 +2646,141 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	int item = I_LEADERS;
+	// if not GIVE UNIT
 	if (amt != -1)
 	{
+		// find item to give
 		token = o->gettoken();
-		if (token)
-		{
-			if (!t->valid())
-				item = ParseEnabledItem(token);
-			else
-				item = ParseGiveableItem(token);
-
-			if (amt == -2)
-			{
-				int found = 0;
-				if (*token == "normal")
-				{
-					item = -IT_NORMAL;
-					found = 1;
-				}
-				else if (*token == "advanced")
-				{
-					item = -IT_ADVANCED;
-					found = 1;
-				}
-				else if (*token == "trade")
-				{
-					item = -IT_TRADE;
-					found = 1;
-				}
-				else if (*token == "man" || *token == "men")
-				{
-					item = -IT_MAN;
-					found = 1;
-				}
-				else if (*token == "monster" || *token == "monsters")
-				{
-					item = -IT_MONSTER;
-					found = 1;
-				}
-				else if (*token == "magic")
-				{
-					item = -IT_MAGIC;
-					found = 1;
-				}
-				else if (*token == "weapon" || *token == "weapons")
-				{
-					item = -IT_WEAPON;
-					found = 1;
-				}
-				else if (*token == "armor")
-				{
-					item = -IT_ARMOR;
-					found = 1;
-				}
-				else if (*token == "mount" || *token == "mounts")
-				{
-					item = -IT_MOUNT;
-					found = 1;
-				}
-				else if (*token == "battle")
-				{
-					item = -IT_BATTLE;
-					found = 1;
-				}
-				else if (*token == "special")
-				{
-					item = -IT_SPECIAL;
-					found = 1;
-				}
-				else if (*token == "food")
-				{
-					item = -IT_FOOD;
-					found = 1;
-				}
-				else if (*token == "tool" || *token == "tools")
-				{
-					item = -IT_TOOL;
-					found = 1;
-				}
-				else if (*token == "item" || *token == "items")
-				{
-					item = -NITEMS;
-					found = 1;
-				}
-				else if (item != -1)
-				{
-					found = 1;
-				}
-
-				if (!found)
-				{
-					ParseError(pCheck, unit, 0, "GIVE: Invalid item or item class.");
-					return;
-				}
-			}
-			else if (item == -1)
-			{
-				ParseError(pCheck, unit, 0, AString("GIVE: Invalid item: ") + *token);
-				return;
-			}
-		}
-		else
+		if (!token)
 		{
 			ParseError(pCheck, unit, 0, "GIVE: No item given.");
 			return;
 		}
+
+		// if GIVE 0 (can drop anything)
+		if (!t->valid())
+			item = ParseEnabledItem(token);
+		else // only giveable items
+			item = ParseGiveableItem(token);
+
+		// if GIVE ALL
+		if (amt == -2)
+		{
+			bool found = false;
+			// translate group aliases (encoded in negative space)
+			if (*token == "normal")
+			{
+				item = -IT_NORMAL;
+				found = true;
+			}
+			else if (*token == "advanced")
+			{
+				item = -IT_ADVANCED;
+				found = true;
+			}
+			else if (*token == "trade")
+			{
+				item = -IT_TRADE;
+				found = true;
+			}
+			else if (*token == "man" || *token == "men")
+			{
+				item = -IT_MAN;
+				found = true;
+			}
+			else if (*token == "monster" || *token == "monsters")
+			{
+				item = -IT_MONSTER;
+				found = true;
+			}
+			else if (*token == "magic")
+			{
+				item = -IT_MAGIC;
+				found = true;
+			}
+			else if (*token == "weapon" || *token == "weapons")
+			{
+				item = -IT_WEAPON;
+				found = true;
+			}
+			else if (*token == "armor")
+			{
+				item = -IT_ARMOR;
+				found = true;
+			}
+			else if (*token == "mount" || *token == "mounts")
+			{
+				item = -IT_MOUNT;
+				found = true;
+			}
+			else if (*token == "battle")
+			{
+				item = -IT_BATTLE;
+				found = true;
+			}
+			else if (*token == "special")
+			{
+				item = -IT_SPECIAL;
+				found = true;
+			}
+			else if (*token == "food")
+			{
+				item = -IT_FOOD;
+				found = true;
+			}
+			else if (*token == "tool" || *token == "tools")
+			{
+				item = -IT_TOOL;
+				found = true;
+			}
+			else if (*token == "item" || *token == "items")
+			{
+				item = -NITEMS;
+				found = true;
+			}
+			else if (item != -1)
+			{
+				found = true;
+			}
+
+			if (!found)
+			{
+				ParseError(pCheck, unit, 0, AString("GIVE: Invalid item or item class: ") + *token + ".");
+				return;
+			}
+		}
+		else if (item == -1)
+		{
+			ParseError(pCheck, unit, 0, AString("GIVE: Invalid item: ") + *token + ".");
+			return;
+		}
+
 		delete token;
 	}
 
-	token = o->gettoken();
+	std::unique_ptr<AString> token2(o->gettoken());
 	int excpt = 0;
-	if (token && *token == "except")
+	MoveType limit = M_NONE;
+	while (token2)
 	{
-		if (amt == -2)
+		if (*token2 == "except")
 		{
-			delete token;
-			if (item < 0)
+			excpt = parseExcept(item, amt, o, unit, pCheck);
+			if (excpt < 0)
+				return; // error
+		}
+		else if (*token2 == "limit")
+		{
+			token2.reset(o->gettoken());
+			limit = parseMoveType(*token2);
+			if (limit == M_MAX)
 			{
-				ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with specific items.");
+				ParseError(pCheck, unit, 0, AString("GIVE LIMIT: Bad move type: ") + *token2 + ".");
 				return;
 			}
+		}
 
-			token = o->gettoken();
-			if (!token)
-			{
-				ParseError(pCheck, unit, 0, "GIVE: EXCEPT requires a value.");
-				return;
-			}
-			excpt = token->value();
-			if (excpt <= 0)
-			{
-				ParseError(pCheck, unit, 0, "GIVE: Invalid EXCEPT value.");
-				return;
-			}
-		}
-		else
-		{
-			ParseError(pCheck, unit, 0, "GIVE: EXCEPT only valid with ALL");
-			return;
-		}
-		delete token;
+		token2.reset(o->gettoken());
 	}
 
 	if (!pCheck)
@@ -2749,6 +2790,8 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		order->target = t;
 		order->amount = amt;
 		order->except = excpt;
+		order->limit = limit;
+
 		unit->giveorders.Add(order);
 	}
 }

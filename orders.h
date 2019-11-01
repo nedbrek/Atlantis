@@ -98,13 +98,15 @@ enum
 };
 
 //----------------------------------------------------------------------------
-enum
+enum MoveType
 {
 	M_NONE,
 	M_WALK,
 	M_RIDE,
 	M_FLY,
-	M_SAIL
+	M_SAIL,
+	M_SWIM,
+	M_MAX
 };
 
 //----------------------------------------------------------------------------
@@ -186,11 +188,12 @@ public:
 	GiveOrder();
 	~GiveOrder();
 
-	int item;
-	int amount; ///< if amount == -1, transfer whole unit, -2 means all of item
-	int except;
+	int item = -1;
+	int amount = 0; ///< if amount == -1, transfer whole unit, -2 means all of item
+	int except = 0;
+	MoveType limit = M_NONE;
 
-	UnitId *target;
+	UnitId *target = nullptr;
 };
 
 /// Increase skill

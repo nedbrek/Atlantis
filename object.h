@@ -152,7 +152,7 @@ public: // data
 	int num; ///< quantity
 	int type; ///< index into global table
 	int incomplete; ///< still under construction
-	int capacity; ///< carrying capacity (on water)
+	int capacity; ///< protection capcity (in battle)
 	int runes; ///< (bool?) has been protected with runes
 	int prevdir; ///< previous direction (trivial portage?)
 	int mages; ///< maximum number of mages that can be inside
