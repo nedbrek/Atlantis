@@ -4388,7 +4388,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"  @3 TEACH !NEW 1\nENDTURN";
 	f.CommandExample(temp,temp2);
 
-	//-----
+	//---give
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("give");
 	f.TagText("H4", "GIVE [unit] [quantity] [item]");
@@ -4396,13 +4396,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H4", "GIVE [unit] ALL [item] EXCEPT [quantity]");
 	f.TagText("H4", "GIVE [unit] ALL [item class]");
 	f.TagText("H4", "GIVE [unit] UNIT");
+	f.TagText("H4", "GIVE [unit] [quantity or ALL] LIMIT [movement type]");
 	temp = "The first form of the GIVE order gives a quantity of an item to "
-		"another unit. The second form of the GIVE order will give all of "
-		"a given item to another unit.  The third form will give all of an "
-		"item except for a specific quantity to another unit.  The fourth "
-		"form will give all items of a specific type to another unit.  The "
-		"final form of the GIVE order gives the entire unit to the "
-		"specified unit's faction.";
+	   "another unit. The second form of the GIVE order will give all of "
+	   "a given item to another unit.  The third form will give all of an "
+	   "item except for a specific quantity to another unit.  The fourth "
+	   "form will give all items of a specific type to another unit.  The "
+	   "fifth form of the GIVE order gives the entire unit to the "
+	   "specified unit's faction.";
+	f.Paragraph(temp);
+	temp = "Any GIVE order (except GIVE UNIT) can have a LIMIT clause."
+	    " The movement types accepted are: WALK, RIDE, FLY, SWIM, and SAIL."
+		 " LIMIT causes the number of items given to be reduced so that the target"
+		 " unit is still able to maintain the movement mode given."
+		 " If the unit is currently overburdened, no items will be given.";
 	f.Paragraph(temp);
 	temp = "The classes of items which are acceptable for the fourth form of "
 		"this order are, NORMAL, ADVANCED, TRADE, MAN or MEN, MONSTER or "
@@ -4428,9 +4435,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += f.Link("#give", "GIVE") + " orders.  Both of these rules are to "
 		"prevent unfair sabotage tactics.";
 	f.Paragraph(temp);
-	temp = "If 0 is specified as the unit number, then the items are "
-		"discarded.";
+	temp = "If 0 is specified as the unit number, then the items are discarded.";
 	f.Paragraph(temp);
+
 	f.Paragraph("Examples:");
 	temp = "Give 10 swords to unit 4573.";
 	temp2 = "GIVE 4573 10 swords";
@@ -4442,7 +4449,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Give control of this unit to the faction owning unit 75.";
 	temp2 = "GIVE 75 UNIT";
 	f.CommandExample(temp, temp2);
+	temp = "Give as much stone as a ship can carry (accounting for current load).";
+	temp2 = "GIVE 75 ALL STONE LIMIT SAIL";
+	f.CommandExample(temp, temp2);
+	temp = "Give away all swords, but keep one for yourself, and make sure target can ride away.";
+	temp2 = "GIVE 75 ALL SWORDS EXCEPT 1 LIMIT RIDE";
+	f.CommandExample(temp, temp2);
 
+	//---guard
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("guard");
 	f.TagText("H4", "GUARD [flag]");

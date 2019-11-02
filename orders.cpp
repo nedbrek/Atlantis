@@ -178,7 +178,6 @@ WithdrawOrder::~WithdrawOrder()
 GiveOrder::GiveOrder()
 : Order(O_GIVE)
 {
-	target = NULL;
 }
 
 GiveOrder::~GiveOrder()
