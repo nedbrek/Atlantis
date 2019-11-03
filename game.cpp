@@ -25,6 +25,7 @@
 #include "game.h"
 #include "faction.h"
 #include "unit.h"
+#include "gameio.h"
 #include "fileio.h"
 #include "astring.h"
 #include "gamedata.h"
@@ -1227,7 +1228,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 	}
 	else
 	{
-		pFac->extraPlayers.Add(new AString(*pToken + *pLine));
+		pFac->extraPlayers_.emplace_back(new AString(*pToken + *pLine));
 	}
 
 	delete pTemp;

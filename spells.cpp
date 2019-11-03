@@ -24,9 +24,11 @@
 // END A3HEADER
 #include "game.h"
 #include "faction.h"
+#include "unit.h"
 #include "gamedata.h"
 #include "object.h"
 #include "orders.h"
+#include "gameio.h"
 
 UnitId* ParseUnit(AString *s);
 

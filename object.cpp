@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "object.h"
+#include "aregion.h"
 #include "items.h"
 #include "skills.h"
 #include "gamedata.h"

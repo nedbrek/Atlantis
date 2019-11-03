@@ -31,6 +31,8 @@
 #include "object.h"
 #include "orders.h"
 #include "unit.h"
+#include "fileio.h"
+#include "gameio.h"
 
 //----------------------------------------------------------------------------
 Battle::Battle()

@@ -27,6 +27,7 @@
 #include "items.h"
 #include "object.h"
 #include "gamedata.h"
+#include "gamedefs.h"
 #include "astring.h"
 
 #define ITEM_ENABLED(X) (!(ItemDefs[(X)].flags & ItemType::DISABLED))

@@ -29,6 +29,7 @@
 #include "gameio.h"
 #include "object.h"
 #include "orders.h"
+#include "fileio.h"
 #include <cstdlib>
 #include <map>
 

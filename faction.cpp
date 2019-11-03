@@ -22,22 +22,15 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person          Comments
-// ----        ------          --------
-// 2000/MAR/14 Larry Stanbery  Modified the elimiation message.
-// 2000/MAR/14 Davis Kulis     Added a new reporting Template.
-// 2001/Feb/18 Joseph Traub    Added Apprentices concept from Lacandon Conquest
-// 2001/Feb/21 Joseph Traub    Added a FACLIM_UNLIMITED option
-// 2001/Feb/22 Joseph Traub    Modified to always save out faction type values
-//                             even in scenarios where they aren't used or
-//                             else your city guard and monster facs lose
-//                             their NPC status in UNLIMITED
-//
 #include "faction.h"
+#include "battle.h"
+#include "object.h"
+#include "unit.h"
 #include "gamedata.h"
 #include "game.h"
-#include "object.h"
+#include "fileio.h"
+#include "gameio.h"
+#include "astring.h"
 #include <stdlib.h>
 
 const char *as[] = {
@@ -47,7 +40,6 @@ const char *as[] = {
 	"Friendly",
 	"Ally"
 };
-
 const char **AttitudeStrs = as;
 
 const char *fs[] = {
@@ -55,56 +47,83 @@ const char *fs[] = {
 	"Trade",
 	"Magic"
 };
-
 const char **FactionStrs = fs;
+
+/// relationship from the owner to a target faction
+class Attitude : public AListElem
+{
+public:
+	explicit Attitude(int num = 0, int att = 0);
+
+	void Writeout(Aoutfile *);
+	void Readin(Ainfile *, ATL_VER version);
+
+public: // data
+	int factionnum;
+	int attitude;
+};
 
 int ParseAttitude(AString *token)
 {
-	for (int i=0; i<NATTITUDES; i++)
-		if (*token == AttitudeStrs[i]) return i;
+	for (int i = 0; i < NATTITUDES; ++i)
+		if (*token == AttitudeStrs[i])
+			return i;
+
 	return -1;
 }
 
-static AString MonResist(int type, int val, int full)
+static
+AString MonResist(int type, int val, int full)
 {
 	AString temp = "This monster ";
-	if(full) {
+
+	// if printing hard numbers
+	if (full)
+	{
 		temp += AString("has a resistance of ") + val;
-	} else {
-		temp += "is ";
-		if(val < 1) temp += "very susceptible";
-		else if(val == 1) temp += "susceptible";
-		else if(val > 1 && val < 3) temp += "typically resistant";
-		else if(val > 2 && val < 5) temp += "slightly resistant";
-		else temp += "very resistant";
 	}
+	else // print vague text
+	{
+		temp += "is ";
+		if (val < 1) temp += "very susceptible";
+		else if (val == 1) temp += "susceptible";
+		else if (1 < val && val < 3) temp += "typically resistant"; // this is just 2
+		else if (2 < val && val < 5) temp += "slightly resistant"; // 3 and 4
+		else temp += "very resistant"; // 5 and above
+	}
+
 	temp += " to ";
 	temp += AttType(type);
 	temp += " attacks.";
-    return temp;
+
+	return temp;
 }
 
-static AString WeapClass(int wclass)
+static
+AString WeapClass(int wclass)
 {
-	switch(wclass) {
-		case SLASHING: return AString("slashing");
-		case PIERCING: return AString("piercing");
-		case CRUSHING: return AString("crushing");
-		case CLEAVING: return AString("cleaving");
-		case ARMORPIERCING: return AString("armor-piercing");
-		case MAGIC_ENERGY: return AString("energy");
-		case MAGIC_SPIRIT: return AString("spirit");
-		case MAGIC_WEATHER: return AString("weather");
-		default: return AString("unknown");
+	switch (wclass)
+	{
+	case SLASHING: return AString("slashing");
+	case PIERCING: return AString("piercing");
+	case CRUSHING: return AString("crushing");
+	case CLEAVING: return AString("cleaving");
+	case ARMORPIERCING: return AString("armor-piercing");
+	case MAGIC_ENERGY: return AString("energy");
+	case MAGIC_SPIRIT: return AString("spirit");
+	case MAGIC_WEATHER: return AString("weather");
+	default: return AString("unknown");
 	}
 }
 
-static AString WeapType(int flags, int wclass)
+static
+AString WeapType(int flags, int wclass)
 {
 	AString type;
-	if(flags & WeaponType::RANGED) type = "ranged";
-	if(flags & WeaponType::LONG) type = "long";
-	if(flags & WeaponType::SHORT) type = "short";
+	if (flags & WeaponType::RANGED) type = "ranged";
+	if (flags & WeaponType::LONG) type = "long";
+	if (flags & WeaponType::SHORT) type = "short";
+
 	type += " ";
 	type += WeapClass(wclass);
 	return type;
@@ -112,78 +131,110 @@ static AString WeapType(int flags, int wclass)
 
 AString* ItemDescription(int item, int full)
 {
-	int i;
+	const ItemType &item_def = ItemDefs[item];
 
-	if(ItemDefs[item].flags & ItemType::DISABLED)
-		return NULL;
+	if (item_def.flags & ItemType::DISABLED)
+		return nullptr;
+
+	const bool illusion = ((item_def.type & IT_MONSTER) &&
+	      item_def.index == MONSTER_ILLUSION);
 
 	AString *temp = new AString;
-	int illusion = ((ItemDefs[item].type & IT_MONSTER) &&
-			(ItemDefs[item].index == MONSTER_ILLUSION));
 
-	*temp += AString(illusion?"illusory ":"")+ ItemDefs[item].name + " [" +
-		(illusion?"I":"") + ItemDefs[item].abr + "], weight " +
-		ItemDefs[item].weight;
+	// start with name abbr and weight
+	*temp += AString(illusion?"illusory ":"") + item_def.name + " [" +
+	    (illusion?"I":"") + item_def.abr + "], weight " + item_def.weight;
 
-	if (ItemDefs[item].walk) {
-		int cap = ItemDefs[item].walk - ItemDefs[item].weight;
-		if(cap) {
+	// walking capacity
+	if (item_def.walk)
+	{
+		const int cap = item_def.walk - item_def.weight;
+		if (cap)
+		{
 			*temp += AString(", walking capacity ") + cap;
-		} else {
+		}
+		else
+		{
 			*temp += ", can walk";
 		}
 	}
+
 	// Each hitch item has its own weight (larger creatures can pull more in the same wagon, for example)
-	for (unsigned c = 0; c < sizeof(ItemDefs[item].hitchItems)/sizeof(HitchItem); ++c) {
-		const HitchItem &hitch = ItemDefs[item].hitchItems[c];
+	for (unsigned c = 0; c < sizeof(item_def.hitchItems)/sizeof(HitchItem); ++c)
+	{
+		const HitchItem &hitch = item_def.hitchItems[c];
 		if (hitch.item == -1)
 			continue;
 
-		int cap = ItemDefs[item].walk - ItemDefs[item].weight + hitch.walk;
-		if(cap) {
+		const int cap = item_def.walk - item_def.weight + hitch.walk;
+		if (cap)
+		{
 			*temp += AString(", walking capacity ") + cap +
-				" when hitched to a " +
-				ItemDefs[hitch.item].name;
+			    " when hitched to a " + ItemDefs[hitch.item].name;
 		}
 	}
 
-	if (ItemDefs[item].ride) {
-		int cap = ItemDefs[item].ride - ItemDefs[item].weight;
-		if(cap) {
+	// riding capacity
+	if (item_def.ride)
+	{
+		const int cap = item_def.ride - item_def.weight;
+		if (cap)
+		{
 			*temp += AString(", riding capacity ") + cap;
-		} else {
+		}
+		else
+		{
 			*temp += ", can ride";
 		}
 	}
-	if (ItemDefs[item].swim) {
-		int cap = ItemDefs[item].swim - ItemDefs[item].weight;
-		if(cap) {
+
+	// swimming capacity
+	if (item_def.swim)
+	{
+		const int cap = item_def.swim - item_def.weight;
+		if (cap)
+		{
 			*temp += AString(", swimming capacity ") + cap;
-		} else {
+		}
+		else
+		{
 			*temp += ", can swim";
 		}
 	}
-	if (ItemDefs[item].fly) {
-		int cap = ItemDefs[item].fly - ItemDefs[item].weight;
-		if(cap) {
+
+	// flying capacity
+	if (item_def.fly)
+	{
+		const int cap = item_def.fly - item_def.weight;
+		if (cap)
+		{
 			*temp += AString(", flying capacity ") + cap;
-		} else {
+		}
+		else
+		{
 			*temp += ", can fly";
 		}
 	}
 
-	if(Globals->ALLOW_WITHDRAW) {
-		if(ItemDefs[item].type & IT_NORMAL && item != I_SILVER) {
-			*temp += AString(", costs ") + (ItemDefs[item].baseprice*5/2) +
-				" silver to withdraw";
+	// withdraw cost
+	if (Globals->ALLOW_WITHDRAW)
+	{
+		if ((item_def.type & IT_NORMAL) && item != I_SILVER)
+		{
+			*temp += AString(", costs ") + (item_def.baseprice*5/2) +
+			    " silver to withdraw";
 		}
 	}
-	*temp += ".";
 
-	if (ItemDefs[item].type & IT_MAN)
+	*temp += "."; // end first sentence
+
+	// man specific description
+	if (item_def.type & IT_MAN)
 	{
-		const int man = ItemDefs[item].index;
+		// pull ManDef index
+		const int man = item_def.index;
 
+		// number of skills
 		*temp += " This race may know ";
 		if (ManDefs[man].max_skills == -1)
 			*temp += "any number of";
@@ -191,23 +242,28 @@ AString* ItemDescription(int item, int full)
 			*temp += ManDefs[man].max_skills;
 		*temp += " skills.";
 
-		int hits = ManDefs[man].hits;
-		if (!hits) hits = 1;
+		// hit points
+		const int hits = ManDefs[man].hits > 0 ? ManDefs[man].hits : 1;
+
 		*temp += AString(" This race takes ") + hits + " " +
 		    ((hits > 1) ? "hits" : "hit") + " to kill.";
 
+		// alignment
 		*temp += AString(" This race has alignment ") +
 		    ManType::ALIGN_STRS[ManDefs[man].align] + ".";
 
+		// skill specializations (max level)
 		*temp += " This race may study ";
 		bool found = false;
 		const unsigned len = sizeof(ManDefs[man].skills) / sizeof(ManDefs[man].skills[0]);
-		for (unsigned c = 0; c < len; c++)
+		for (unsigned c = 0; c < len; ++c)
 		{
 			const int skill = ManDefs[man].skills[c];
 			if (skill != -1)
 			{
-				if (SkillDefs[skill].flags & SkillType::DISABLED) continue;
+				if (SkillDefs[skill].flags & SkillType::DISABLED)
+					continue;
+
 				if (found) *temp += ", ";
 				if (found && c == len - 1) *temp += "and ";
 				found = true;
@@ -215,233 +271,323 @@ AString* ItemDescription(int item, int full)
 			}
 		}
 
-		if (found) {
+		if (found)
+		{
 			*temp += AString(" to level ") + ManDefs[man].speciallevel +
-				" and all other non-magic skills to level " + ManDefs[man].defaultlevel + ".";
-		} else {
+			    " and all other non-magic skills to level " + ManDefs[man].defaultlevel + ".";
+		}
+		else
+		{
 			*temp += AString("all non-magic skills to level ") +
-				ManDefs[man].defaultlevel + ".";
+			    ManDefs[man].defaultlevel + ".";
 		}
 
 		// if non-leaders can't study magic
-		if ((Globals->MAGE_NONLEADERS || item == I_LEADERS) && ManDefs[man].magiclevel != 0) {
+		if ((Globals->MAGE_NONLEADERS || item == I_LEADERS) && ManDefs[man].magiclevel != 0)
+		{
 			*temp += AString(" This race may study all magic skills to ") + ManDefs[man].magiclevel + ".";
-		} else {
+		}
+		else
+		{
 			*temp += AString(" This race may not study magic skills.");
 		}
 	}
 
-	if(ItemDefs[item].type & IT_MONSTER) {
+	// monster specific description
+	if (item_def.type & IT_MONSTER)
+	{
 		*temp += " This is a monster.";
-		int mon = ItemDefs[item].index;
+
+		const int mon = item_def.index;
+
 		*temp += AString(" This monster attacks with a combat skill of ") +
-			MonDefs[mon].attackLevel + ".";
-		for(int c = 0; c < NUM_ATTACK_TYPES; c++) {
-			*temp += AString(" ") + MonResist(c,MonDefs[mon].defense[c], full);
+		    MonDefs[mon].attackLevel + ".";
+
+		for (int c = 0; c < NUM_ATTACK_TYPES; ++c)
+		{
+			*temp += AString(" ") + MonResist(c, MonDefs[mon].defense[c], full);
 		}
-		if(MonDefs[mon].special && MonDefs[mon].special != -1) {
-			*temp += AString(" ") +
-				"Monster can cast " +
-				ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel,
-						1, 0);
+
+		// special attack
+		if (MonDefs[mon].special && MonDefs[mon].special != -1)
+		{
+			*temp += AString(" ") + "Monster can cast " +
+			    ShowSpecial(MonDefs[mon].special, MonDefs[mon].specialLevel, 1, 0);
 		}
-		if(full) {
-			int hits = MonDefs[mon].hits;
-			int atts = MonDefs[mon].numAttacks;
-			int regen = MonDefs[mon].regen;
-			if(!hits) hits = 1;
-			if(!atts) atts = 1;
+
+		// if full info
+		if (full)
+		{
+			const int hits = MonDefs[mon].hits > 0 ? MonDefs[mon].hits : 1;
+			const int atts = MonDefs[mon].numAttacks > 0 ? MonDefs[mon].numAttacks : 1;
+
 			*temp += AString(" This monster has ") + atts + " melee " +
-				((atts > 1)?"attacks":"attack") + " per round and takes " +
-				hits + " " + ((hits > 1)?"hits":"hit") + " to kill.";
-			if (regen > 0) {
+			    ((atts > 1)?"attacks":"attack") + " per round and takes " +
+			    hits + " " + ((hits > 1)?"hits":"hit") + " to kill.";
+
+			const int regen = MonDefs[mon].regen;
+			if (regen > 0)
+			{
 				*temp += AString(" This monsters regenerates ") + regen +
-					" hits per round of battle.";
+				    " hits per round of battle.";
 			}
+
 			*temp += AString(" This monster has a tactics score of ") +
-				MonDefs[mon].tactics + ", a stealth score of " +
-				MonDefs[mon].stealth + ", and an observation score of " +
-				MonDefs[mon].obs + ".";
+			    MonDefs[mon].tactics + ", a stealth score of " +
+			    MonDefs[mon].stealth + ", and an observation score of " +
+			    MonDefs[mon].obs + ".";
 		}
+
+		// loot info
 		*temp += " This monster might have ";
-		if(MonDefs[mon].spoiltype != -1) {
-			if(MonDefs[mon].spoiltype & IT_MAGIC) {
+		if (MonDefs[mon].spoiltype != -1)
+		{
+			if (MonDefs[mon].spoiltype & IT_MAGIC)
 				*temp += "magic items and ";
-			} else if(MonDefs[mon].spoiltype & IT_ADVANCED) {
+			if (MonDefs[mon].spoiltype & IT_ADVANCED)
 				*temp += "advanced items and ";
-			} else if(MonDefs[mon].spoiltype & IT_NORMAL) {
+			if (MonDefs[mon].spoiltype & IT_NORMAL)
 				*temp += "normal or trade items and ";
-			}
 		}
 		*temp += "silver as treasure.";
 	}
 
-	if(ItemDefs[item].type & IT_WEAPON) {
-		int wep = ItemDefs[item].index;
+	// weapon specific description
+	if (item_def.type & IT_WEAPON)
+	{
+		const int wep = item_def.index;
 		WeaponType *pW = &WeaponDefs[wep];
+
 		*temp += " This is a ";
 		*temp += WeapType(pW->flags, pW->weapClass) + " weapon.";
-		if(pW->flags & WeaponType::NEEDSKILL) {
+
+		if (pW->flags & WeaponType::NEEDSKILL)
+		{
 			*temp += AString(" Knowledge of ") + SkillStrs(pW->baseSkill);
-			if(pW->orSkill != -1)
+			if (pW->orSkill != -1)
 				*temp += AString(" or ") + SkillStrs(pW->orSkill);
 			*temp += " is needed to wield this weapon.";
-		} else {
-			if(pW->baseSkill == -1 && pW->orSkill == -1)
+		}
+		else
+		{
+			if (pW->baseSkill == -1 && pW->orSkill == -1)
 				*temp += " No skill is needed to wield this weapon.";
 		}
 
 		int flag = 0;
-		if(pW->attackBonus != 0) {
+		if (pW->attackBonus != 0)
+		{
 			*temp += " This weapon grants a ";
 			*temp += ((pW->attackBonus > 0) ? "bonus of " : "penalty of ");
 			*temp += abs(pW->attackBonus);
 			*temp += " on attack";
 			flag = 1;
 		}
-		if(pW->defenseBonus != 0) {
-			if(flag) {
-				if(pW->attackBonus == pW->defenseBonus) {
+
+		if (pW->defenseBonus != 0)
+		{
+			if (flag)
+			{
+				if (pW->attackBonus == pW->defenseBonus)
+				{
 					*temp += " and defense.";
 					flag = 0;
-				} else {
+				}
+				else
+				{
 					*temp += " and a ";
 				}
-			} else {
+			}
+			else
+			{
 				*temp += " This weapon grants a ";
 				flag = 1;
 			}
-			if(flag) {
-				*temp += ((pW->defenseBonus > 0)?"bonus of ":"penalty of ");
+
+			if (flag)
+			{
+				*temp += ((pW->defenseBonus > 0) ? "bonus of " : "penalty of ");
 				*temp += abs(pW->defenseBonus);
 				*temp += " on defense.";
 				flag = 0;
 			}
 		}
-		if(flag) *temp += ".";
-		if(pW->mountBonus && full) {
+
+		if (flag) *temp += ".";
+
+		if (pW->mountBonus && full)
+		{
 			*temp += " This weapon ";
-			if(pW->attackBonus != 0 || pW->defenseBonus != 0)
+			if (pW->attackBonus != 0 || pW->defenseBonus != 0)
 				*temp += "also ";
 			*temp += "grants a ";
-			*temp += ((pW->mountBonus > 0)?"bonus of ":"penalty of ");
+			*temp += ((pW->mountBonus > 0) ? "bonus of " : "penalty of ");
 			*temp += abs(pW->mountBonus);
 			*temp += " against mounted opponents.";
 		}
 
-		if(pW->flags & WeaponType::NOFOOT)
+		if (pW->flags & WeaponType::NOFOOT)
 			*temp += " Only mounted troops may use this weapon.";
-		else if(pW->flags & WeaponType::NOMOUNT)
+		else if (pW->flags & WeaponType::NOMOUNT)
 			*temp += " Only foot troops may use this weapon.";
 
-		if(pW->flags & WeaponType::RIDINGBONUS) {
+		if (pW->flags & WeaponType::RIDINGBONUS)
+		{
 			*temp += " Wielders of this weapon, if mounted, get their riding "
-				"skill bonus on combat attack and defense.";
-		} else if(pW->flags & WeaponType::RIDINGBONUSDEFENSE) {
+			    "skill bonus on combat attack and defense.";
+		}
+		else if (pW->flags & WeaponType::RIDINGBONUSDEFENSE)
+		{
 			*temp += " Wielders of this weapon, if mounted, get their riding "
 				"skill bonus on combat defense.";
 		}
 
-		if(pW->flags & WeaponType::NODEFENSE) {
+		if (pW->flags & WeaponType::NODEFENSE)
+		{
 			*temp += " Defenders are treated as if they have an "
-				"effective combat skill of 0.";
+			    "effective combat skill of 0.";
 		}
 
-		if(pW->flags & WeaponType::NOATTACKERSKILL) {
+		if (pW->flags & WeaponType::NOATTACKERSKILL)
+		{
 			*temp += " Attackers do not get skill bonus on defense.";
 		}
 
-		if(pW->flags & WeaponType::ALWAYSREADY) {
-			*temp += " Wielders of this weapon never miss a round to ready "
-				"their weapon.";
-		} else {
+		if (pW->flags & WeaponType::ALWAYSREADY)
+		{
+			*temp += " Wielders of this weapon never miss a round to ready their weapon.";
+		}
+		else
+		{
 			*temp += " There is a 50% chance that the wielder of this weapon "
 				"gets a chance to attack in any given round.";
 		}
 
-		if(full) {
-			int atts = pW->numAttacks;
+		if (full)
+		{
 			*temp += AString(" This weapon attacks versus the target's ") +
 				"defense against " + AttType(pW->attackType) + " attacks.";
+
+			const int atts = pW->numAttacks;
 			*temp += AString(" This weapon allows ");
-			if(atts > 0) {
-				if(atts >= WeaponType::NUM_ATTACKS_HALF_SKILL) {
+			if (atts > 0)
+			{
+				if (atts >= WeaponType::NUM_ATTACKS_HALF_SKILL)
+				{
 					int max = WeaponType::NUM_ATTACKS_HALF_SKILL;
 					const char *attd = "half the skill level (rounded up)";
-					if(atts >= WeaponType::NUM_ATTACKS_SKILL) {
+					if (atts >= WeaponType::NUM_ATTACKS_SKILL)
+					{
 						max = WeaponType::NUM_ATTACKS_SKILL;
 						attd = "the skill level";
 					}
 					*temp += "a number of attacks equal to ";
 					*temp += attd;
 					*temp += " of the attacker";
-					int val = atts - max;
-					if(val > 0) *temp += AString(" plus ") + val;
-				} else {
+					const int val = atts - max;
+					if (val > 0) *temp += AString(" plus ") + val;
+				}
+				else
+				{
 					*temp += AString(atts) + ((atts==1)?" attack ":" attacks");
 				}
 				*temp += " per round.";
-			} else {
-				atts = -atts;
+			}
+			else // 1/n encoded in negative space
+			{
 				*temp += "1 attack every ";
-				if(atts == 1) *temp += "round .";
-				else *temp += AString(atts) + " rounds.";
+				if (atts == -1) *temp += "round.";
+				else *temp += AString(-atts) + " rounds.";
 			}
 		}
 	}
 
-	if(ItemDefs[item].type & IT_ARMOR) {
+	// armor specific description
+	if (item_def.type & IT_ARMOR)
+	{
 		*temp += " This is a type of armor.";
-		int arm = ItemDefs[item].index;
+		const int arm = item_def.index;
 		ArmorType *pA = &ArmorDefs[arm];
+
 		*temp += " This armor will protect its wearer ";
-		for(i = 0; i < NUM_WEAPON_CLASSES; i++) {
-			if(i == NUM_WEAPON_CLASSES - 1) {
+		for (int i = 0; i < NUM_WEAPON_CLASSES; ++i)
+		{
+			if (i == NUM_WEAPON_CLASSES - 1)
+			{
 				*temp += ", and ";
-			} else if(i > 0) {
+			}
+			else if (i > 0)
+			{
 				*temp += ", ";
 			}
-			int percent = (int)(((float)pA->saves[i]*100.0) /
-					(float)pA->from+0.5);
+
+			const int percent = (int)(((float)pA->saves[i]*100.0) /
+			     (float)pA->from+0.5);
 			*temp += AString(percent) + "% of the time versus " +
-				WeapClass(i) + " attacks";
+			    WeapClass(i) + " attacks";
 		}
+
 		*temp += ".";
-		if(full) {
-			if(pA->flags & ArmorType::USEINASSASSINATE) {
-				*temp += " This armor may be worn during assassination "
-					"attempts.";
+
+		if (full)
+		{
+			if (pA->flags & ArmorType::USEINASSASSINATE)
+			{
+				*temp += " This armor may be worn during assassination attempts.";
 			}
 		}
 	}
 
-	if(ItemDefs[item].type & IT_TOOL) {
-		int comma = 0;
-		int last = -1;
+	// tool specific description
+	if (item_def.type & IT_TOOL)
+	{
 		*temp += " This is a tool.";
 		*temp += " This item increases the production of ";
-		for(i = NITEMS - 1; i > 0; i--) {
-			if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-			if(ItemDefs[i].mult_item == item) {
+
+		// find last item (for commas and "and")
+		int last = -1;
+		for (int i = NITEMS - 1; i > 0; --i)
+		{
+			if (ItemDefs[i].flags & ItemType::DISABLED)
+				continue;
+
+			if (ItemDefs[i].mult_item == item)
+			{
 				last = i;
 				break;
 			}
 		}
-		for(i = 0; i < NITEMS; i++) {
-		   if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-		   if(ItemDefs[i].mult_item == item) {
-			   if(comma) {
-				   if(last == i) {
-					   if(comma > 1) *temp += ",";
+
+		int comma = 0;
+		for (int i = 0; i < NITEMS; ++i)
+		{
+		   if (ItemDefs[i].flags & ItemType::DISABLED)
+				continue;
+
+		   if (ItemDefs[i].mult_item == item)
+			{
+			   if (comma)
+				{
+				   if (last == i)
+					{
+					   if (comma > 1)
+							*temp += ",";
+
 					   *temp += " and ";
-				   } else {
+				   }
+					else
+					{
 					   *temp += ", ";
 				   }
 			   }
 			   comma++;
-			   if(i == I_SILVER) {
+
+			   if (i == I_SILVER)
+				{
 				   *temp += "entertainment";
-			   } else {
+			   }
+				else
+				{
 				   *temp += ItemDefs[i].names;
 			   }
 			   *temp += AString(" by ") + ItemDefs[i].mult_val;
@@ -450,131 +596,181 @@ AString* ItemDescription(int item, int full)
 		*temp += ".";
 	}
 
-	if(ItemDefs[item].type & IT_TRADE) {
+	// trade good specific description
+	if (item_def.type & IT_TRADE)
+	{
 		*temp += " This is a trade good.";
-		if(full) {
-			if(Globals->RANDOM_ECONOMY) {
+
+		if (full)
+		{
+			if (Globals->RANDOM_ECONOMY)
+			{
 				int maxbuy, minbuy, maxsell, minsell;
-				if(Globals->MORE_PROFITABLE_TRADE_GOODS) {
-					minsell = (ItemDefs[item].baseprice*250)/100;
-					maxsell = (ItemDefs[item].baseprice*350)/100;
-					minbuy = (ItemDefs[item].baseprice*100)/100;
-					maxbuy = (ItemDefs[item].baseprice*190)/100;
-				} else {
-					minsell = (ItemDefs[item].baseprice*150)/100;
-					maxsell = (ItemDefs[item].baseprice*200)/100;
-					minbuy = (ItemDefs[item].baseprice*100)/100;
-					maxbuy = (ItemDefs[item].baseprice*150)/100;
+				if (Globals->MORE_PROFITABLE_TRADE_GOODS)
+				{
+					minsell = (item_def.baseprice*250)/100;
+					maxsell = (item_def.baseprice*350)/100;
+					minbuy = (item_def.baseprice*100)/100;
+					maxbuy = (item_def.baseprice*190)/100;
+				}
+				else
+				{
+					minsell = (item_def.baseprice*150)/100;
+					maxsell = (item_def.baseprice*200)/100;
+					minbuy = (item_def.baseprice*100)/100;
+					maxbuy = (item_def.baseprice*150)/100;
 				}
 				*temp += AString(" This item can be bought for between ") +
-					minbuy + " and " + maxbuy + " silver.";
+				    minbuy + " and " + maxbuy + " silver.";
 				*temp += AString(" This item can be sold for between ") +
-					minsell+ " and " + maxsell+ " silver.";
-			} else {
+				    minsell+ " and " + maxsell+ " silver.";
+			}
+			else
+			{
 				*temp += AString(" This item can be bought and sold for ") +
-					ItemDefs[item].baseprice + " silver.";
+				    item_def.baseprice + " silver.";
 			}
 		}
 	}
 
-	if(ItemDefs[item].type & IT_MOUNT) {
+	// mount specific description
+	if (item_def.type & IT_MOUNT)
+	{
 		*temp += " This is a mount.";
-		int mnt = ItemDefs[item].index;
+
+		const int mnt = item_def.index;
 		MountType *pM = &MountDefs[mnt];
-		if(pM->skill == -1) {
+
+		if (pM->skill == -1)
+		{
 			*temp += " No skill is required to use this mount.";
-		} else if(SkillDefs[pM->skill].flags & SkillType::DISABLED) {
-			*temp += " This mount is unridable.";
-		} else {
-			*temp += AString(" This mount requires ") + SkillStrs(pM->skill) +
-				" of at least level " + pM->minBonus + " to ride in combat.";
 		}
+		else if(SkillDefs[pM->skill].flags & SkillType::DISABLED)
+		{
+			*temp += " This mount is unridable.";
+		}
+		else
+		{
+			*temp += AString(" This mount requires ") + SkillStrs(pM->skill) +
+			    " of at least level " + pM->minBonus + " to ride in combat.";
+		}
+
 		*temp += AString(" This mount gives a minimum bonus of +") +
-			pM->minBonus + " when ridden into combat.";
+		    pM->minBonus + " when ridden into combat.";
 		*temp += AString(" This mount gives a maximum bonus of +") +
-			pM->maxBonus + " when ridden into combat.";
-		if(full) {
-			if(ItemDefs[item].fly) {
+		    pM->maxBonus + " when ridden into combat.";
+
+		if (full)
+		{
+			if (item_def.fly)
+			{
 				*temp += AString(" This mount gives a maximum bonus of +") +
-					pM->maxHamperedBonus + " when ridden into combat in " +
-					"terrain which allows ridden mounts but not flying "+
-					"mounts.";
+				    pM->maxHamperedBonus + " when ridden into combat in terrain" +
+				    " which allows ridden mounts but not flying mounts.";
 			}
-			if(pM->mountSpecial != -1) {
+			if (pM->mountSpecial != -1)
+			{
 				*temp += AString(" When ridden, this mount causes ") +
-					ShowSpecial(pM->mountSpecial, pM->specialLev, 1, 0);
+				    ShowSpecial(pM->mountSpecial, pM->specialLev, 1, 0);
 			}
 		}
 	}
 
-	if(ItemDefs[item].pSkill != -1 &&
-			!(SkillDefs[ItemDefs[item].pSkill].flags & SkillType::DISABLED)) {
-		unsigned int c;
-		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].pSkill) +
-			" " + ItemDefs[item].pLevel + " may PRODUCE ";
-		if (ItemDefs[item].flags & ItemType::SKILLOUT)
+	// production specific description
+	if (item_def.pSkill != -1 &&
+	    !(SkillDefs[item_def.pSkill].flags & SkillType::DISABLED))
+	{
+		*temp += AString(" Units with ") + SkillStrs(item_def.pSkill) +
+		    " " + item_def.pLevel + " may PRODUCE ";
+
+		if (item_def.flags & ItemType::SKILLOUT)
 			*temp += "a number of this item equal to their skill level";
 		else
 			*temp += "this item";
-		len = sizeof(ItemDefs[item].pInput)/sizeof(Materials);
-		int count = 0;
+
+		const unsigned len = sizeof(item_def.pInput)/sizeof(Materials);
+		int count = 0; // commas
 		int tot = len;
-		for(c = 0; c < len; c++) {
-			int itm = ItemDefs[item].pInput[c].item;
-			int amt = ItemDefs[item].pInput[c].amt;
-			if(itm == -1 || ItemDefs[itm].flags & ItemType::DISABLED) {
+		for (unsigned c = 0; c < len; c++)
+		{
+			const int itm = item_def.pInput[c].item;
+			if (itm == -1 || (ItemDefs[itm].flags & ItemType::DISABLED))
+			{
 				tot--;
 				continue;
 			}
-			if(count == 0) {
+
+			const int amt = item_def.pInput[c].amt;
+			if (count == 0)
+			{
 				*temp += " from ";
-				if (ItemDefs[item].flags & ItemType::ORINPUTS)
+				if (item_def.flags & ItemType::ORINPUTS)
 					*temp += "any of ";
-			} else if (count == tot) {
+			}
+			else if (count == tot)
+			{
 				if(c > 1) *temp += ",";
 				*temp += " and ";
-			} else {
+			}
+			else
+			{
 				*temp += ", ";
 			}
 			count++;
 			*temp += AString(amt) + " " + ItemDefs[itm].names;
 		}
-		if(ItemDefs[item].pOut) {
-			*temp += AString(" at a rate of ") + ItemDefs[item].pOut;
-			if(ItemDefs[item].pMonths) {
-				if(ItemDefs[item].pMonths == 1) {
+
+		if (item_def.pOut)
+		{
+			*temp += AString(" at a rate of ") + item_def.pOut;
+			if (item_def.pMonths)
+			{
+				if (item_def.pMonths == 1)
+				{
 					*temp += " per man-month.";
-				} else {
-					*temp += AString(" per ") + ItemDefs[item].pMonths +
+				}
+				else
+				{
+					*temp += AString(" per ") + item_def.pMonths +
 						" man-months.";
 				}
 			}
 		}
 	}
-	if(ItemDefs[item].mSkill != -1 &&
-			!(SkillDefs[ItemDefs[item].mSkill].flags & SkillType::DISABLED)) {
-		unsigned int c;
-		unsigned int len;
-		*temp += AString(" Units with ") + SkillStrs(ItemDefs[item].mSkill) +
-			" of at least level " + ItemDefs[item].mLevel +
-			" may attempt to create this item via magic";
-		len = sizeof(ItemDefs[item].mInput)/sizeof(Materials);
+
+	// magic production specific description
+	if (item_def.mSkill != -1 &&
+	    !(SkillDefs[item_def.mSkill].flags & SkillType::DISABLED))
+	{
+		*temp += AString(" Units with ") + SkillStrs(item_def.mSkill) +
+		    " of at least level " + item_def.mLevel +
+		    " may attempt to create this item via magic";
+
+		const unsigned len = sizeof(item_def.mInput)/sizeof(Materials);
+
 		int count = 0;
 		int tot = len;
-		for(c = 0; c < len; c++) {
-			int itm = ItemDefs[item].mInput[c].item;
-			int amt = ItemDefs[item].mInput[c].amt;
-			if(itm == -1 || ItemDefs[itm].flags & ItemType::DISABLED) {
+		for (unsigned c = 0; c < len; ++c)
+		{
+			const int itm = item_def.mInput[c].item;
+			const int amt = item_def.mInput[c].amt;
+			if (itm == -1 || (ItemDefs[itm].flags & ItemType::DISABLED))
+			{
 				tot--;
 				continue;
 			}
-			if(count == 0) {
+
+			if (count == 0)
+			{
 				*temp += " at a cost of ";
-			} else if (count == tot) {
+			}
+			else if (count == tot)
+			{
 				if(c > 1) *temp += ",";
 				*temp += " and ";
-			} else {
+			}
+			else
+			{
 				*temp += ", ";
 			}
 			count++;
@@ -583,24 +779,32 @@ AString* ItemDescription(int item, int full)
 		*temp += ".";
 	}
 
-	if((ItemDefs[item].type & IT_BATTLE) && full) {
+	// battle item specific description
+	if ((item_def.type & IT_BATTLE) && full)
+	{
 		*temp += " This item is a miscellaneous combat item.";
-		for(i = 0; i < NUMBATTLEITEMS; i++) {
-			if(BattleItemDefs[i].itemNum == item) {
-				if(BattleItemDefs[i].flags & BattleItemType::MAGEONLY) {
+		for (int i = 0; i < NUMBATTLEITEMS; ++i)
+		{
+			BattleItemType &bitem = BattleItemDefs[i];
+			if (bitem.itemNum == item)
+			{
+				if (bitem.flags & BattleItemType::MAGEONLY)
+				{
 					*temp += " This item may only be used by a mage";
-					if(Globals->APPRENTICES_EXIST) {
+					if (Globals->APPRENTICES_EXIST)
 						*temp += " or an apprentice";
-					}
+
 					*temp += ".";
 				}
+
 				*temp += AString(" ") + "Item can cast " +
-					ShowSpecial(BattleItemDefs[i].index,
-							BattleItemDefs[i].skillLevel, 1, 1);
+				   ShowSpecial(bitem.index, bitem.skillLevel, 1, 1);
 			}
 		}
 	}
-	if((ItemDefs[item].flags & ItemType::CANTGIVE) && full) {
+
+	if ((item_def.flags & ItemType::CANTGIVE) && full)
+	{
 		*temp += " This item cannot be given to other units.";
 	}
 
@@ -621,7 +825,8 @@ FactionVector::~FactionVector()
 
 void FactionVector::ClearVector()
 {
-	for (int i=0; i<vectorsize; i++) vector[i] = 0;
+	for (int i = 0; i < vectorsize; ++i)
+		vector[i] = nullptr;
 }
 
 void FactionVector::SetFaction(int x, Faction *fac)
@@ -629,26 +834,24 @@ void FactionVector::SetFaction(int x, Faction *fac)
 	vector[x] = fac;
 }
 
-Faction *FactionVector::GetFaction(int x)
+Faction* FactionVector::GetFaction(int x)
 {
 	return vector[x];
 }
 
-Attitude::Attitude()
+Attitude::Attitude(int num, int att)
+: factionnum(num)
+, attitude(att)
 {
 }
 
-Attitude::~Attitude()
-{
-}
-
-void Attitude::Writeout( Aoutfile *f )
+void Attitude::Writeout(Aoutfile *f)
 {
 	f->PutInt(factionnum);
 	f->PutInt(attitude);
 }
 
-void Attitude::Readin( Ainfile *f, ATL_VER v )
+void Attitude::Readin(Ainfile *f, ATL_VER v)
 {
 	factionnum = f->GetInt();
 	attitude = f->GetInt();
@@ -659,7 +862,7 @@ Faction::Faction(Game &g)
 {
 	exists = 1;
 	name = 0;
-	for (int i=0; i<NFACTYPES; i++) {
+	for (int i = 0; i < NFACTYPES; ++i) {
 		type[i] = 1;
 	}
 	lastchange = -6;
@@ -680,7 +883,7 @@ Faction::Faction(Game &g, int n)
 {
 	exists = 1;
 	num = n;
-	for (int i=0; i<NFACTYPES; i++) {
+	for (int i = 0; i < NFACTYPES; ++i) {
 		type[i] = 1;
 	}
 	lastchange = -6;
@@ -700,17 +903,17 @@ Faction::Faction(Game &g, int n)
 
 Faction::~Faction()
 {
-	if (name) delete name;
-	if (address) delete address;
-	if (password) delete password;
+	delete name;
+	delete address;
+	delete password;
 	attitudes.DeleteAll();
 }
 
-void Faction::Writeout( Aoutfile *f )
+void Faction::Writeout(Aoutfile *f)
 {
 	f->PutInt(num);
 
-	for (int i=0; i<NFACTYPES; i++) {
+	for (int i = 0; i < NFACTYPES; ++i) {
 		f->PutInt(type[i]);
 	}
 
@@ -729,16 +932,15 @@ void Faction::Writeout( Aoutfile *f )
 	f->PutInt(defaultattitude);
 	f->PutInt(attitudes.Num());
 	forlist((&attitudes))
-		((Attitude *) elem)->Writeout( f );
+		((Attitude*)elem)->Writeout(f);
 	f->PutInt(alignments_);
 }
 
-void Faction::Readin( Ainfile *f, ATL_VER v )
+void Faction::Readin(Ainfile *f, ATL_VER v)
 {
 	num = f->GetInt();
-	int i;
 
-	for (i=0; i<NFACTYPES; i++) {
+	for (int i = 0; i < NFACTYPES; ++i) {
 		type[i] = f->GetInt();
 	}
 
@@ -763,10 +965,10 @@ void Faction::Readin( Ainfile *f, ATL_VER v )
 
 	// attitudes
 	int n = f->GetInt();
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		Attitude * a = new Attitude;
-		a->Readin(f,v);
+		a->Readin(f, v);
 		if (a->factionnum == num)
 		{
 			delete a;
@@ -787,7 +989,7 @@ void Faction::View()
 	Awrite(temp);
 }
 
-void Faction::SetName(AString * s)
+void Faction::SetName(AString *s)
 {
 	if (s)
 	{
@@ -802,9 +1004,10 @@ void Faction::SetName(AString * s)
 	}
 }
 
-void Faction::SetNameNoChange( AString *s )
+void Faction::SetNameNoChange(AString *s)
 {
-	if( s ) {
+	if (s)
+	{
 		delete name;
 		name = new AString( *s );
 	}
@@ -813,53 +1016,69 @@ void Faction::SetNameNoChange( AString *s )
 void Faction::SetAddress(const AString &strNewAddress)
 {
 	delete address;
-	address = new AString( strNewAddress );
+	address = new AString(strNewAddress);
 }
 
 AString Faction::FactionTypeStr()
 {
-	AString temp;
-	if (IsNPC()) return AString("NPC");
+	if (IsNPC())
+		return AString("NPC");
 
-	if( Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED) {
-		return (AString("Unlimited"));
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) {
-		return( AString( "Normal" ));
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)
+		return AString("Unlimited");
+
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+		return AString("Normal");
+
+	AString temp;
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	{
 		int comma = 0;
-		for (int i=0; i<NFACTYPES; i++) {
-			if (type[i]) {
-				if (comma) {
+		for (int i = 0; i < NFACTYPES; ++i)
+		{
+			if (type[i])
+			{
+				if (comma)
+				{
 					temp += ", ";
-				} else {
+				}
+				else
+				{
 					comma = 1;
 				}
 				temp += AString(FactionStrs[i]) + " " + type[i];
 			}
 		}
-		if (!comma) return AString("none");
+
+		if (!comma)
+			return AString("none");
 	}
 	return temp;
 }
 
-void Faction::WriteReport( Areport *f, Game *pGame )
+void Faction::WriteReport(Areport *f, Game *pGame)
 {
 	if (IsNPC() && num == 1)
 	{
-		if(Globals->GM_REPORT || (pGame->currentMonth() == 0 && pGame->currentYear() == 1)) {
+		if (Globals->GM_REPORT || (pGame->currentMonth() == 0 && pGame->currentYear() == 1))
+		{
 			int i, j;
 			// Put all skills, items and objects in the GM report
 			shows.DeleteAll();
-			for(i = 0; i < NSKILLS; i++) {
-				for(j = 1; j < 6; j++) {
+			for (i = 0; i < NSKILLS; i++)
+			{
+				for (j = 1; j < 6; j++)
+				{
 					shows.Add(new ShowSkill(i, j));
 				}
 			}
-			if(shows.Num()) {
+
+			if (shows.Num())
+			{
 				f->PutStr("Skill reports:" );
 				forlist(&shows) {
 					AString *string = ((ShowSkill *)elem)->Report(this);
-					if(string) {
+					if (string) {
 						f->PutStr("");
 						f->PutStr(*string);
 						delete string;
@@ -870,13 +1089,14 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			}
 
 			itemshows.DeleteAll();
-			for(i = 0; i < NITEMS; i++) {
+			for (i = 0; i < NITEMS; i++)
+			{
 				AString *show = ItemDescription(i, 1);
-				if(show) {
+				if (show) {
 					itemshows.Add(show);
 				}
 			}
-			if(itemshows.Num()) {
+			if (itemshows.Num()) {
 				f->PutStr("Item reports:");
 				forlist(&itemshows) {
 					f->PutStr("");
@@ -887,13 +1107,13 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			}
 
 			objectshows.DeleteAll();
-			for(i = 0; i < NOBJECTS; i++) {
+			for (i = 0; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
 				if(show) {
 					objectshows.Add(show);
 				}
 			}
-			if(objectshows.Num()) {
+			if (objectshows.Num()) {
 				f->PutStr("Object reports:");
 				forlist(&objectshows) {
 					f->PutStr("");
@@ -919,26 +1139,30 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 			}
 			present_regions.DeleteAll();
 		}
-		errors.DeleteAll();
+		deleteAll(errors_);
 		events.DeleteAll();
 		battles.DeleteAll();
 		return;
 	}
 
 	f->PutStr("Atlantis Report For:");
-	if((Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT) ||
-			(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)) {
-		f->PutStr( *name );
-	} else if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES) {
+	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT ||
+	    Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_UNLIMITED)
+	{
+		f->PutStr(*name);
+	}
+	else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+	{
 		f->PutStr(*name + " (" + FactionTypeStr() + ")");
 	}
+
 	f->PutStr(AString(MonthNames[ pGame->currentMonth() ]) + ", Year " + pGame->currentYear() );
 	f->EndLine();
 
-	f->PutStr( AString( "Atlantis Engine Version: " ) +
-			ATL_VER_STRING( CURRENT_ATL_VER ));
+	f->PutStr( AString("Atlantis Engine Version: ") +
+	    ATL_VER_STRING( CURRENT_ATL_VER ));
 	f->PutStr( AString( Globals->RULESET_NAME ) + ", Version: " +
-			ATL_VER_STRING( Globals->RULESET_VERSION ));
+	    ATL_VER_STRING( Globals->RULESET_VERSION ));
 	f->EndLine();
 
 	if (!times)
@@ -956,11 +1180,12 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	if (Globals->MAX_INACTIVE_TURNS != -1)
 	{
 		int cturn = pGame->TurnNumber() - lastorders;
-		if((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC()) {
+		if ((cturn >= (Globals->MAX_INACTIVE_TURNS - 3)) && !IsNPC())
+		{
 			cturn = Globals->MAX_INACTIVE_TURNS - cturn;
 			f->PutStr( AString("WARNING: You have ") + cturn +
-					AString(" turns until your faction is automatically ")+
-					AString("removed due to inactivity!"));
+			    AString(" turns until your faction is automatically ")+
+			    AString("removed due to inactivity!"));
 			f->EndLine();
 		}
 	}
@@ -970,25 +1195,25 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		if (quit == QUIT_AND_RESTART)
 		{
 			f->PutStr( "You restarted your faction this turn. This faction "
-					"has been removed, and a new faction has been started "
-					"for you. (Your new faction report will come in a "
-					"separate message.)" );
+			    "has been removed, and a new faction has been started "
+			    "for you. (Your new faction report will come in a "
+			    "separate message.)" );
 		}
-		else if( quit == QUIT_GAME_OVER )
+		else if (quit == QUIT_GAME_OVER)
 		{
 			f->PutStr( "I'm sorry, the game has ended. Better luck in "
-					"the next game you play!" );
+			    "the next game you play!" );
 		}
-		else if( quit == QUIT_WON_GAME )
+		else if (quit == QUIT_WON_GAME)
 		{
-			f->PutStr( "Congratulations, you have won the game!" );
+			f->PutStr("Congratulations, you have won the game!");
 		}
 		else
 		{
-			f->PutStr( "I'm sorry, your faction has been eliminated." );
-			f->PutStr( "If you wish to restart, please let the "
-					"Gamemaster know, and you will be restarted for "
-					"the next available turn." );
+			f->PutStr("I'm sorry, your faction has been eliminated.");
+			f->PutStr("If you wish to restart, please let the "
+			    "Gamemaster know, and you will be restarted for "
+			    "the next available turn." );
 		}
 
 		f->PutStr("");
@@ -998,23 +1223,26 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
 	{
 		f->PutStr( AString("Mages: ") + nummages + " (" +
-				pGame->AllowedMages( this ) + ")");
-		if(Globals->APPRENTICES_EXIST) {
+		    pGame->AllowedMages( this ) + ")");
+		if (Globals->APPRENTICES_EXIST)
+		{
 			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
-					pGame->AllowedApprentices(this)+ ")");
+			    pGame->AllowedApprentices(this)+ ")");
 		}
 	}
 	else if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
 	{
 		f->PutStr( AString("Tax Regions: ") + war_regions.Num() + " (" +
-				pGame->AllowedTaxes( this ) + ")");
+		    pGame->AllowedTaxes( this ) + ")");
 		f->PutStr( AString("Trade Regions: ") + trade_regions.Num() + " (" +
-				pGame->AllowedTrades( this ) + ")");
+		    pGame->AllowedTrades( this ) + ")");
 		f->PutStr( AString("Mages: ") + nummages + " (" +
-				pGame->AllowedMages( this ) + ")");
-		if(Globals->APPRENTICES_EXIST) {
+		    pGame->AllowedMages( this ) + ")");
+
+		if (Globals->APPRENTICES_EXIST)
+		{
 			f->PutStr( AString("Apprentices: ") + numapprentices + " (" +
-					pGame->AllowedApprentices(this)+ ")");
+			    pGame->AllowedApprentices(this)+ ")");
 		}
 	}
 
@@ -1025,60 +1253,72 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 
 	f->PutStr("");
 
-	if (errors.Num())
+	if (!errors_.empty())
 	{
 		f->PutStr("Errors during turn:");
-		forlist((&errors)) {
-			f->PutStr(*((AString *) elem));
+		for (auto p : errors_)
+		{
+			f->PutStr(*p);
+			delete p;
 		}
-		errors.DeleteAll();
+		errors_.clear();
+
 		f->EndLine();
 	}
 
-	if (battles.Num()) {
+	if (battles.Num())
+	{
 		f->PutStr("Battles during turn:");
 		forlist(&battles) {
-			((BattlePtr *) elem)->ptr->Report(f,this);
+			((BattlePtr*)elem)->ptr->Report(f, this);
 		}
 		battles.DeleteAll();
 	}
 
-	if (events.Num()) {
+	if (events.Num())
+	{
 		f->PutStr("Events during turn:");
 		forlist((&events)) {
-			f->PutStr(*((AString *) elem));
+			f->PutStr(*((AString*)elem));
 		}
 		events.DeleteAll();
 		f->EndLine();
 	}
 
-	if (shows.Num()) {
+	if (shows.Num())
+	{
 		f->PutStr("Skill reports:");
-		forlist(&shows) {
-			AString * string = ((ShowSkill *) elem)->Report(this);
-			if (string) {
+		forlist(&shows)
+		{
+			AString *string = ((ShowSkill*)elem)->Report(this);
+			if (string)
+			{
 				f->PutStr("");
 				f->PutStr(*string);
+				delete string;
 			}
-			delete string;
 		}
 		shows.DeleteAll();
 		f->EndLine();
 	}
 
-	if (itemshows.Num()) {
+	if (itemshows.Num())
+	{
 		f->PutStr("Item reports:");
-		forlist(&itemshows) {
+		forlist(&itemshows)
+		{
 			f->PutStr("");
-			f->PutStr(*((AString *) elem));
+			f->PutStr(*((AString*)elem));
 		}
 		itemshows.DeleteAll();
 		f->EndLine();
 	}
 
-	if(objectshows.Num()) {
+	if (objectshows.Num())
+	{
 		f->PutStr("Object reports:");
-		forlist(&objectshows) {
+		forlist(&objectshows)
+		{
 			f->PutStr("");
 			f->PutStr(*((AString *)elem));
 		}
@@ -1086,18 +1326,22 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 		f->EndLine();
 	}
 
-	/* Attitudes */
+	// Attitudes
 	AString temp = AString("Declared Attitudes (default ") +
-		AttitudeStrs[defaultattitude] + "):";
+	    AttitudeStrs[defaultattitude] + "):";
 	f->PutStr(temp);
-	for (int i=0; i<NATTITUDES; i++) {
-		int j=0;
+
+	for (int i = 0; i < NATTITUDES; ++i)
+	{
 		temp = AString(AttitudeStrs[i]) + " : ";
-		forlist((&attitudes)) {
-			Attitude * a = (Attitude *) elem;
-			if (a->attitude == i) {
+		int j = 0;
+		forlist((&attitudes))
+		{
+			Attitude *a = (Attitude*)elem;
+			if (a->attitude == i)
+			{
 				if (j) temp += ", ";
-				temp += *( pGame->getFaction(a->factionnum)->name);
+				temp += *(pGame->getFaction(a->factionnum)->name);
 				j = 1;
 			}
 		}
@@ -1112,39 +1356,39 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	f->PutStr("");
 
 	forlist(&present_regions) {
-		((ARegionPtr *) elem)->ptr->WriteReport( f, this, pGame->currentMonth(),
-												 &( pGame->getRegions() ));
+		((ARegionPtr*)elem)->ptr->WriteReport(f, this, pGame->currentMonth(),
+		     &pGame->getRegions());
 	}
 
-	if (temformat != TEMPLATE_OFF) {
+	if (temformat != TEMPLATE_OFF)
+	{
 		f->PutStr("");
 
-		switch (temformat) {
-			case TEMPLATE_SHORT:
-				f->PutStr("Orders Template (Short Format):");
-				break;
-			case TEMPLATE_LONG:
-				f->PutStr("Orders Template (Long Format):");
-				break;
-				// DK
-			case TEMPLATE_MAP:
-				f->PutStr("Orders Template (Map Format):");
-				break;
+		switch (temformat)
+		{
+		case TEMPLATE_SHORT: f->PutStr("Orders Template (Short Format):"); break;
+
+		case TEMPLATE_LONG: f->PutStr("Orders Template (Long Format):"); break;
+
+		case TEMPLATE_MAP: f->PutStr("Orders Template (Map Format):"); break;
 		}
-
 		f->PutStr("");
+
 		temp = AString("#atlantis ") + num;
-		if (!(*password == "none")) {
+		if (!(*password == "none"))
+		{
 			temp += AString(" \"") + *password + "\"";
 		}
 		f->PutStr(temp);
-		forlist((&present_regions)) {
-			// DK
-			((ARegionPtr *) elem)->ptr->WriteTemplate( f, this,
-													   &( pGame->getRegions() ),
-													   pGame->currentMonth() );
+
+		forlist((&present_regions))
+		{
+			((ARegionPtr*)elem)->ptr->WriteTemplate(f, this,
+			   &pGame->getRegions(), pGame->currentMonth());
 		}
-	} else {
+	}
+	else
+	{
 		f->PutStr("");
 		f->PutStr("Orders Template (Off)");
 	}
@@ -1156,7 +1400,7 @@ void Faction::WriteReport( Areport *f, Game *pGame )
 	present_regions.DeleteAll();
 }
 
-void Faction::WriteFacInfo( Aoutfile *file )
+void Faction::WriteFacInfo(Aoutfile *file)
 {
 	file->PutStr( AString( "Faction: " ) + num );
 	file->PutStr( AString( "Name: " ) + *name );
@@ -1165,21 +1409,26 @@ void Faction::WriteFacInfo( Aoutfile *file )
 	file->PutStr( AString( "LastOrders: " ) + lastorders );
 	file->PutStr( AString( "SendTimes: " ) + times );
 
-	forlist( &extraPlayers ) {
-		AString *pStr = (AString *) elem;
-		file->PutStr( *pStr );
+	for (auto pStr : extraPlayers_)
+	{
+		file->PutStr(*pStr);
+		delete pStr;
 	}
 
-	extraPlayers.DeleteAll();
+	extraPlayers_.clear();
 }
 
-void Faction::CheckExist(ARegionList * regs)
+void Faction::CheckExist(ARegionList *regs)
 {
-    if (IsNPC()) return;
+	if (IsNPC())
+		return;
+
 	exists = 0;
-	forlist(regs) {
-		ARegion * reg = (ARegion *) elem;
-		if (reg->Present(this)) {
+	forlist(regs)
+	{
+		ARegion *reg = (ARegion*)elem;
+		if (reg->Present(this))
+		{
 			exists = 1;
 			return;
 		}
@@ -1188,30 +1437,34 @@ void Faction::CheckExist(ARegionList * regs)
 
 void Faction::Error(const AString &s)
 {
-	if (IsNPC()) return;
-	if (errors.Num() > 1000) {
-		if (errors.Num() == 1001) {
-			errors.Add(new AString("Too many errors!"));
+	if (IsNPC())
+		return;
+
+	if (errors_.size() > 1000)
+	{
+		if (errors_.size() == 1001)
+		{
+			errors_.emplace_back(new AString("Too many errors!"));
 		}
 		return;
 	}
 
-	AString *temp = new AString(s);
-	errors.Add(temp);
+	errors_.emplace_back(new AString(s));
 }
 
 void Faction::Event(const AString &s)
 {
-	if (IsNPC()) return;
-	AString *temp = new AString(s);
-	events.Add(temp);
+	if (!IsNPC())
+		events.Add(new AString(s));
 }
 
 void Faction::RemoveAttitude(int f)
 {
-	forlist((&attitudes)) {
-		Attitude *a = (Attitude *) elem;
-		if (a->factionnum == f) {
+	forlist((&attitudes))
+	{
+		Attitude *a = (Attitude*)elem;
+		if (a->factionnum == f)
+		{
 			attitudes.Remove(a);
 			delete a;
 			return;
@@ -1243,83 +1496,113 @@ int Faction::GetAttitude(int n)
 	return std::min(max_relation, defaultattitude);
 }
 
-void Faction::SetAttitude(int num,int att)
+void Faction::SetAttitude(int num, int att)
 {
-	forlist((&attitudes)) {
-		Attitude *a = (Attitude *) elem;
-		if (a->factionnum == num) {
-			if (att == -1) {
+	forlist((&attitudes))
+	{
+		Attitude *a = (Attitude*)elem;
+		if (a->factionnum == num)
+		{
+			if (att == -1)
+			{
 				attitudes.Remove(a);
 				delete a;
 				return;
-			} else {
-				a->attitude = att;
-				return;
 			}
+			a->attitude = att;
+			return;
 		}
 	}
-	if (att != -1) {
-		Attitude *a = new Attitude;
-		a->factionnum = num;
-		a->attitude = att;
-		attitudes.Add(a);
-	}
+
+	// if not remove attitude
+	if (att != -1)
+		attitudes.Add(new Attitude(num, att));
 }
 
 int Faction::CanCatch(ARegion *r, Unit *t)
 {
-	if (TerrainDefs[r->type].similar_type == R_OCEAN) return 1;
+	if (TerrainDefs[r->type].similar_type == R_OCEAN)
+		return 1; // can catch everyone at sea
 
 	int def = t->GetDefenseRiding();
 
-	forlist(&r->objects) {
-		Object *o = (Object *) elem;
-		forlist(&o->units) {
-			Unit *u = (Unit *) elem;
-			if (u == t && o->type != O_DUMMY) return 1;
-			if (u->faction == this && u->GetAttackRiding() >= def) return 1;
+	forlist(&r->objects)
+	{
+		Object *o = (Object*)elem;
+		forlist(&o->units)
+		{
+			Unit *u = (Unit*)elem;
+			if (u == t && o->type != O_DUMMY)
+				return 1;
+
+			if (u->faction == this && u->GetAttackRiding() >= def)
+				return 1;
 		}
 	}
 	return 0;
 }
 
-int Faction::CanSee(ARegion * r,Unit * u, int practise)
+int Faction::CanSee(ARegion *r, Unit *u, int practise)
 {
-	int detfac = 0;
-	if (u->faction == this) return 2;
-	if (u->reveal == REVEAL_FACTION) return 2;
+	if (u->faction == this)
+		return 2; // self
+
+	if (u->reveal == REVEAL_FACTION)
+		return 2; // easy to spot
+
 	int retval = 0;
-	if (u->reveal == REVEAL_UNIT) retval = 1;
-	forlist((&r->objects)) {
-		Object * obj = (Object *) elem;
-		int dummy = 0;
-		if (obj->type == O_DUMMY) dummy = 1;
-		forlist((&obj->units)) {
-			Unit * temp = (Unit *) elem;
-			if (u == temp && dummy == 0) retval = 1;
-			if (temp->faction == this) {
-				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH)) {
-					if (practise) {
+	if (u->reveal == REVEAL_UNIT)
+		retval = 1;
+
+	bool detfac = false;
+	forlist((&r->objects))
+	{
+		Object *obj = (Object*)elem;
+		const bool dummy = (obj->type == O_DUMMY);
+
+		forlist((&obj->units))
+		{
+			Unit *temp = (Unit*)elem;
+			if (u == temp && !dummy)
+				retval = 1;
+
+			if (temp->faction == this)
+			{
+				if (temp->GetSkill(S_OBSERVATION) > u->GetSkill(S_STEALTH))
+				{
+					if (practise)
+					{
 						temp->Practise(S_OBSERVATION);
 						temp->Practise(S_TRUE_SEEING);
 						retval = 2;
 					}
 					else
 						return 2;
-				} else {
-					if (temp->GetSkill(S_OBSERVATION)==u->GetSkill(S_STEALTH)) {
-						if (practise) {
+				}
+				else
+				{
+					if (temp->GetSkill(S_OBSERVATION) == u->GetSkill(S_STEALTH))
+					{
+						if (practise)
+						{
 							temp->Practise(S_OBSERVATION);
 							temp->Practise(S_TRUE_SEEING);
 						}
-						if (retval < 1) retval = 1;
+						if (retval < 1)
+							retval = 1;
 					}
 				}
-				if (temp->GetSkill(S_MIND_READING) > 2) detfac = 1;
+
+				// mind reading 3 allows detecting faction
+				if (temp->GetSkill(S_MIND_READING) > 2)
+					detfac = true;
 			}
 		}
 	}
-	if (retval == 1 && detfac) return 2;
+
+	if (retval == 1 && detfac)
+		return 2;
+
 	return retval;
 }
 
@@ -1332,7 +1615,8 @@ void Faction::DefaultOrders()
 
 void Faction::TimesReward()
 {
-	if (Globals->TIMES_REWARD) {
+	if (Globals->TIMES_REWARD)
+	{
 		Event(AString("Times reward of ") + Globals->TIMES_REWARD + " silver.");
 		unclaimed += Globals->TIMES_REWARD;
 	}
@@ -1340,52 +1624,67 @@ void Faction::TimesReward()
 
 void Faction::SetNPC()
 {
-	for (int i=0; i<NFACTYPES; i++) type[i] = -1;
+	for (int i = 0; i < NFACTYPES; ++i)
+		type[i] = -1;
 }
 
 int Faction::IsNPC()
 {
-	if (type[F_WAR] == -1) return 1;
-	return 0;
+	return (type[F_WAR] == -1) ? 1 : 0;
 }
 
-Faction *GetFaction(AList *facs, int n)
+Faction* GetFaction(AList *facs, int n)
 {
 	forlist(facs)
-		if (((Faction *) elem)->num == n)
-			return (Faction *) elem;
-	return 0;
+	{
+		if (((Faction*)elem)->num == n)
+			return (Faction*)elem;
+	}
+
+	return nullptr;
 }
 
-Faction *GetFaction2(AList *facs, int n)
+Faction* GetFaction2(AList *facs, int n)
 {
 	forlist(facs)
-		if (((FactionPtr *) elem)->ptr->num == n)
-			return ((FactionPtr *) elem)->ptr;
-	return 0;
+	{
+		if (((FactionPtr*)elem)->ptr->num == n)
+			return ((FactionPtr*)elem)->ptr;
+	}
+	return nullptr;
 }
 
 void Faction::DiscoverItem(int item, int force, int full)
 {
-	int seen = items.GetNum(item);
-	if(!seen) {
-		if(full) {
+	const int seen = items.GetNum(item);
+	if (!seen)
+	{
+		if (full)
+		{
 			items.SetNum(item, 2);
-		} else {
+		}
+		else
+		{
 			items.SetNum(item, 1);
 		}
 		force = 1;
-	} else {
-		if(seen == 1) {
-			if(full) {
+	}
+	else
+	{
+		if (seen == 1)
+		{
+			if (full)
+			{
 				items.SetNum(item, 2);
 			}
 			force = 1;
-		} else {
+		}
+		else
+		{
 			full = 1;
 		}
 	}
-	if(force) {
+
+	if (force)
 		itemshows.Add(ItemDescription(item, full));
-	}
 }
