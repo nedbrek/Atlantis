@@ -27,8 +27,10 @@
 //
 #include "game.h"
 #include "faction.h"
+#include "unit.h"
 #include "gamedata.h"
 #include "object.h"
+#include "gameio.h"
 
 int Game::SetupFaction( Faction *pFac )
 {

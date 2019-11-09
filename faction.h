@@ -1,3 +1,5 @@
+#ifndef FACTION_CLASS
+#define FACTION_CLASS
 // START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
@@ -22,28 +24,26 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date        Person         Comments
-// ----        ------         --------
-// 2000/MAR/14 Davis Kulis    Added a new reporting Template.
-// 2001/Feb/18 Joseph Traub   Added Apprentices from Lacandon Conquest
-#ifndef FACTION_CLASS
-#define FACTION_CLASS
+#include "items.h"
+#include "skills.h"
+#include "helper.h"
+#include "alist.h"
+#include <list>
+#include <vector>
 
+class Ainfile;
+class Aoutfile;
+class ARegion;
+class ARegionList;
+class Areport;
+class AString;
 class Faction;
 class Game;
+class Unit;
 
-#include "gameio.h"
-#include "aregion.h"
-#include "fileio.h"
-#include "unit.h"
-#include "battle.h"
-#include "skills.h"
-#include "items.h"
-#include "alist.h"
-#include "astring.h"
-
-enum {
+/// Relations between factions
+enum Attitudes
+{
 	A_HOSTILE,
 	A_UNFRIENDLY,
 	A_NEUTRAL,
@@ -51,70 +51,67 @@ enum {
 	A_ALLY,
 	NATTITUDES
 };
+extern const char* *AttitudeStrs; ///< string for enum
+int ParseAttitude(AString *); ///< enum from string
 
-enum {
-    F_WAR,
-    F_TRADE,
-    F_MAGIC,
-    NFACTYPES
+/// Places to spend faction points
+enum FactionPointTypes
+{
+	F_WAR,
+	F_TRADE,
+	F_MAGIC,
+	NFACTYPES
+};
+extern const char* *FactionStrs; ///< string for enum
+
+/// Player report format
+enum ReportFormat
+{
+	TEMPLATE_OFF,
+	TEMPLATE_SHORT,
+	TEMPLATE_LONG,
+	TEMPLATE_MAP
 };
 
-// DK
-enum {
-    TEMPLATE_OFF,
-    TEMPLATE_SHORT,
-    TEMPLATE_LONG,
-    TEMPLATE_MAP
+/// Ways to quit
+enum QuitCommand
+{
+	QUIT_NONE,
+	QUIT_BY_ORDER,
+	QUIT_BY_GM,
+	QUIT_AND_RESTART,
+	QUIT_WON_GAME,
+	QUIT_GAME_OVER,
 };
 
-enum {
-    QUIT_NONE,
-    QUIT_BY_ORDER,
-    QUIT_BY_GM,
-    QUIT_AND_RESTART,
-    QUIT_WON_GAME,
-    QUIT_GAME_OVER,
-};
-
-extern const char* *AttitudeStrs;
-extern const char* *FactionStrs;
-
-int ParseAttitude(AString *);
-
-int MagesByFacType(int);
-
-class FactionVector {
+/// a list of factions
+class FactionVector
+{
 public:
-  FactionVector(int);
-  ~FactionVector();
+	explicit FactionVector(int);
+	~FactionVector();
 
-  void ClearVector();
-  void SetFaction(int, Faction *);
-  Faction *GetFaction(int);
+	void ClearVector();
+	void SetFaction(int, Faction *);
+	Faction* GetFaction(int);
 
-  Faction **vector;
-  int vectorsize;
+public: // data
+	Faction **vector;
+	int vectorsize;
 };
-  
-class Attitude : public AListElem {
+
+/// wrapper of faction
+class FactionPtr : public AListElem
+{
 public:
-  Attitude();
-  ~Attitude();
-  void Writeout(Aoutfile * );
-  void Readin( Ainfile *, ATL_VER version );
-  
-  int factionnum;
-  int attitude;
+	Faction *ptr;
 };
 
-class FactionPtr : public AListElem {
-public:
-  Faction * ptr;
-};
-
+/// toplevel container for one player to control
 class Faction : public AListElem
 {
 public:
+	 /// Track good and evil
 	 enum Alignments
 	 {
 		 ALL_NEUTRAL,
@@ -124,97 +121,99 @@ public:
 	 };
 
 public:
-    explicit Faction(Game &g);
-    Faction(Game &g, int);
-    ~Faction();
-    
-    void Readin( Ainfile *, ATL_VER version );
-    void Writeout( Aoutfile * );
-    void View();
-    
-    void SetName(AString *);
-    void SetNameNoChange( AString *str );
-    void SetAddress(const AString &strNewAddress);
-    
-    void CheckExist(ARegionList *);
-    void Error(const AString &);
-    void Event(const AString &);
-    
-    AString FactionTypeStr();
-    void WriteReport( Areport *f, Game *pGame );
-    void WriteFacInfo(Aoutfile *);
-    
-    void SetAttitude(int,int); /* faction num, attitude */
-    /* if attitude == -1, clear it */
-    int GetAttitude(int);
-    void RemoveAttitude(int);
-    
-    int CanCatch(ARegion *,Unit *);
-	/* Return 1 if can see, 2 if can see faction */
-    int CanSee(ARegion *,Unit *, int practise = 0);
-    
-    void DefaultOrders();
-    void TimesReward();
-    
-    void SetNPC();
-    int IsNPC();
+	/// simplest constructor
+	explicit Faction(Game &g);
+
+	/// construct with faction number
+	Faction(Game &g, int);
+
+	/// destructor
+	~Faction();
+
+	/// read from game file
+	void Readin(Ainfile *, ATL_VER version);
+
+	/// write to game file
+	void Writeout(Aoutfile *);
+
+	/// write short faction string
+	void View();
+
+	void SetName(AString *);
+	void SetNameNoChange(AString *str);
+	void SetAddress(const AString &strNewAddress);
+
+	void CheckExist(ARegionList *);
+	void Error(const AString &);
+	void Event(const AString &);
+
+	AString FactionTypeStr();
+	void WriteReport(Areport *f, Game *pGame);
+	void WriteFacInfo(Aoutfile *);
+
+	void SetAttitude(int num, int attitude); // if attitude == -1, clear it
+	int GetAttitude(int);
+	void RemoveAttitude(int);
+
+	int CanCatch(ARegion *, Unit *);
+
+	// Return 1 if can see, 2 if can see faction
+	int CanSee(ARegion *, Unit *, int practise = 0);
+
+	void DefaultOrders();
+	void TimesReward();
+
+	void SetNPC();
+	int IsNPC();
 
 	void DiscoverItem(int item, int force, int full);
 
 public: // data
 	Game &game_; ///< back pointer to game
-    int num;
+	int num;
 
-    //
-    // The type is only used if Globals->FACTION_LIMIT_TYPE ==
-    // FACLIM_FACTION_TYPES
-    //
-    int type[NFACTYPES];
+	int type[NFACTYPES]; ///< current placement of faction points
 
-    int lastchange;
-    int lastorders;
-    int unclaimed;
-    AString * name;
-    AString * address;
-    AString * password;
-    int times;
-    int temformat;
-    char exists;
-    int quit;
-    int numshows;
-    
-    int nummages;
+	int lastchange;
+	int lastorders;
+	int unclaimed;
+	AString *name;
+	AString *address;
+	AString *password;
+	int times;
+	int temformat;
+	char exists;
+	int quit;
+	int numshows;
+
+	int nummages;
 	int numapprentices;
-    AList war_regions;
-    AList trade_regions;
+	AList war_regions;
+	AList trade_regions;
 
-    /* Used when writing reports */
-    AList present_regions;
-    
-    int defaultattitude;
-    AList attitudes;
-    SkillList skills;
+	// Used when writing reports
+	AList present_regions;
+
+	int defaultattitude;
+	AList attitudes;
+	SkillList skills;
 	ItemList items;
 	
-    //
-    // Both are lists of AStrings
-    //
-    AList extraPlayers;
-    AList errors;
-    AList events;
-    AList battles;
-    AList shows;
-    AList itemshows;
+	std::list<AString*> extraPlayers_;
+	std::vector<AString*> errors_;
+	AList events;
+	AList battles;
+	AList shows;
+	AList itemshows;
 	AList objectshows;
 
-	// These are used for 'granting' units to a faction via the players.in
-	// file
+	// used for 'granting' units to a faction via the players.in file
 	ARegion *pReg;
 	int noStartLeader;
 	Alignments alignments_;
 };
 
-Faction * GetFaction(AList *,int);
-Faction * GetFaction2(AList *,int); /*This AList is a list of FactionPtr*/
+Faction* GetFaction(AList *fac_list, int fac_num);
+Faction* GetFaction2(AList *fac_ptr_list, int fac_num); // This AList is a list of FactionPtr
 
 #endif

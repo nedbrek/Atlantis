@@ -24,11 +24,13 @@
 // END A3HEADER
 #include "game.h"
 #include "faction.h"
-#include "gameio.h"
+#include "unit.h"
 #include "orders.h"
 #include "skills.h"
 #include "gamedata.h"
 #include "object.h"
+#include "gameio.h"
+#include "fileio.h"
 #include <memory>
 
 //----------------------------------------------------------------------------

@@ -24,6 +24,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+#include <vector>
 
 /**
  * Base class for intrusive single-linked list
@@ -96,6 +97,13 @@ private:
 	AListElem *lastelem;
 	int num;
 };
+
+template<typename T>
+void deleteAll(const std::vector<T*> &v)
+{
+	for (auto i : v)
+		delete i;
+}
 
 #define forlist(l) \
 	AListElem *elem, *_elem2; \

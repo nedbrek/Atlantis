@@ -24,6 +24,7 @@
 // END A3HEADER
 #include "game.h"
 #include "faction.h"
+#include "battle.h"
 #include "unit.h"
 #include "gamedata.h"
 #include "object.h"

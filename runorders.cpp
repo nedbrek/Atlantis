@@ -30,9 +30,11 @@
 //
 #include "game.h"
 #include "faction.h"
+#include "unit.h"
 #include "gamedata.h"
 #include "object.h"
 #include "orders.h"
+#include "gameio.h"
 
 //----------------------------------------------------------------------------
 ///@return true if the man type given by 'manIdx' is compatible with faction alignment 'a'
