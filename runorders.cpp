@@ -2661,7 +2661,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		}
 
 		// if item cannot carry itself
-		if (item_capacity <= item.weight)
+		if (item_capacity < item.weight)
 		{
 			// check current target state
 			if (max_weight <= target_weight)
