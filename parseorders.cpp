@@ -1719,11 +1719,9 @@ void Game::ProcessLeaveOrder(Unit *u, OrdersCheck *pCheck)
 {
 	if (!pCheck)
 	{
-		if (u->monthorders && u->monthorders->type == O_BUILD)
-			return;
-
-		if (u->enter == 0)
-			u->enter = -1;
+		// only leave if no explicit enter given
+		if (u->enter_ == 0)
+			u->enter_ = -1;
 	}
 }
 
@@ -1736,13 +1734,13 @@ void Game::ProcessEnterOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	int i = token->value();
+	const int i = token->value();
 	delete token;
 
-	if (i)
+	if (i != 0)
 	{
 		if (!pCheck)
-			u->enter = i;
+			u->enter_ = i;
 	}
 	else
 	{
@@ -1788,8 +1786,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			if (Globals->TAX_PILLAGE_MONTH_LONG)
 				unit->taxing = TAX_NONE;
 			unit->monthorders = order;
-			if (unit->enter == -1)
-				unit->enter = 0;
 
 			return;
 		}
@@ -1851,8 +1847,6 @@ void Game::ProcessBuildOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
 		unit->taxing = TAX_NONE;
 	unit->monthorders = order;
-	if (unit->enter == -1)
-		unit->enter = 0;
 }
 
 void Game::ProcessAttackOrder(Unit *u, AString *o, OrdersCheck *pCheck)
