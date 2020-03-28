@@ -1770,7 +1770,7 @@ void Unit::Short(int needed, int hunger)
 	}
 
 	// while there are men to starve and maintenance needed
-	while (num_men && (needed || hunger))
+	while (num_men && (needed > 0 || hunger > 0))
 	{
 		// pick a man at random
 		const int tgt = getrandom(num_men);
