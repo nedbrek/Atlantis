@@ -418,7 +418,7 @@ public: // data
 
 	// Orders
 	int destroy;
-	int enter;
+	int enter_ = 0; ///< default to not enter, or leave (-1)
 	Object *build;
 	int leftShip;
 	UnitId *promote;

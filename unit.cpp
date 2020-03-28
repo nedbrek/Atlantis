@@ -154,7 +154,6 @@ Unit::Unit(int seq, Faction *f, int a)
 	free = 0;
 	practised = 0;
 	destroy = 0;
-	enter = 0;
 	build = NULL;
 	leftShip = 0;
 	promote = NULL;
@@ -776,7 +775,7 @@ void Unit::ClearOrders()
 	canattack = 1;
 	nomove = 0;
 	destroy = 0;
-	enter = 0;
+	enter_ = 0;
 	build = NULL;
 	leftShip = 0;
 	promote = NULL;

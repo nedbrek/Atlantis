@@ -1017,7 +1017,7 @@ void Game::RunEnterOrders()
 			Object * o = (Object *) elem;
 			forlist(&o->units) {
 				Unit * u = (Unit *) elem;
-				if (u->enter)
+				if (u->enter_)
 					Do1EnterOrder(r,o,u);
 			}
 		}
@@ -1027,10 +1027,10 @@ void Game::RunEnterOrders()
 void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 {
 	Object *to = NULL;
-	if (u->enter == -1)
+	if (u->enter_ == -1)
 	{
 		to = r->GetDummy();
-		u->enter = 0;
+		u->enter_ = 0;
 
 		if ((TerrainDefs[r->type].similar_type == R_OCEAN) &&
 		    (!u->CanSwim() || u->GetFlag(FLAG_NOCROSS_WATER)))
@@ -1047,8 +1047,8 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 	}
 	else
 	{
-		to = r->GetObject(u->enter);
-		u->enter = 0;
+		to = r->GetObject(u->enter_);
+		u->enter_ = 0;
 		if (!to || !to->CanEnter(r, u))
 		{
 			u->Error("ENTER: Can't enter that.");
