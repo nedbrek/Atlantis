@@ -145,7 +145,7 @@ void Game::ModifyItemHitch(int it, int i, int item, int capacity)
 	if(it < 0 || it > (NITEMS-1)) return;
 	if(item < -1 || item > (NITEMS-1)) return;
 	if(capacity < 0) return;
-	if(i < 0 || i >= (int)(sizeof(ItemDefs[it].hitchItems)/sizeof(HitchItem)))
+	if(i < 0 || i >= (int)ItemDefs[it].hitchItems.size())
 		return;
 	ItemDefs[it].hitchItems[i].item = item;
 	ItemDefs[it].hitchItems[i].walk = capacity;
@@ -170,13 +170,16 @@ void Game::ModifyItemProductionOutput(int it, int months, int count)
 
 void Game::ModifyItemProductionInput(int it, int i, int input, int amount)
 {
-	if(it < 0 || it > (NITEMS-1)) return;
-	if(i < 0 || i >= (int)(sizeof(ItemDefs[it].pInput)/sizeof(Materials)))
+	if (it < 0 || it > (NITEMS-1)) return;
+	ItemType &item = ItemDefs[it];
+
+	if (i < 0 || i >= (int)item.pInput.size())
 		return;
-	if(input < -1 || input > (NITEMS-1)) return;
-	if(amount < 0) amount = 0;
-	ItemDefs[it].pInput[i].item = input;
-	ItemDefs[it].pInput[i].amt = amount;
+
+	if (input < -1 || input > (NITEMS-1)) return;
+	if (amount < 0) amount = 0;
+	item.pInput[i].item = input;
+	item.pInput[i].amt = amount;
 }
 
 void Game::ModifyItemMagicSkill(int it, int sk, int lev)
@@ -197,7 +200,7 @@ void Game::ModifyItemMagicOutput(int it, int count)
 void Game::ModifyItemMagicInput(int it, int i, int input, int amount)
 {
 	if(it < 0 || it > (NITEMS-1)) return;
-	if(i < 0 || i >= (int)(sizeof(ItemDefs[it].mInput)/sizeof(Materials)))
+	if(i < 0 || i >= (int)ItemDefs[it].mInput.size())
 		return;
 	if(input < -1 || input > (NITEMS-1)) return;
 	if(amount < 0) amount = 0;

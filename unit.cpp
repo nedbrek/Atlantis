@@ -1911,8 +1911,8 @@ int Unit::WalkingCapacity()
 		cap += ItemDefs[i->type].walk * i->num;
 
 		// Add capacity of pullable items (wagons, etc)
-		for (unsigned c = 0; c < sizeof(ItemDefs[i->type].hitchItems)/sizeof(HitchItem); ++c) {
-
+		for (unsigned c = 0; c < ItemDefs[i->type].hitchItems.size(); ++c)
+		{
 			const HitchItem &pulling_item = ItemDefs[i->type].hitchItems[c];
 
 			// No pulling item specified

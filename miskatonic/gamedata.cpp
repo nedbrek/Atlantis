@@ -22,32 +22,6 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
-// MODIFICATIONS
-// Date			Person				Comments
-// ----			------				--------
-// 2000/MAR/16	Larry Stanbery		Revised description for runesword, to give
-//									it FEAR 3 special ability.
-//									Added new items for Realms of the Arcane.
-// 2000/MAR/21	Azthar Septragen	Added roads.
-// 2000/MAR/25	Larry Stanbery		Corrected a few comments
-// 2000/SEP/06	Joseph Traub		Added base man cost to allow races to have
-//									different base costs
-// 2001/FEB/01	Joseph Traub		Added options for flying over water and
-//									easier underworld viewing and farseeing
-// 2001/FEB/07	Joseph Traub		Added option to make starting cities safe
-//									or not and to control the guard numbers
-//									and to make them slightly tougher.
-//									Added option to give starting city guards
-//									mage support.
-// 2001/Feb/18	Joseph Traub		Added support for Apprentices if desired.
-// 2001/Feb/19	Joseph Traub		Removed the ENGINE_VERSION from the gamedef
-//									since it wasn't being used.
-// 2001/Feb/21	Joseph Traub		Added the ability to disable items, skills
-//									and objects.
-// 2001/Feb/22	Joseph Traub		Moved out of the individual rules files
-// 2001/July/5	Thomas Alsen		Changed the combat system and monsters
-//									significantly
-//
 #include "gamedata.h"
 #include "items.h"
 #include "skills.h"
@@ -66,8 +40,7 @@
 // hitchItems array
 // mult_item,mult_val
 
-ItemType id[] =
-{
+std::vector<ItemType> ItemDefs = {
 	{"faction leader", "faction leaders", "FLEAD",
 	 0,
 	 -1,0,0,0, {{-1,0},{-1,0},{-1,0},{-1,0}},
@@ -2473,12 +2446,11 @@ ItemType id[] =
 	 {{-1,0},{-1,0},{-1,0},{-1,0},{-1,0},{-1,0}},
 	 -1,0},
 };
-ItemType * ItemDefs = id;
 
 //
 // Table of men
 //
-ManType mt[] = {
+ManType mt[NUMMAN] = {
 	//
 	// max skills, specialized skill max level, default skills max level, magic skills max level
 	// 1st skill, 2nd, 3rd, 4th, 5th, 6th, hits, alignment
@@ -2534,7 +2506,7 @@ ManType * ManDefs = mt;
 //
 // Table of monsters.
 //
-MonType md[] = {
+MonType md[NUMMONSTERS] = {
 	// attackLevel, defense array
 	// numAttacks, hits, regen,
 	// tactics, stealth, obs
@@ -2820,7 +2792,7 @@ MonType * MonDefs = md;
 //  weapClass, attackType, numAttacks
 //  attackBonus, defenseBonus, mountBonus
 //
-WeaponType wepd[] = {
+WeaponType wepd[NUMWEAPONS] = {
 	// WEAPON_NONE
 	{0,
 	 -1, -1,
@@ -3279,7 +3251,7 @@ WeaponType *WeaponDefs = wepd;
 // flags, from, slashChance, pierceChance, crushChance, cleaveChance,
 // armorpiercingChance, energyChance, spiritChance, weatherChance;
 //
-ArmorType armd[] = {
+ArmorType armd[NUMARMORS] = {
 	// ARMOR_NONE
 	{ 0, 100, {0, 0, 0, 0, 0, 0, 0, 0}},
 	// ARMOR_CLOAKOFI
@@ -3372,7 +3344,7 @@ ArmorType *ArmorDefs = armd;
 // Table of mounts
 // skill,minBonus,maxBonus,maxHamperedBonus
 //
-MountType mountd[] = {
+MountType mountd[NUMMOUNTS] = {
 	// MOUNT_NONE
 	{-1, 0, 0, 0, -1, 0},
 	// MOUNT_WHORSE
@@ -3398,7 +3370,7 @@ MountType *MountDefs = mountd;
 //
 // Table of other battle items
 //
-BattleItemType bitd[] = {
+BattleItemType bitd[NUMBATTLEITEMS] = {
 	// BATTLE_NONE
 	{ 0, 0, 0, 0 },
 	// LLS
@@ -3432,7 +3404,7 @@ BattleItemType *BattleItemDefs = bitd;
 //
 // Table of skills.
 //
-static SkillType sd[] = {
+static SkillType sd[NSKILLS] = {
 	//
 	// name, abbr, cost,
 	// flags, special, rangeindex
@@ -3814,7 +3786,7 @@ SkillType * SkillDefs = sd;
 //
 // Table of objects.
 //
-static ObjectType ot[] =
+static ObjectType ot[NOBJECTS] =
 {
 	//
 	// name,
@@ -4235,7 +4207,7 @@ ObjectType *const ObjectDefs = ot;
 //
 // Table of terrain types.
 //
-static TerrainType td[] = {
+static TerrainType td[R_NUM] = {
 	//
 	// name, similar_type, flags,
 	// pop, wages, economy, movepoints,
@@ -4797,7 +4769,7 @@ static HealType hd[] = {
 };
 HealType * HealDefs = hd;
 
-static SpecialType spd[] = {
+static SpecialType spd[NUMSPECIALS] = {
 	// NONE
 	{"an unknown attack",
 	 0,
@@ -5133,7 +5105,7 @@ static SpecialType spd[] = {
 
 SpecialType *SpecialDefs = spd;
 
-static EffectType efd[] = {
+static EffectType efd[NUMEFFECTS] = {
 	// EFFECT_DAZZLE
 	{"dazzle", -2,
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
@@ -5152,7 +5124,7 @@ EffectType *EffectDefs = efd;
 
 // Range definitions
 // flags, rangeclass, rangemult, crosslevelpenalty
-static RangeType rtd[] = {
+static RangeType rtd[NUMRANGES] = {
 	{0, RangeType::RNG_LEVEL2, 2, 4}, // RANGE_TELEPORT
 	{0, RangeType::RNG_LEVEL2, 2, 4}, // RANGE_PORTAL_LORE
 	{0, RangeType::RNG_LEVEL2, 4, 4}, // RANGE_FARSIGHT

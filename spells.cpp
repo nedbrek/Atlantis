@@ -843,7 +843,7 @@ void Game::RunEnchantItem(ARegion *r,Unit *u)
 
 	// figure out how many input components are required
 	int count = 0;
-	for (unsigned c = 0; c < sizeof(ItemDefs[order->output_item].mInput) / sizeof(Materials); ++c)
+	for (unsigned c = 0; c < ItemDefs[order->output_item].mInput.size(); ++c)
 	{
 		if (ItemDefs[order->output_item].mInput[c].item != -1)
 			++count;
@@ -857,7 +857,7 @@ void Game::RunEnchantItem(ARegion *r,Unit *u)
 	{
 		// see if we have enough of all items
 		int found = 0;
-		for (unsigned c = 0; c < sizeof(ItemDefs[order->output_item].mInput) / sizeof(Materials); ++c)
+		for (unsigned c = 0; c < ItemDefs[order->output_item].mInput.size(); ++c)
 		{
 			const int i = ItemDefs[order->output_item].mInput[c].item;
 			const int a = ItemDefs[order->output_item].mInput[c].amt;
@@ -873,7 +873,7 @@ void Game::RunEnchantItem(ARegion *r,Unit *u)
 			break;
 
 		// decrement inputs
-		for (unsigned c = 0; c < sizeof(ItemDefs[order->output_item].mInput) / sizeof(Materials); ++c)
+		for (unsigned c = 0; c < ItemDefs[order->output_item].mInput.size(); ++c)
 		{
 			const int i = ItemDefs[order->output_item].mInput[c].item;
 			const int a = ItemDefs[order->output_item].mInput[c].amt;
@@ -894,7 +894,7 @@ void Game::RunEnchantItem(ARegion *r,Unit *u)
 	r->NotifySpell(u, S_ARTIFACT_LORE, &regions );
 }
 
-void Game::RunCreateFood(ARegion *r,Unit *u)
+void Game::RunCreateFood(ARegion *r, Unit *u)
 {
 	int level = u->GetSkill(S_CREATE_FOOD);
 	int max = ItemDefs[I_FOOD].mOut * level;
@@ -904,15 +904,15 @@ void Game::RunCreateFood(ARegion *r,Unit *u)
 	int found;
 
 	// Figure out how many components there are
-	for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
-		if(ItemDefs[I_FOOD].mInput[c].item != -1) count++;
+	for (c = 0; c < ItemDefs[I_FOOD].mInput.size(); ++c) {
+		if (ItemDefs[I_FOOD].mInput[c].item != -1) count++;
 	}
 
 	while(max) {
 		int i, a;
 		found = 0;
 		// See if we have enough of all items
-		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
+		for (c = 0; c < ItemDefs[I_FOOD].mInput.size(); ++c) {
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
 			if(i != -1) {
@@ -923,7 +923,8 @@ void Game::RunCreateFood(ARegion *r,Unit *u)
 		if(found != count) break;
 
 		// Decrement our inputs
-		for(c=0; c<sizeof(ItemDefs[I_FOOD].mInput)/sizeof(Materials); c++) {
+		for (c = 0; c < ItemDefs[I_FOOD].mInput.size(); ++c)
+		{
 			i = ItemDefs[I_FOOD].mInput[c].item;
 			a = ItemDefs[I_FOOD].mInput[c].amt;
 			if(i != -1) {
@@ -1063,7 +1064,8 @@ void Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 {
 	int level = u->GetSkill(skill);
 	unsigned int c;
-	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c = 0; c < ItemDefs[item].mInput.size(); ++c)
+	{
 		if(ItemDefs[item].mInput[c].item == -1) continue;
 		int amt = u->items.GetNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;
@@ -1076,7 +1078,8 @@ void Game::RunCreateArtifact(ARegion *r,Unit *u,int skill,int item)
 	}
 
 	// Deduct the costs
-	for(c = 0; c < sizeof(ItemDefs[item].mInput)/sizeof(Materials); c++) {
+	for (c = 0; c < ItemDefs[item].mInput.size(); ++c)
+	{
 		if(ItemDefs[item].mInput[c].item == -1) continue;
 		int amt = u->items.GetNum(ItemDefs[item].mInput[c].item);
 		int cost = ItemDefs[item].mInput[c].amt;

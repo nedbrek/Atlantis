@@ -895,13 +895,13 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	{
 		// figure out the max we can produce based on the inputs
 		int count = 0;
-		for (unsigned c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); ++c)
+		for (unsigned c = 0; c < item.pInput.size(); ++c)
 		{
-			const int i = ItemDefs[o->item].pInput[c].item;
+			const int i = item.pInput[c].item;
 			if (i == -1)
 				continue;
 
-			const int amt_req = ItemDefs[o->item].pInput[c].amt;
+			const int amt_req = item.pInput[c].amt;
 			count += u->canConsume(i, amt_req * (maxproduced - count)) / amt_req;
 		}
 
@@ -910,7 +910,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 
 		// deduct the items spent
 		count = maxproduced;
-		for (unsigned c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); ++c)
+		for (unsigned c = 0; c < item.pInput.size(); ++c)
 		{
 			const int i = ItemDefs[o->item].pInput[c].item;
 			if (i == -1)
@@ -939,13 +939,13 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	else // AND inputs
 	{
 		// figure out the max we can produce based on all inputs
-		for (unsigned c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); ++c)
+		for (unsigned c = 0; c < item.pInput.size(); ++c)
 		{
-			const int i = ItemDefs[o->item].pInput[c].item;
+			const int i = item.pInput[c].item;
 			if (i == -1)
 				continue;
 
-			const int a = ItemDefs[o->item].pInput[c].amt;
+			const int a = item.pInput[c].amt;
 			const int amt = u->canConsume(i, a * maxproduced);
 			if (amt / a < maxproduced)
 			{
@@ -954,13 +954,13 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 		}
 
 		// deduct the items spent
-		for (unsigned c = 0; c < sizeof(ItemDefs->pInput)/sizeof(Materials); ++c)
+		for (unsigned c = 0; c < item.pInput.size(); ++c)
 		{
-			const int i = ItemDefs[o->item].pInput[c].item;
+			const int i = item.pInput[c].item;
 			if (i == -1)
 				continue;
 
-			const int a = ItemDefs[o->item].pInput[c].amt;
+			const int a = item.pInput[c].amt;
 			u->consume(i, maxproduced * a);
 		}
 	}

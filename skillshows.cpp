@@ -1184,7 +1184,7 @@ AString* ShowSkill::Report(Faction *f)
 
 				*str += " Each output requires: ";
 				bool first = true;
-				for (unsigned c = 0; c < sizeof(ItemDefs[i].mInput) / sizeof(Materials); ++c)
+				for (unsigned c = 0; c < ItemDefs[i].mInput.size(); ++c)
 				{
 					const int in_item = ItemDefs[i].mInput[c].item;
 					const int a = ItemDefs[i].mInput[c].amt;
@@ -1217,7 +1217,7 @@ AString* ShowSkill::Report(Faction *f)
 
 				*str += " Each output requires: ";
 				bool first = true;
-				for (unsigned c = 0; c < sizeof(ItemDefs[i].mInput) / sizeof(Materials); ++c)
+				for (unsigned c = 0; c < ItemDefs[i].mInput.size(); ++c)
 				{
 					const int in_item = ItemDefs[i].mInput[c].item;
 					const int a = ItemDefs[i].mInput[c].amt;
@@ -1330,7 +1330,7 @@ AString* ShowSkill::Report(Faction *f)
 		    last2 == -1)
 		{
 			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].mInput.size(); ++c)
 			{
 				if (ItemDefs[i].mInput[c].item == -1)
 					continue;
@@ -1347,7 +1347,7 @@ AString* ShowSkill::Report(Faction *f)
 		{
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].pInput.size(); ++c)
 			{
 				if (ItemDefs[i].pInput[c].item == -1)
 					continue;
@@ -1376,7 +1376,7 @@ AString* ShowSkill::Report(Faction *f)
 		if (ItemDefs[i].mSkill == skill && ItemDefs[i].mLevel == level)
 		{
 			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].mInput.size(); ++c)
 			{
 				if (ItemDefs[i].mInput[c].item == -1)
 					continue;
@@ -1414,7 +1414,7 @@ AString* ShowSkill::Report(Faction *f)
 		{
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].pInput.size(); ++c)
 			{
 				if (ItemDefs[i].pInput[c].item == -1)
 					continue;
