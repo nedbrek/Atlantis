@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 79 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 80 )
 
 class Aorders;
 class ExchangeOrder;
@@ -155,58 +155,13 @@ private: // methods
 	// Functions to allow enabling/disabling parts of the data tables
 	void EnableSkill(int sk); // Enabled a disabled skill
 	void DisableSkill(int sk);  // Prevents skill being studied or used
-	void ModifySkillDependancy(int sk, int i, int dep, int lev);
-	void ModifySkillFlags(int sk, int flags);
-	void ModifySkillCost(int sk, int cost);
-	void ModifySkillSpecial(int sk, int special);
-	void ModifySkillRange(int sk, int range);
 
 	void EnableItem(int it); // Enables a disabled item
 	void DisableItem(int it); // Prevents item being generated/produced
-	void ModifyItemFlags(int it, int flags);
-	void ModifyItemType(int it, int type);
-	void ModifyItemWeight(int it, int weight);
-	void ModifyItemBasePrice(int it, int price);
-	void ModifyItemCapacities(int it, int walk, int ride, int fly, int swim);
-	void ModifyItemProductionBooster(int it, int item, int bonus);
-	void ModifyItemHitch(int it, int i, int item, int capacity);
-	void ModifyItemProductionSkill(int it, int sk, int lev);
-	void ModifyItemProductionOutput(int it, int months, int count);
-	void ModifyItemProductionInput(int it, int i, int input, int amount);
-	void ModifyItemMagicSkill(int it, int sk, int lev);
-	void ModifyItemMagicOutput(int it, int count);
-	void ModifyItemMagicInput(int it, int i, int input, int amount);
-
-	void ModifyRaceSkillLevels(int race, int special, int def);
-	void ModifyRaceSkills(int race, int i, int sk);
-
-	void ModifyMonsterAttackLevel(int mon, int lev);
-	void ModifyMonsterDefense(int mon, int defenseType, int level);
-	void ModifyMonsterAttacksAndHits(int mon, int numattacks, int hits, int regen);
-	void ModifyMonsterSkills(int mon, int tact, int stealth, int obs);
-	void ModifyMonsterSpecial(int mon, int special, int lev);
-	void ModifyMonsterSpoils(int mon, int silver, int spoilType);
-	void ModifyMonsterThreat(int mon, int num, int hostileChance);
-
-	void ModifyWeaponSkills(int weap, int baseSkill, int orSkill);
-	void ModifyWeaponFlags(int weap, int flags);
-	void ModifyWeaponAttack(int weap, int wclass, int attackType, int numAtt);
-	void ModifyWeaponBonuses(int weap, int attack, int defense, int vsMount);
-
-	void ModifyArmorFlags(int armor, int flags);
-	void ModifyArmorSaveFrom(int armor, int from);
-	void ModifyArmorSaveValue(int armor, int wclass, int val);
-
-	void ModifyMountSkill(int mount, int skill);
-	void ModifyMountBonuses(int mount, int min, int max, int hampered);
-	void ModifyMountSpecial(int mount, int special, int level);
 
 	void EnableObject(int ob); // Enables a disabled object
 	void DisableObject(int ob); // Prevents object being built
 	void ModifyObjectFlags(int ob, int flags);
-	void ModifyObjectDecay(int ob, int maxMaint, int maxMonthDecay, int mFact);
-	void ModifyObjectProduction(int ob, int it);
-	void ModifyObjectMonster(int ob, int monster);
 	void ModifyObjectConstruction(int ob, int it, int num, int sk, int lev);
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 
@@ -215,33 +170,9 @@ private: // methods
 	void ModifyTerrainCoastRace(int t, int i, int r);
 	void ClearTerrainItems(int t);
 	void ModifyTerrainItems(int t, int i, int p, int c, int a);
-	void ModifyTerrainWMons(int t, int freq, int smon, int bigmon, int hum);
-	void ModifyTerrainLairChance(int t, int chance);
-	void ModifyTerrainLair(int t, int i, int lair);
 	void ModifyTerrainEconomy(int t, int pop, int wages, int econ, int move);
 
-	void ModifyBattleItemFlags(int item, int flags);
-	void ModifyBattleItemSpecial(int item, int special, int level);
-
-	void ModifySpecialTargetFlags(int special, int targetflags);
-	void ModifySpecialTargetObjects(int special, int index, int obj);
-	void ModifySpecialTargetItems(int special, int index, int item);
-	void ModifySpecialTargetEffects(int special, int index, int effect);
-	void ModifySpecialEffectFlags(int special, int effectflags);
-	void ModifySpecialShields(int special, int index, int type);
-	void ModifySpecialDefenseMods(int special, int index, int type, int val);
-	void ModifySpecialDamage(int special, int index, int type, int min,
-	      int val, int flags, int cls, int effect);
-
-	void ModifyEffectFlags(int effect, int flags);
-	void ModifyEffectAttackMod(int effect, int val);
-	void ModifyEffectDefenseMod(int effect, int index, int type, int val);
-	void ModifyEffectCancelEffect(int effect, int uneffect);
-
 	void ModifyRangeFlags(int range, int flags);
-	void ModifyRangeClass(int range, int rclass);
-	void ModifyRangeMultiplier(int range, int mult);
-	void ModifyRangeLevelPenalty(int range, int pen);
 
 	// Parsing functions
 	void ParseError(OrdersCheck *pCheck, Unit *pUnit, Faction *pFac, const AString &strError);

@@ -1687,7 +1687,7 @@ int Unit::MaintCost()
 
 	if (Globals->MAINT_COST_PER_HIT) {
 		// Check each man to determine hit upkeep
-		for (int i = 0; i <= NITEMS; ++i)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 			if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 

@@ -468,32 +468,31 @@ void ARegion::SetupCityMarket()
 	int magic = 0;
 
 	//foreach item
-	for (int i = 0; i < NITEMS; ++i)
+	int i = 0;
+	for (auto ip = ItemDefs.begin(); ip != ItemDefs.end(); ++i, ++ip)
 	{
-		if (i == I_SILVER)
-			continue; // not in market
-
+		const ItemType &item = *ip;
 		// skip if disabled or not in markets
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		if (item.flags & ItemType::DISABLED) continue;
+		if (item.flags & ItemType::NOMARKET) continue;
 
 		// trade items handled later
-		if (ItemDefs[i].type & IT_TRADE)
+		if (item.type & IT_TRADE)
 		{
 			++numtrade;
 			continue;
 		}
 
-		// specific food items
-		if (i == I_GRAIN || i == I_LIVESTOCK || i == I_FISH)
+		// food items
+		if (item.flags & IT_FOOD)
 		{
-			if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+			if (item.flags & ItemType::NOBUY) continue;
 
 			if (i == I_FISH && !IsCoastal())
 				continue;
 
 			int amt = Globals->CITY_MARKET_NORMAL_AMT;
-			int price = ItemDefs[i].baseprice;
+			int price = item.baseprice;
 
 			if (Globals->RANDOM_ECONOMY)
 			{
@@ -509,32 +508,10 @@ void ARegion::SetupCityMarket()
 			continue;
 		}
 
-		// generic food
-		if (i == I_FOOD)
-		{
-			if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
-
-			int amt = Globals->CITY_MARKET_NORMAL_AMT;
-			int price = ItemDefs[i].baseprice;
-
-			if (Globals->RANDOM_ECONOMY)
-			{
-				amt += getrandom(amt);
-				price *= 120 + getrandom(80);
-				price /= 100;
-			}
-
-			int cap = citymax / 8;
-			if (cap < citymax) cap = citymax * 3/4;
-
-			markets.Add(new Market (M_BUY, i, price, amt, population+cap, population+6*cap, amt, amt*5));
-			continue;
-		}
-
-		if (ItemDefs[i].type & IT_NORMAL)
+		if (item.type & IT_NORMAL)
 		{
 			// raw material
-			if (ItemDefs[i].pInput[0].item == -1)
+			if (item.pInput[0].item == -1)
 			{
 				// check if the product can be produced in the region
 				bool canProduce = false;
@@ -549,16 +526,16 @@ void ARegion::SetupCityMarket()
 					}
 				}
 
+				// if item can be produced here
 				if (canProduce)
 				{
-					if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
+					if  (item.flags & ItemType::NOSELL) continue;
 
-					// item can be produced here
 					if (getrandom(2) == 0)
-						continue;
+						continue; // skip it
 
 					int amt = Globals->CITY_MARKET_NORMAL_AMT;
-					int price = ItemDefs[i].baseprice;
+					int price = item.baseprice;
 
 					if (Globals->RANDOM_ECONOMY)
 					{
@@ -580,7 +557,7 @@ void ARegion::SetupCityMarket()
 				// perhaps it is in demand here?
 				if (!getrandom(6))
 				{
-					if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+					if (item.flags & ItemType::NOBUY) continue;
 
 					int amt = Globals->CITY_MARKET_NORMAL_AMT;
 					int price = ItemDefs[i].baseprice;
@@ -604,10 +581,10 @@ void ARegion::SetupCityMarket()
 			// chance to sell
 			if (getrandom(3) == 0)
 			{
-				if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+				if (item.flags & ItemType::NOBUY) continue;
 
 				int amt = Globals->CITY_MARKET_NORMAL_AMT;
-				int price = ItemDefs[i].baseprice;
+				int price = item.baseprice;
 
 				if (Globals->RANDOM_ECONOMY)
 				{
@@ -623,14 +600,14 @@ void ARegion::SetupCityMarket()
 				continue;
 			}
 
-			if  (ItemDefs[i].flags & ItemType::NOSELL) continue;
+			if (item.flags & ItemType::NOSELL) continue;
 
 			// chance to buy
 			if (getrandom(6) != 0)
 				continue;
 
 			int amt = Globals->CITY_MARKET_NORMAL_AMT;
-			int price = ItemDefs[i].baseprice;
+			int price = item.baseprice;
 
 			if (Globals->RANDOM_ECONOMY)
 			{
@@ -650,15 +627,15 @@ void ARegion::SetupCityMarket()
 		}
 
 		// Everything else is SELL
-		if  (ItemDefs[i].flags & ItemType::NOBUY) continue;
+		if (item.flags & ItemType::NOBUY) continue;
 
-		if (ItemDefs[i].type & IT_ADVANCED)
+		if (item.type & IT_ADVANCED)
 		{
 			if (getrandom(4) != 2)
 				continue;
 
 			int amt = Globals->CITY_MARKET_ADVANCED_AMT;
-			int price = ItemDefs[i].baseprice;
+			int price = item.baseprice;
 
 			if (Globals->RANDOM_ECONOMY)
 			{
@@ -679,14 +656,14 @@ void ARegion::SetupCityMarket()
 			continue;
 		}
 
-		if ((ItemDefs[i].type & IT_MAGIC) == 0)
+		if ((item.type & IT_MAGIC) == 0)
 			continue;
 
 		if (getrandom(8) != 2)
 			continue;
 
 		int amt = Globals->CITY_MARKET_MAGIC_AMT;
-		int price = ItemDefs[i].baseprice;
+		int price = item.baseprice;
 
 		if (Globals->RANDOM_ECONOMY)
 		{
@@ -725,12 +702,14 @@ void ARegion::SetupCityMarket()
 	int tradebuy = 0;
 	int tradesell = 0;
 
-	for (int i = 0; i < NITEMS; ++i)
+	i = 0;
+	for (auto ip = ItemDefs.begin(); ip != ItemDefs.end(); ++i, ++ip)
 	{
-		if (ItemDefs[i].flags & ItemType::DISABLED) continue;
-		if (ItemDefs[i].flags & ItemType::NOMARKET) continue;
+		ItemType &item = *ip;
+		if (item.flags & ItemType::DISABLED) continue;
+		if (item.flags & ItemType::NOMARKET) continue;
 
-		if ((ItemDefs[i].type & IT_TRADE) == 0)
+		if ((item.type & IT_TRADE) == 0)
 			continue;
 
 		int addbuy = 0;
@@ -748,13 +727,13 @@ void ARegion::SetupCityMarket()
 		sell1--;
 		sell2--;
 
-		if (ItemDefs[i].flags & ItemType::NOBUY) addbuy = 0;
-		if (ItemDefs[i].flags & ItemType::NOSELL) addsell = 0;
+		if (item.flags & ItemType::NOBUY) addbuy = 0;
+		if (item.flags & ItemType::NOSELL) addsell = 0;
 
 		if (addbuy)
 		{
 			int amt = Globals->CITY_MARKET_TRADE_AMT;
-			int price = ItemDefs[i].baseprice;
+			int price = item.baseprice;
 
 			if (Globals->RANDOM_ECONOMY)
 			{

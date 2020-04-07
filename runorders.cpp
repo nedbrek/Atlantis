@@ -1978,7 +1978,8 @@ void Game::AssessMaintenance()
 		{
 			// Can claim food for maintenance, so find the cheapest food
 			int i = -1, cost = -1;
-			for (int j = 0; j < NITEMS; j++) {
+			for (unsigned j = 0; j < ItemDefs.size(); ++j)
+			{
 				if (ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if (ItemDefs[j].type & IT_FOOD) {
 					if (i == -1 ||
@@ -2211,7 +2212,7 @@ void Game::DoGiveOrders()
 					forlist((&u->items))
 					{
 						Item *item = (Item*)elem;
-						if (mask == NITEMS || // GIVE ALL ITEMS
+						if (mask == (int)ItemDefs.size() || // GIVE ALL ITEMS
 						    (ItemDefs[item->type].type & mask)) // GIVE ALL CLASS and class match
 						{
 							// create new give order

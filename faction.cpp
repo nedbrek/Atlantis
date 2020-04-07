@@ -545,8 +545,8 @@ AString* ItemDescription(int item, int full)
 		*temp += " This item increases the production of ";
 
 		// find last item (for commas and "and")
-		int last = -1;
-		for (int i = NITEMS - 1; i > 0; --i)
+		unsigned last = -1;
+		for (int i = ItemDefs.size() - 1; i > 0; --i)
 		{
 			if (ItemDefs[i].flags & ItemType::DISABLED)
 				continue;
@@ -559,7 +559,7 @@ AString* ItemDescription(int item, int full)
 		}
 
 		int comma = 0;
-		for (int i = 0; i < NITEMS; ++i)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 		   if (ItemDefs[i].flags & ItemType::DISABLED)
 				continue;
@@ -1089,7 +1089,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			itemshows.DeleteAll();
-			for (i = 0; i < NITEMS; i++)
+			for (unsigned i = 0; i < ItemDefs.size(); i++)
 			{
 				AString *show = ItemDescription(i, 1);
 				if (show) {
@@ -1107,7 +1107,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			objectshows.DeleteAll();
-			for (i = 0; i < NOBJECTS; i++) {
+			for (unsigned i = 0; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
 				if(show) {
 					objectshows.Add(show);

@@ -60,7 +60,7 @@ static AString DefType(int atype)
 int ParseAllItems(const AString *token)
 {
 	//foreach item definition
-	for (int i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		// if the current item is an illusionary version of a monster
 		if ((ItemDefs[i].type & IT_MONSTER) &&
@@ -87,9 +87,9 @@ int ParseAllItems(const AString *token)
 	return -1;
 }
 
-int ParseEnabledItem(AString *token)
+int ParseEnabledItem(const AString *token)
 {
-	for (int i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		if (ItemDefs[i].flags & ItemType::DISABLED)
 			continue;
@@ -121,7 +121,7 @@ int ParseEnabledItem(AString *token)
 int ParseGiveableItem(AString *token)
 {
 	int r = -1;
-	for (int i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		if (ItemDefs[i].flags & ItemType::DISABLED)
 			continue;

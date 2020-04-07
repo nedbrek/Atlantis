@@ -88,7 +88,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	bool swimming_exists = false;
 	if (Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE)
 		move_over_water = true;
-	for (unsigned i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		if (ItemDefs[i].flags & ItemType::DISABLED)
 			continue;
@@ -830,7 +830,6 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Paragraph(temp);
 
 	int cap;
-	unsigned i, j, k;
 	int last = -1;
 
 	f.Paragraph("");
@@ -1468,7 +1467,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Cost");
 		f.TagText("TH", "Sailors");
 		f.Enclose(0, "TR");
-		for(i = 0; i < NOBJECTS; i++) {
+		for(unsigned i = 0; i < NOBJECTS; ++i)
+		{
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(!ObjectIsShip(i)) continue;
 			if(ItemDefs[ObjectDefs[i].item].flags & ItemType::DISABLED)
@@ -1543,14 +1543,17 @@ int Game::GenRules(const AString &rules, const AString &css,
 	int comma = 0;
 	int found = 0;
 	last = -1;
-	for(i = 0; i < NSKILLS; i++) {
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(SkillDefs[i].flags & SkillType::APPRENTICE) continue;
-		if(SkillDefs[i].flags & SkillType::MAGIC) continue;
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (SkillDefs[i].flags & SkillType::APPRENTICE) continue;
+		if (SkillDefs[i].flags & SkillType::MAGIC) continue;
 		found = 0;
-		for(j = 0; j < 3; j++) {
+		for (unsigned j = 0; j < 3; j++)
+		{
 			const int k = SkillDefs[i].depends[j].skill;
-			if(k != -1 && !(SkillDefs[k].flags & SkillType::DISABLED)) {
+			if (k != -1 && !(SkillDefs[k].flags & SkillType::DISABLED))
+			{
 				found = 1;
 				break;
 			}
@@ -1627,7 +1630,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Max Skills");
 		f.Enclose(0, "TR");
 
-		for (i = 0; i < NITEMS; i++)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 			if (ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if (!(ItemDefs[i].type & IT_MAN)) continue;
@@ -1652,11 +1655,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 			int spec = 0;
 			comma = 0;
 			temp = "";
-			for (j = 0; j < (int)(sizeof(ManDefs->skills) /
-						 sizeof(ManDefs->skills[0])); j++)
+			for (unsigned j = 0; j < (int)(sizeof(ManDefs->skills) /
+			     sizeof(ManDefs->skills[0])); ++j)
 			{
-				if(ManDefs[m].skills[j] < 0) continue;
-				if(SkillDefs[ManDefs[m].skills[j]].flags & SkillType::DISABLED)
+				if (ManDefs[m].skills[j] < 0) continue;
+				if (SkillDefs[ManDefs[m].skills[j]].flags & SkillType::DISABLED)
 					continue;
 				spec = 1;
 
@@ -1983,7 +1986,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("TH", "Weight (capacity)");
 	f.TagText("TH", "Extra Information");
 	f.Enclose(0, "TR");
-	for (unsigned i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		if(ItemDefs[i].flags & ItemType::DISABLED) continue;
 		if(!(ItemDefs[i].type & IT_NORMAL)) continue;
@@ -2126,7 +2129,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 		if (ItemDefs[i].type & IT_TOOL)
 		{
-			for (unsigned j = 0; j < NITEMS; j++)
+			for (unsigned j = 0; j < ItemDefs.size(); j++)
 			{
 				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 				if(ItemDefs[j].mult_item != int(i)) continue;
@@ -2173,7 +2176,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			last = j;
 		}
 		if(last != -1) temp2 += ItemDefs[last].names;
-		j = ItemDefs[I_SWORD].pSkill;
+		const int j = ItemDefs[I_SWORD].pSkill;
 		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 			temp += " Example: PRODUCE SWORDS will produce as many swords "
 				"as possible during the month, provided that the unit has "
@@ -2186,12 +2189,14 @@ int Game::GenRules(const AString &rules, const AString &css,
 		}
 	}
 	f.Paragraph(temp);
+
 	temp = "If an item requires raw materials, then the specified "
-		"amount of each material is consumed for each item produced. ";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED)) {
+	    "amount of each material is consumed for each item produced. ";
+	if (!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED))
+	{
 		last = -1;
 		temp2 = "";
-		k = 0;
+		int k = 0;
 		for (unsigned i = 0; i < ItemDefs[I_LONGBOW].pInput.size(); ++i)
 		{
 			const int j = ItemDefs[I_LONGBOW].pInput[i].item;
@@ -2209,24 +2214,28 @@ int Game::GenRules(const AString &rules, const AString &css,
 			last = j;
 			k = ItemDefs[I_LONGBOW].pInput[i].amt;
 		}
-		if(last != -1) {
+
+		if (last != -1)
+		{
 			temp2 += AString(5*k);
 			temp2 += " units of ";
 			temp2 += ItemDefs[last].names;
-		}
-		j = ItemDefs[I_LONGBOW].pSkill;
-		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
-			temp += "Thus to produce 5 longbows (a supply of arrows is "
-				"assumed to be included with the bow), ";
-			temp += temp2;
-			temp += " are required. ";
+			const int j = ItemDefs[I_LONGBOW].pSkill;
+			if (!(SkillDefs[j].flags & SkillType::DISABLED))
+			{
+				temp += "Thus to produce 5 longbows (a supply of arrows is "
+				    "assumed to be included with the bow), ";
+				temp += temp2;
+				temp += " are required. ";
+			}
 		}
 	}
 	temp += "The higher ones skill, the more productive each man-month "
 		"of work";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
+	if (!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
 			(ItemDefs[I_LONGBOW].pMonths == 1) &&
-			(ItemDefs[I_LONGBOW].pOut == 1)) {
+			(ItemDefs[I_LONGBOW].pOut == 1))
+	{
 		temp += "; thus, 5 longbows could be produced by a 5-man unit of "
 			"skill 1, or a 1-man unit of skill 5.";
 		if(!(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) &&
@@ -2237,7 +2246,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				"produce 1 plate armor per month.";
 			last = -1;
 			temp2 = "";
-			k = 0;
+			int k = 0;
 			for (unsigned i = 0; i < ItemDefs[I_PLATEARMOR].pInput.size(); ++i)
 			{
 				const int j = ItemDefs[I_PLATEARMOR].pInput[i].item;
@@ -2260,7 +2269,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 				temp2 += " units of ";
 				temp2 += ItemDefs[last].names;
 			}
-			j = ItemDefs[I_PLATEARMOR].pSkill;
+			const int j = ItemDefs[I_PLATEARMOR].pSkill;
 			if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 				temp += " Plate armor also takes ";
 				temp += temp2;
@@ -2536,7 +2545,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("TH", "Material");
 		f.TagText("TH", "Skill (min level)");
 		f.Enclose(0, "TR");
-		for(i = 0; i < NOBJECTS; i++) {
+		for (unsigned i = 0; i < NOBJECTS; ++i)
+		{
 			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
 			if(ObjectDefs[i].productionAided != -1) continue;
 			if(ObjectDefs[i].protect) continue;
@@ -3512,11 +3522,12 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp2 = "";
 			last = -1;
 			comma = 0;
-			for(i = 0; i < NITEMS; i++) {
+			for (unsigned i = 0; i < ItemDefs.size(); ++i)
+			{
 				if(!(ItemDefs[i].type & IT_ARMOR)) continue;
 				if(!(ItemDefs[i].type & IT_NORMAL)) continue;
 				if(ItemDefs[i].flags & ItemType::DISABLED) continue;
-				j = ItemDefs[i].index;
+				const int j = ItemDefs[i].index;
 				if(!(ArmorDefs[j].flags & ArmorType::USEINASSASSINATE))
 					continue;
 				if(last == -1) {
@@ -3590,8 +3601,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"differences.  The basic magic skills, called Foundations, are ";
 	last = -1;
 	comma = 0;
-	j = 0;
-	for(i = 0; i < NSKILLS; i++) {
+	int j = 0;
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
 		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
 		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
 		j++;
@@ -3679,7 +3691,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp += " Foundation skills are called ";
 	last = -1;
 	comma = 0;
-	for(i = 0; i < NSKILLS; i++) {
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
 		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
 		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
 		if(last == -1) {

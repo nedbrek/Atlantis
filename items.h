@@ -193,6 +193,7 @@ public:
 	};
 	static const char *const ALIGN_STRS[NUM_ALIGN];
 
+	const char *name;
 	int max_skills; ///< maximum number of skills that can be learned
 	int speciallevel; ///< highest level that can be attained in specialized skills
 	int defaultlevel; ///< highest level that can be attained in everything else, except magic
@@ -347,7 +348,7 @@ extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
 int ParseAllItems(const AString *token);
-int ParseEnabledItem(AString *);
+int ParseEnabledItem(const AString *);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);
