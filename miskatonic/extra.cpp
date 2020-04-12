@@ -31,6 +31,7 @@
 #include "gamedata.h"
 #include "object.h"
 #include "gameio.h"
+#include "astring.h"
 
 int Game::SetupFaction( Faction *pFac )
 {
@@ -75,8 +76,14 @@ int Game::SetupFaction( Faction *pFac )
 	// Special wizard items
 	faction_leader->items.SetNum(I_WIZARDSTAFF, 1);
 	pFac->DiscoverItem(I_WIZARDSTAFF, 0, 1);
-	faction_leader->items.SetNum(I_WIZROBE, 1);
-	pFac->DiscoverItem(I_WIZROBE, 0, 1);
+
+	const AString wiz_robe("wizard robe");
+	const int wiz_robe_idx = ParseEnabledItem(&wiz_robe);
+	if (wiz_robe_idx != -1)
+	{
+		faction_leader->items.SetNum(wiz_robe_idx, 1);
+		pFac->DiscoverItem(wiz_robe_idx, 0, 1);
+	}
 
 	// Horses too heavy for base GATE LORE skill
 	if (!Globals->NEXUS_NO_EXITS) {
@@ -84,7 +91,9 @@ int Game::SetupFaction( Faction *pFac )
 		pFac->DiscoverItem(I_HORSE, 0, 1);
 	}
 
-	if(TurnNumber() >= 24) {
+	// give late comers some extra skills
+	if (TurnNumber() >= 24)
+	{
 		faction_leader->Study(S_PATTERN, 60);
 		faction_leader->Study(S_SPIRIT, 60);
 		faction_leader->Study(S_FORCE, 90);
@@ -92,7 +101,9 @@ int Game::SetupFaction( Faction *pFac )
 		faction_leader->Study(S_STEALTH, 30);
 		faction_leader->Study(S_OBSERVATION, 30);
 	}
-	if(TurnNumber() >= 36) {
+
+	if (TurnNumber() >= 36)
+	{
 		faction_leader->Study(S_TACTICS, 90);
 		faction_leader->Study(S_COMBAT, 60);
 	}
@@ -139,7 +150,7 @@ int Game::SetupFaction( Faction *pFac )
     return( 1 );
 }
 
-Faction *Game::CheckVictory()
+Faction* Game::CheckVictory()
 {
 	ARegion *reg = NULL;
 	forlist(&regions) {
@@ -170,10 +181,11 @@ Faction *Game::CheckVictory()
 
 void Game::ModifyTablesPerRuleset(void)
 {
-	if(Globals->APPRENTICES_EXIST)
+	if (Globals->APPRENTICES_EXIST)
 	   	EnableSkill(S_MANIPULATE);
 
-	if((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1)) {
+	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1))
+	{
 		EnableItem(I_MUSHROOM);
 		EnableItem(I_HEALPOTION);
 		EnableItem(I_ROUGHGEM);
@@ -185,10 +197,11 @@ void Game::ModifyTablesPerRuleset(void)
 		EnableSkill(S_MONSTERTRAINING);
 	}
 
-	if(!Globals->GATES_EXIST)
+	if (!Globals->GATES_EXIST)
 		DisableSkill(S_GATE_LORE);
 
-	if(Globals->NEXUS_IS_CITY) {
+	if (Globals->NEXUS_IS_CITY)
+	{
 		ClearTerrainRaces(R_NEXUS);
 		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
 
@@ -202,27 +215,6 @@ void Game::ModifyTablesPerRuleset(void)
 	}
 
 	// Races
-	EnableItem(I_HIGHELF);
-	EnableItem(I_WOODELF);
-	EnableItem(I_HILLDWARF);
-	EnableItem(I_HALFLING);
-	EnableItem(I_CENTAURMAN);
-	EnableItem(I_MOUNTAINDWARF);
-	EnableItem(I_GNOME);
-	EnableItem(I_GREYELF);
-	EnableItem(I_HUMAN);
-	EnableItem(I_LIZARDMAN);
-	//EnableItem(I_HALFORC);
-	EnableItem(I_MINOTAUR);
-	EnableItem(I_ORC);
-	EnableItem(I_HOBGOBLIN);
-	EnableItem(I_GNOLL);
-	EnableItem(I_OGREMAN);
-	EnableItem(I_GOBLINMAN);
-	EnableItem(I_UNDERDWARF);
-	EnableItem(I_DARKELF);
-	EnableItem(I_KOBOLDMAN);
-
 	DisableItem(I_VIKING);
 	DisableItem(I_BARBARIAN);
 	DisableItem(I_PLAINSMAN);
@@ -317,10 +309,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_ECROSSBOW);
 	EnableItem(I_EHEAVYCROSSBOW);
 
-	// Special Leader Items
-	EnableItem(I_WIZARDSTAFF);
-	EnableItem(I_WIZROBE);
-
 	// Armor
 	EnableItem(I_PADDEDARMOR);
 	EnableItem(I_LEATHERARMOR);
@@ -334,31 +322,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_MMAILARMOR);
 	EnableItem(I_MPLATEMAILARMOR);
 	EnableItem(I_MPLATEARMOR);
-	// Admantium
-	EnableItem(I_ASCALEARMOR);
-	EnableItem(I_AMAILARMOR);
-	EnableItem(I_APLATEMAILARMOR);
-	EnableItem(I_APLATEARMOR);
-
-	// Enchanted
-	// Armor
-	EnableItem(I_EPADDEDARMOR);
-	EnableItem(I_ELEATHERARMOR);
-	// Iron
-	EnableItem(I_ESCALEARMOR);
-	EnableItem(I_EMAILARMOR);
-	EnableItem(I_EPLATEMAILARMOR);
-	EnableItem(I_EPLATEARMOR);
-	// Mithril
-	EnableItem(I_EMSCALEARMOR);
-	EnableItem(I_EMMAILARMOR);
-	EnableItem(I_EMPLATEMAILARMOR);
-	EnableItem(I_EMPLATEARMOR);
-	// Admantium
-	EnableItem(I_EASCALEARMOR);
-	EnableItem(I_EAMAILARMOR);
-	EnableItem(I_EAPLATEMAILARMOR);
-	EnableItem(I_EAPLATEARMOR);
 
 	DisableItem(I_CHAINARMOR);
 	DisableItem(I_CLOTHARMOR);
@@ -390,15 +353,10 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableItem(I_LASSO);
 	EnableItem(I_BAG);
 	EnableItem(I_SPINNING);
-	//EnableItem(I_ROUGHGEM);
-	//EnableItem(I_GEMS);
 
 	// Skills
 	EnableSkill(S_CAMELTRAINING);
 	EnableSkill(S_MONSTERTRAINING);
-	//EnableSkill(S_WEAPONCRAFT);
-	//EnableSkill(S_ARMORCRAFT);
-	//EnableSkill(S_GEMCUTTING);
 
 	// Monsters
 	EnableItem(I_DROW);
@@ -474,7 +432,6 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainRace(R_PLAIN, 3, I_CENTAURMAN);
 
 	ModifyTerrainItems(R_PLAIN, 1, I_WHORSE, 5, 5);
-	// ModifyTerrainLairChance(R_PLAIN, 5);
 
 	// FOREST
 	ClearTerrainRaces(R_FOREST);
@@ -553,21 +510,12 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyObjectFlags(O_DCLIFFS, ObjectType::CANENTER|ObjectType::NEVERDECAY);
 	ModifyObjectConstruction(O_DCLIFFS, I_ROOTSTONE, 50, S_DRAGON_LORE, 3);
 
-	// Make GateLore, ConstructGate and PortalLore take twice as long to study.
-	// ModifySkillFlags(S_GATE_LORE,
-	// 		SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
-	// ModifySkillFlags(S_CONSTRUCT_GATE,
-	// 		SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
-	// ModifySkillFlags(S_PORTAL_LORE,
-	// 		SkillType::MAGIC | SkillType::CAST | SkillType::SLOWSTUDY);
-
 	// Modify the various spells which are allowed to cross levels
-	if(Globals->EASIER_UNDERWORLD) {
+	if (Globals->EASIER_UNDERWORLD)
+	{
 		ModifyRangeFlags(RANGE_TELEPORT, RangeType::RNG_CROSS_LEVELS);
 		ModifyRangeFlags(RANGE_FARSIGHT, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
-        ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_CLEAR_SKIES, RangeType::RNG_CROSS_LEVELS);
+		ModifyRangeFlags(RANGE_WEATHER_LORE, RangeType::RNG_CROSS_LEVELS);
 	}
-
-	return;
 }

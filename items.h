@@ -77,6 +77,63 @@ struct HitchItem
 class ItemType
 {
 public:
+	ItemType(
+	    const char *n,
+	    const char *p,
+	    const char *a,
+		 int f,
+		 int ps,
+		 int pl,
+		 int pm,
+		 int po,
+		 const std::vector<Materials> &pi,
+		 int ms,
+		 int ml,
+		 int mo,
+		 const std::vector<Materials> &mi,
+		 int wt,
+		 int tp,
+		 int bp,
+		 int c,
+		 int idx,
+		 int bidx,
+		 int wk,
+		 int rd,
+		 int fy,
+		 int sm,
+		 const std::vector<HitchItem> &hi,
+		 int mit,
+		 int mv
+	)
+	: name(n)
+	, names(p)
+	, abr(a)
+	, flags(f)
+	, pSkill(ps)
+	, pLevel(pl)
+	, pMonths(pm)
+	, pOut(po)
+	, pInput(pi)
+	, mSkill(ms)
+	, mLevel(ml)
+	, mOut(mo)
+	, mInput(mi)
+	, weight(wt)
+	, type(tp)
+	, baseprice(bp)
+	, combat(c)
+	, index(idx)
+	, battleindex(bidx)
+	, walk(wk)
+	, ride(rd)
+	, fly(fy)
+	, swim(sm)
+	, hitchItems(hi)
+	, mult_item(mit)
+	, mult_val(mv)
+	{
+	}
+
 	const char *name;  ///< full name of the item
 	const char *names; ///< plural
 	const char *abr;   ///< short form
@@ -97,12 +154,12 @@ public:
 	int pLevel; ///< skill level required to produce this
 	int pMonths; ///< man months required to produce this
 	int pOut; ///< how many of this we get in a batch
-	Materials pInput[4]; ///< normal production inputs
+	std::vector<Materials> pInput; ///< normal production inputs
 
 	int mSkill; ///< skill required for magical production
 	int mLevel; ///< skill level for magical production
 	int mOut; ///< how many of this are conjured in a batch
-	Materials mInput[4]; ///< inputs for magical production
+	std::vector<Materials> mInput; ///< inputs for magical production
 
 	int weight; ///< in units (stones?)
 	int type; ///< bitwise or of ItemFlags
@@ -116,12 +173,12 @@ public:
 	int fly;  ///< carrying capacity while moving through air
 	int swim; ///< carrying capacity while moving through water
 
-	HitchItem hitchItems[6];  ///< array of item/capacity that can be attached to for increased capacity
+	std::vector<HitchItem> hitchItems;  ///< array of item/capacity that can be attached to for increased capacity
 
 	int mult_item; ///< index of item which can increase production
 	int mult_val;  ///< number of additional items produced
 };
-extern ItemType *ItemDefs;
+extern std::vector<ItemType> ItemDefs;
 
 /// Skill specializations for men
 class ManType
@@ -136,6 +193,7 @@ public:
 	};
 	static const char *const ALIGN_STRS[NUM_ALIGN];
 
+	const char *name;
 	int max_skills; ///< maximum number of skills that can be learned
 	int speciallevel; ///< highest level that can be attained in specialized skills
 	int defaultlevel; ///< highest level that can be attained in everything else, except magic
@@ -290,7 +348,7 @@ extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
 int ParseAllItems(const AString *token);
-int ParseEnabledItem(AString *);
+int ParseEnabledItem(const AString *);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);

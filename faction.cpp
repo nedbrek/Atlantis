@@ -160,7 +160,7 @@ AString* ItemDescription(int item, int full)
 	}
 
 	// Each hitch item has its own weight (larger creatures can pull more in the same wagon, for example)
-	for (unsigned c = 0; c < sizeof(item_def.hitchItems)/sizeof(HitchItem); ++c)
+	for (unsigned c = 0; c < item_def.hitchItems.size(); ++c)
 	{
 		const HitchItem &hitch = item_def.hitchItems[c];
 		if (hitch.item == -1)
@@ -545,8 +545,8 @@ AString* ItemDescription(int item, int full)
 		*temp += " This item increases the production of ";
 
 		// find last item (for commas and "and")
-		int last = -1;
-		for (int i = NITEMS - 1; i > 0; --i)
+		unsigned last = -1;
+		for (int i = ItemDefs.size() - 1; i > 0; --i)
 		{
 			if (ItemDefs[i].flags & ItemType::DISABLED)
 				continue;
@@ -559,7 +559,7 @@ AString* ItemDescription(int item, int full)
 		}
 
 		int comma = 0;
-		for (int i = 0; i < NITEMS; ++i)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 		   if (ItemDefs[i].flags & ItemType::DISABLED)
 				continue;
@@ -688,7 +688,7 @@ AString* ItemDescription(int item, int full)
 		else
 			*temp += "this item";
 
-		const unsigned len = sizeof(item_def.pInput)/sizeof(Materials);
+		const unsigned len = item_def.pInput.size();
 		int count = 0; // commas
 		int tot = len;
 		for (unsigned c = 0; c < len; c++)
@@ -746,7 +746,7 @@ AString* ItemDescription(int item, int full)
 		    " of at least level " + item_def.mLevel +
 		    " may attempt to create this item via magic";
 
-		const unsigned len = sizeof(item_def.mInput)/sizeof(Materials);
+		const unsigned len = item_def.mInput.size();
 
 		int count = 0;
 		int tot = len;
@@ -1089,7 +1089,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			itemshows.DeleteAll();
-			for (i = 0; i < NITEMS; i++)
+			for (unsigned i = 0; i < ItemDefs.size(); i++)
 			{
 				AString *show = ItemDescription(i, 1);
 				if (show) {
@@ -1107,7 +1107,7 @@ void Faction::WriteReport(Areport *f, Game *pGame)
 			}
 
 			objectshows.DeleteAll();
-			for (i = 0; i < NOBJECTS; i++) {
+			for (unsigned i = 0; i < NOBJECTS; i++) {
 				AString *show = ObjectDescription(i);
 				if(show) {
 					objectshows.Add(show);

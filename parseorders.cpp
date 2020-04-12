@@ -1954,7 +1954,7 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			if (pCheck)
 			{
 				it = -1;
-				for (int i = 0; i < NITEMS; ++i)
+				for (unsigned i = 0; i < ItemDefs.size(); ++i)
 				{
 					if (ItemDefs[i].flags & ItemType::DISABLED)
 						continue;
@@ -2731,7 +2731,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 			}
 			else if (*token == "item" || *token == "items")
 			{
-				item = -NITEMS;
+				item = -ItemDefs.size();
 				found = true;
 			}
 			else if (item != -1)
@@ -3159,7 +3159,7 @@ void Game::ProcessNocrossOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	if (!move_over_water)
 	{
-		for (int i = 0; i < NITEMS; ++i)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 			if (ItemDefs[i].flags & ItemType::DISABLED)
 				continue;

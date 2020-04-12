@@ -2628,7 +2628,8 @@ void ARegion::MakeStartingCity()
 
     markets.DeleteAll();
 	if(Globals->START_CITIES_START_UNLIMITED) {
-		for (int i=0; i<NITEMS; i++) {
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
+		{
 			if( ItemDefs[i].flags & ItemType::DISABLED) continue;
 			if( ItemDefs[ i ].type & IT_NORMAL ) {
 				if (i==I_SILVER || i==I_LIVESTOCK || i==I_FISH || i==I_GRAIN)

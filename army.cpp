@@ -851,12 +851,11 @@ void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
 		thespoil = IT_TRADE;
 
 	int count = 0;
-	int i;
-	for (i = 0; i < NITEMS; ++i)
+	for (const auto &item : ItemDefs)
 	{
-		if ( (ItemDefs[i].type & thespoil) &&
-		    !(ItemDefs[i].type & IT_SPECIAL) &&
-		    !(ItemDefs[i].flags & ItemType::DISABLED))
+		if ( (item.type & thespoil) &&
+		    !(item.type & IT_SPECIAL) &&
+		    !(item.flags & ItemType::DISABLED))
 		{
 			count++;
 		}
@@ -864,11 +863,12 @@ void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
 
 	count = getrandom(count) + 1;
 
-	for (i = 0; i < NITEMS; ++i)
+	int i = 0;
+	for (const auto &item : ItemDefs)
 	{
-		if ( (ItemDefs[i].type & thespoil) &&
-		    !(ItemDefs[i].type & IT_SPECIAL) &&
-		    !(ItemDefs[i].flags & ItemType::DISABLED))
+		if ( (item.type & thespoil) &&
+		    !(item.type & IT_SPECIAL) &&
+		    !(item.flags & ItemType::DISABLED))
 		{
 			count--;
 			if (count == 0)
@@ -877,6 +877,7 @@ void Army::GetMonSpoils(ItemList *spoils, int monitem, int free)
 				break;
 			}
 		}
+		++i;
 	}
 
 	int val = getrandom(MonDefs[ItemDefs[monitem].index].silver * 2);

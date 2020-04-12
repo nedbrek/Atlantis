@@ -92,7 +92,7 @@ AString* ShowSkill::Report(Faction *f)
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of fish production.";
 			break;
-		case S_HERBLORE:
+		case S_HERB_LORE:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of herb production.";
 			break;
@@ -1174,7 +1174,7 @@ AString* ShowSkill::Report(Faction *f)
 				*str += "A mage with the Enchant Swords skill may magically create enchanted weapons.";
 			}
 
-			for (unsigned i = 0; i < NITEMS; ++i)
+			for (unsigned i = 0; i < ItemDefs.size(); ++i)
 			{
 				if (ITEM_DISABLED(i) || ItemDefs[i].mSkill != S_ENCHANT_SWORDS || ItemDefs[i].mLevel != level)
 					continue;
@@ -1184,7 +1184,7 @@ AString* ShowSkill::Report(Faction *f)
 
 				*str += " Each output requires: ";
 				bool first = true;
-				for (unsigned c = 0; c < sizeof(ItemDefs[i].mInput) / sizeof(Materials); ++c)
+				for (unsigned c = 0; c < ItemDefs[i].mInput.size(); ++c)
 				{
 					const int in_item = ItemDefs[i].mInput[c].item;
 					const int a = ItemDefs[i].mInput[c].amt;
@@ -1207,7 +1207,7 @@ AString* ShowSkill::Report(Faction *f)
 				*str += "A mage with the Enchant Armor skill may magically create enchanted armors.";
 			}
 
-			for (unsigned i = 0; i < NITEMS; ++i)
+			for (unsigned i = 0; i < ItemDefs.size(); ++i)
 			{
 				if (ITEM_DISABLED(i) || ItemDefs[i].mSkill != S_ENCHANT_ARMOR || ItemDefs[i].mLevel != level)
 					continue;
@@ -1217,7 +1217,7 @@ AString* ShowSkill::Report(Faction *f)
 
 				*str += " Each output requires: ";
 				bool first = true;
-				for (unsigned c = 0; c < sizeof(ItemDefs[i].mInput) / sizeof(Materials); ++c)
+				for (unsigned c = 0; c < ItemDefs[i].mInput.size(); ++c)
 				{
 					const int in_item = ItemDefs[i].mInput[c].item;
 					const int a = ItemDefs[i].mInput[c].amt;
@@ -1320,7 +1320,7 @@ AString* ShowSkill::Report(Faction *f)
 	temp1 += "A unit with this skill may PRODUCE ";
 	temp2 += "A unit with this skill may create ";
 
-	for (i = NITEMS - 1; i >= 0; --i)
+	for (i = ItemDefs.size() - 1; i >= 0; --i)
 	{
 		if (ITEM_DISABLED(i))
 			continue;
@@ -1330,7 +1330,7 @@ AString* ShowSkill::Report(Faction *f)
 		    last2 == -1)
 		{
 			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].mInput.size(); ++c)
 			{
 				if (ItemDefs[i].mInput[c].item == -1)
 					continue;
@@ -1347,7 +1347,7 @@ AString* ShowSkill::Report(Faction *f)
 		{
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].pInput.size(); ++c)
 			{
 				if (ItemDefs[i].pInput[c].item == -1)
 					continue;
@@ -1365,18 +1365,18 @@ AString* ShowSkill::Report(Faction *f)
 		}
 	}
 
-	for (i = 0; i < NITEMS; ++i)
+	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
 		if (ITEM_DISABLED(i))
 			continue;
 
-		int illusion = ((ItemDefs[i].type & IT_MONSTER) &&
+		const bool illusion = ((ItemDefs[i].type & IT_MONSTER) &&
 				(ItemDefs[i].index == MONSTER_ILLUSION));
 
 		if (ItemDefs[i].mSkill == skill && ItemDefs[i].mLevel == level)
 		{
 			int canmagic = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].mInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].mInput.size(); ++c)
 			{
 				if (ItemDefs[i].mInput[c].item == -1)
 					continue;
@@ -1389,7 +1389,7 @@ AString* ShowSkill::Report(Faction *f)
 			{
 				if (comma2)
 				{
-					if (last2 == i)
+					if (last2 == (int)i)
 					{
 						if (comma2 > 1)
 							temp2 += ",";
@@ -1414,7 +1414,7 @@ AString* ShowSkill::Report(Faction *f)
 		{
 			int canmake = 1;
 			int resource = 1;
-			for (c = 0; c < sizeof(ItemDefs[i].pInput)/sizeof(Materials); ++c)
+			for (c = 0; c < ItemDefs[i].pInput.size(); ++c)
 			{
 				if (ItemDefs[i].pInput[c].item == -1)
 					continue;
@@ -1428,7 +1428,7 @@ AString* ShowSkill::Report(Faction *f)
 			{
 				if (comma1)
 				{
-					if (last1 == i)
+					if (last1 == (int)i)
 					{
 						if (comma1 > 1)
 							temp1 += ",";
@@ -1450,7 +1450,7 @@ AString* ShowSkill::Report(Faction *f)
 			{
 				if (comma)
 				{
-					if (last == i)
+					if (last == (int)i)
 					{
 						if (comma > 1)
 							temp += ",";

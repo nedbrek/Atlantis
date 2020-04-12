@@ -1687,7 +1687,7 @@ int Unit::MaintCost()
 
 	if (Globals->MAINT_COST_PER_HIT) {
 		// Check each man to determine hit upkeep
-		for (int i = 0; i <= NITEMS; ++i)
+		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
 			if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 
@@ -1911,8 +1911,8 @@ int Unit::WalkingCapacity()
 		cap += ItemDefs[i->type].walk * i->num;
 
 		// Add capacity of pullable items (wagons, etc)
-		for (unsigned c = 0; c < sizeof(ItemDefs[i->type].hitchItems)/sizeof(HitchItem); ++c) {
-
+		for (unsigned c = 0; c < ItemDefs[i->type].hitchItems.size(); ++c)
+		{
 			const HitchItem &pulling_item = ItemDefs[i->type].hitchItems[c];
 
 			// No pulling item specified

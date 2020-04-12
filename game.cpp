@@ -2670,7 +2670,7 @@ int Game::GetAvgMaintPerMan()
 	int man_count = 0;
 	int hits_sum = 0;
 
-	for (int i = 0; i <= NITEMS; ++i)
+	for (unsigned i = 0; i <= ItemDefs.size(); ++i)
 	{
 		if (!(ItemDefs[i].type & IT_MAN)) { continue; }
 		if (ItemDefs[i].flags & ItemType::DISABLED) { continue; }
