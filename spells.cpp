@@ -627,8 +627,9 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		return;
 	}
 
-	int sk = u->castorders->spell;
-	switch (sk) {
+	const int sk = u->castorders->spell;
+	switch (sk)
+	{
 		case S_MIND_READING:
 			RunMindReading(r,u);
 			break;
@@ -642,39 +643,24 @@ void Game::RunACastOrder(ARegion * r,Object *o,Unit * u)
 		case S_ENGRAVE_RUNES_OF_WARDING:
 			RunEngraveRunes(r,o,u);
 			break;
+
 		case S_CONSTRUCT_PORTAL:
-			RunCreateArtifact(r,u,sk,I_PORTAL);
-			break;
 		case S_CREATE_RING_OF_INVISIBILITY:
-			RunCreateArtifact(r,u,sk,I_RINGOFI);
-			break;
 		case S_CREATE_CLOAK_OF_INVULNERABILITY:
-			RunCreateArtifact(r,u,sk,I_CLOAKOFI);
-			break;
 		case S_CREATE_STAFF_OF_FIRE:
-			RunCreateArtifact(r,u,sk,I_STAFFOFF);
-			break;
 		case S_CREATE_STAFF_OF_LIGHTNING:
-			RunCreateArtifact(r,u,sk,I_STAFFOFL);
-			break;
 		case S_CREATE_AMULET_OF_TRUE_SEEING:
-			RunCreateArtifact(r,u,sk,I_AMULETOFTS);
-			break;
 		case S_CREATE_AMULET_OF_PROTECTION:
-			RunCreateArtifact(r,u,sk,I_AMULETOFP);
-			break;
 		case S_CREATE_RUNESWORD:
-			RunCreateArtifact(r,u,sk,I_RUNESWORD);
-			break;
 		case S_CREATE_SHIELDSTONE:
-			RunCreateArtifact(r,u,sk,I_SHIELDSTONE);
-			break;
 		case S_CREATE_MAGIC_CARPET:
-			RunCreateArtifact(r,u,sk,I_MCARPET);
-			break;
 		case S_CREATE_FLAMING_SWORD:
-			RunCreateArtifact(r,u,sk,I_FSWORD);
+		{
+			const int item_idx = itemForSkill(sk);
+			RunCreateArtifact(r, u, sk, item_idx);
 			break;
+		}
+
 		case S_SUMMON_IMPS:
 			RunSummonImps(r,u);
 			break;

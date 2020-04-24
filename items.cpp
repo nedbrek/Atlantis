@@ -248,9 +248,6 @@ AString ShowSpecial(int special, const int level, const int expandLevel, const i
 
 	temp += ".";
 
-	if (fromItem)
-		temp += " This ability only affects the possessor of the item.";
-
 	bool comma = false;
 	int last = -1;
 	int val;

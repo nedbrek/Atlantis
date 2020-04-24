@@ -29,6 +29,26 @@
 #include "fileio.h"
 #include "astring.h"
 
+int itemForSkill(int skill)
+{
+	int ret = -1;
+	int item_idx = 0;
+	for (const auto &item : ItemDefs)
+	{
+		if (item.mSkill == skill)
+		{
+			if (ret != -1)
+			{
+				printf("Multiple items for skill %s", SkillDefs[skill].name);
+				exit(-1);
+			}
+			ret = item_idx;
+		}
+		++item_idx;
+	}
+	return ret;
+}
+
 int ParseSkill(const AString *token)
 {
 	for (int i = 0; i < NSKILLS; ++i)

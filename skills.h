@@ -158,5 +158,7 @@ public:
 	void SetDays(int skill, int new_days);
 };
 
+int itemForSkill(int skill);
+
 #endif
 
