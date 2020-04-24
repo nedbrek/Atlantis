@@ -37,6 +37,42 @@
 #define OBJECT_ENABLED(X) (!(ObjectDefs[(X)].flags & ObjectType::DISABLED))
 #define OBJECT_DISABLED(X) (ObjectDefs[(X)].flags & ObjectType::DISABLED)
 
+namespace
+{
+AString describeProb(const ItemType &item)
+{
+	AString str;
+	const int prob = item.mOut;
+	if (prob % 100)
+	{
+		str += " A mage has a ";
+		str += prob;
+		str += " percent times his level chance to create a ";
+		str += item.name;
+		return str;
+	}
+	//else
+
+	str += " A mage can create ";
+	const int full_prob = prob / 100;
+	if (full_prob > 1)
+	{
+		str += full_prob;
+		str += " times his level ";
+		str += item.names;
+	}
+	else
+	{
+		str += "1 ";
+		str += item.name;
+		str += " per level";
+	}
+
+	str += " with each casting";
+	return str;
+}
+}
+
 //----------------------------------------------------------------------------
 ShowSkill::ShowSkill(int s, int l)
 : skill(s)
@@ -46,12 +82,13 @@ ShowSkill::ShowSkill(int s, int l)
 
 AString* ShowSkill::Report(Faction *f)
 {
-	if (SkillDefs[skill].flags & SkillType::DISABLED)
-		return NULL;
+	const SkillType &skill_def = SkillDefs[skill];
+	if (skill_def.flags & SkillType::DISABLED)
+		return nullptr;
 
 	AString *str = new AString;
 	int val;
-	RangeType *range = NULL;
+	RangeType *range = nullptr;
 
 	// Here we pick apart the skill
 	switch (skill)
@@ -992,122 +1029,121 @@ AString* ShowSkill::Report(Faction *f)
 		case S_ARTIFACT_LORE:
 			if(level > 1) break;
 			*str += "Artifact Lore is one of the most advanced forms of "
-				"magic; in general, creation of an artifact requires both "
-				"Artifact Lore, and the appropriate skill for the item being "
-				"created. A mage with knowledge of the Artifact Lore skill "
-				"will detect the use of Artifact Lore by any other mage in "
-				"the region.";
+			    "magic; in general, creation of an artifact requires both "
+			    "Artifact Lore, and the appropriate skill for the item being "
+			    "created. A mage with knowledge of the Artifact Lore skill "
+			    "will detect the use of Artifact Lore by any other mage in "
+			    "the region.";
 			break;
+
 		case S_CREATE_RING_OF_INVISIBILITY:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_RINGOFI)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Ring of Invisibility skill may "
-				"create a Ring of Invisibility, which grants a 3 bonus to a "
-				"unit's effective Stealth (note that a unit must possess "
-				"one ring for each man to gain this bonus).";
-			if(ITEM_ENABLED(I_AMULETOFTS)) {
-				*str += " A Ring of Invisibility has one limitation; a "
-					"unit possessing a ring cannot assassinate, nor steal "
-					"from, a unit with an Amulet of True Seeing.";
+		{
+			if (level > 1) break;
+
+			const int item_idx = itemForSkill(skill);
+			if (item_idx == -1 || ITEM_DISABLED(item_idx)) break;
+			const ItemType &item = ItemDefs[item_idx];
+
+			*str += "A ";
+			*str += item.name;
+			*str += " grants a bonus of 3 to a unit's effective Stealth (note that"
+			    " a unit must possess one ring for each man to gain this bonus).";
+
+			if (ITEM_ENABLED(I_AMULETOFTS)) {
+				*str += " There is one limitation; a unit possessing a ring cannot"
+				    " assassinate, or steal from, a unit with an Amulet of True Seeing.";
 			}
-			*str += " A mage has a 20 percent times his level chance to "
-				"create a Ring of Invisibility. To use this spell, the mage "
-				"should CAST Create_Ring_of_Invisibility.";
+
+			*str += describeProb(item);
+			*str += ". To use this spell, CAST ";
+			*str += SkillDefs[skill].abbr;
+			*str += ".";
 			break;
+		}
+
+		case S_CONSTRUCT_PORTAL:
 		case S_CREATE_CLOAK_OF_INVULNERABILITY:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_CLOAKOFI)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Cloak of Invulnerability skill "
-				"may create a Cloak of Invulnerability. A mage has a 20 "
-				"percent times his level chance to create a Cloak of "
-				"Invulnerability. To use this spell, the mage should CAST "
-				"Create_Cloak_of_Invulnerability.";
-			break;
 		case S_CREATE_STAFF_OF_FIRE:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_STAFFOFF)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Staff of Fire skill may create a "
-				"Staff of Fire. A Staff of Fire allows any mage to throw "
-				"fireballs in combat as if he had a Fire skill of 3. A mage "
-				"has a 20 percent times his level chance to create a Staff "
-				"of Fire. To use this spell, CAST Create_Staff_of_Fire.";
-			break;
 		case S_CREATE_STAFF_OF_LIGHTNING:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_STAFFOFL)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Staff of Lightning skill may "
-				"create a Staff of Lightning. A Staff of Lightning allows "
-				"any mage to call down lightning bolts as if he had Call "
-				"Lightning skill of 3. A mage has a 20 percent times his "
-				"level chance to create a Staff of Lightning. To use this "
-				"spell, CAST Create_Staff_of_Lightning.";
-			break;
-		case S_CREATE_AMULET_OF_TRUE_SEEING:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_AMULETOFTS)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Amulet of Tree Seeing skill may "
-				"create an Amulet of True Seeing. This amulet gives the "
-				"possessor a bonus of 2 to his effective Observation skill.";
-			if(ITEM_ENABLED(I_RINGOFI)) {
-				*str += "Also, a unit with an Amulet of True Seeing cannot "
-					"be assassinated by, nor have items stolen by, a unit "
-					"with a Ring of Invisibility (Note that the unit must "
-					"have at least one Amulet of True Seeing per man to "
-					"repel a unit with a Ring of Invisibility).";
-			}
-			*str += "A mage has a 20 percent times his skill level chance to "
-			   "create an Amulet of True Seeing. To use this spell, CAST "
-			   "Create_Amulet_of_True_Seeing.";
-			break;
 		case S_CREATE_AMULET_OF_PROTECTION:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_AMULETOFP)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Amulet of Protection skill may "
-				"create Amulets of Protection, which grants the possessor a "
-				"personal Spirit Shield of 3. A mage may create his skill "
-				"level of these amulets per turn. To use this spell, CAST "
-				"Create_Amulet_of_Protection.";
-			break;
 		case S_CREATE_RUNESWORD:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_RUNESWORD)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Runesword skill may create a "
-				"Runesword, which when wielded in combat gives the wielder "
-				"a plus 4 bonus to Combat skill, and also allows the wielder "
-				"to project an Aura of Fear in battle, as if he had Create "
-				"Aura of Fear skill of level 3 (provided the wielder is "
-				"not casting any other combat spells). A mage has a 20 "
-				"percent times his skill level chance of creating a "
-				"Runesword. To cast this spell, CAST Create_Runesword.";
-			break;
 		case S_CREATE_SHIELDSTONE:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_SHIELDSTONE)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Shieldstone skill may create "
-				"Shieldstones, which confers upon the possessor a personal "
-				"Energy Shield of 3. A mage may create his skill level in "
-				"Shieldstones per turn. To use this spell, CAST "
-				"Create_Shieldstone";
+		case S_CREATE_FLAMING_SWORD:
+		{
+			if (level > 1) break; // no description past level 1
+
+			const int item_idx = itemForSkill(skill);
+			if (item_idx == -1 || ITEM_DISABLED(item_idx)) break;
+			const ItemType &item = ItemDefs[item_idx];
+
+			if (item.battleindex != -1 && item.battleindex != 0)
+			{
+				const BattleItemType &bitem = BattleItemDefs[item.battleindex];
+				*str += "A ";
+				*str += item.name;
+				*str += " allows the wielder to cast ";
+				*str += ShowSpecial(bitem.index, bitem.skillLevel, 1, 1);
+			}
+
+			*str += describeProb(item);
+			*str += ". To use this spell, CAST ";
+			*str += SkillDefs[skill].abbr;
+			*str += ".";
 			break;
+		}
+
+		case S_CREATE_AMULET_OF_TRUE_SEEING:
+		{
+			if (level > 1) break;
+
+			const int item_idx = itemForSkill(skill);
+			if (item_idx == -1 || ITEM_DISABLED(item_idx)) break;
+			const ItemType &item = ItemDefs[item_idx];
+
+			*str += "An ";
+			*str += item.name;
+			*str += " grants a bonus of 2 to a unit's effective Observation skill.";
+
+			if (ITEM_ENABLED(I_RINGOFI))
+			{
+				*str += " Also, a unit with an amulet cannot be assassinated by,"
+				    " or have items stolen by, a unit with a Ring of Invisibility";
+
+				if (Globals->PROPORTIONAL_AMTS_USAGE)
+				{
+					*str += " (Note that the protection is degraded if not every "
+					    "man has an amulet).";
+				}
+				else
+				{
+					*str += " (Note that the unit must have at least one amulet per man"
+					    " to repel a unit with a Ring of Invisibility).";
+				}
+			}
+
+			*str += describeProb(item);
+			*str += ". To use this spell, CAST ";
+			*str += SkillDefs[skill].abbr;
+			*str += ".";
+			break;
+		}
+
 		case S_CREATE_MAGIC_CARPET:
-			/* XXX -- This should be cleaner somehow. */
-			if(ITEM_DISABLED(I_MCARPET)) break;
-			if(level > 1) break;
-			*str += "A mage with the Create Magic Carpet skill may create "
-				"Magic Carpets, which provide for flying transportation. A "
-				"Magic Carpet can carry up to 15 weight units in the air. "
-				"Casting this spell allows the mage to create his skill "
-				"level in Magic Carpets. To cast the spell, CAST "
-				"Create_Magic_Carpet.";
+		{
+			if (level > 1) break;
+
+			const int item_idx = itemForSkill(skill);
+			if (item_idx == -1 || ITEM_DISABLED(item_idx)) break;
+			const ItemType &item = ItemDefs[item_idx];
+
+			*str += "A Magic Carpet provides flying transportation.";
+			*str += describeProb(item);
+			*str += ". To use this spell, CAST ";
+			*str += SkillDefs[skill].abbr;
+			*str += ".";
 			break;
+		}
+
 		case S_ENGRAVE_RUNES_OF_WARDING:
 			/* XXX -- This should be cleaner somehow. */
 			if(level == 1) {
@@ -1158,15 +1194,17 @@ AString* ShowSkill::Report(Faction *f)
 				}
 			}
 			break;
+
 		case S_CONSTRUCT_GATE:
-			/* XXX -- This should be cleaner somehow. */
-			if(level > 1) break;
+			if (level > 1) break;
+
 			*str += "A mage with the Construct Gate skill may construct a "
 				"Gate in a region. The mage has a 20 percent times his "
 				"skill level chance of success, and the attempt costs 1000 "
 				"silver. To use this spell, the mage should issue the order "
 				"CAST Construct_Gate.";
 			break;
+
 		case S_ENCHANT_SWORDS:
 			if (level == 1)
 			{
@@ -1232,19 +1270,7 @@ AString* ShowSkill::Report(Faction *f)
 			}
 			break;
 		}
-		case S_CONSTRUCT_PORTAL:
-			/* XXX -- This should be cleaner somehow. */
-			if(level > 1) break;
-			if (ITEM_DISABLED(I_PORTAL)) break;
-			*str += "A mage with the Construct Portal skill may construct a "
-				"Portal";
-			if(SKILL_ENABLED(S_PORTAL_LORE)) {
-				*str += " for use with the Portal Lore skill";
-			}
-			*str += ". The mage has a 20 percent times his skill level "
-				"chance of creating a Portal, and the attempt costs 600 "
-				"silver. To use this spell, CAST Construct_Portal.";
-			break;
+
 		case S_MANIPULATE:
 			if(!Globals->APPRENTICES_EXIST) break;
 			if(level > 1) break;
