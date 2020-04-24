@@ -776,6 +776,10 @@ AString* ItemDescription(int item, int full)
 			count++;
 			*temp += AString(amt) + " " + ItemDefs[itm].names;
 		}
+		if (count)
+		{
+			*temp += " (costs are consumed even if the attempt fails)";
+		}
 		*temp += ".";
 	}
 
