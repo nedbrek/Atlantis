@@ -971,7 +971,7 @@ void Game::ProcessReshowOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			return;
 		}
 
-		const int item = ParseEnabledItem(token);
+		const int item = ParseEnabledItem(*token);
 		delete token;
 
 		if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED))
@@ -1144,7 +1144,7 @@ void Game::ProcessPrepareOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	const int it = ParseEnabledItem(token);
+	const int it = ParseEnabledItem(*token);
 	const int bt = ParseBattleItem(it);
 	delete token;
 
@@ -1213,7 +1213,7 @@ void Game::ProcessWeaponOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int items[MAX_READY];
 	while (token && i < MAX_READY)
 	{
-		it = ParseEnabledItem(token);
+		it = ParseEnabledItem(*token);
 		delete token;
 
 		if (it == -1)
@@ -1282,7 +1282,7 @@ void Game::ProcessArmorOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	int items[MAX_READY];
 	while (token && i < MAX_READY)
 	{
-		it = ParseEnabledItem(token);
+		it = ParseEnabledItem(*token);
 		delete token;
 
 		if (it == -1)
@@ -1460,7 +1460,7 @@ void Game::ProcessStealOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	int i = ParseEnabledItem(token);
+	int i = ParseEnabledItem(*token);
 	delete token;
 	if (i == -1)
 	{
@@ -1999,7 +1999,7 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	const int it = ParseEnabledItem(token);
+	const int it = ParseEnabledItem(*token);
 	delete token;
 
 	if (it == -1 || (ItemDefs[it].flags & ItemType::DISABLED))
@@ -2655,7 +2655,7 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 
 		// if GIVE 0 (can drop anything)
 		if (!t->valid())
-			item = ParseEnabledItem(token);
+			item = ParseEnabledItem(*token);
 		else // only giveable items
 			item = ParseGiveableItem(token);
 

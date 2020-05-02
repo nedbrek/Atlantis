@@ -64,6 +64,15 @@ struct Materials
 {
 	int item; ///< index of the input item
 	int amt;  ///< number of input items required to produce 1 batch of this item
+	const char *back_ref = nullptr;
+
+	Materials(int i, int a)
+	: item(i)
+	, amt(a)
+	{
+	}
+
+	Materials(const char *iabbr, int a);
 };
 
 /// items which be used to hitch another item
@@ -71,6 +80,40 @@ struct HitchItem
 {
 	int item; ///< index of the hitch item
 	int walk;  ///< walking capacity
+	const char *back_ref = nullptr;
+
+	HitchItem(int i, int w)
+	: item(i)
+	, walk(w)
+	{
+	}
+
+	HitchItem(const char *i, int w)
+	: item(-2)
+	, walk(w)
+	, back_ref(i)
+	{
+	}
+};
+
+struct MultItem
+{
+	int mult_item; ///< index of item which can increase production
+	int mult_val;  ///< number of additional items produced
+	const char *back_ref = nullptr;
+
+	MultItem(int mi, int mv)
+	: mult_item(mi)
+	, mult_val(mv)
+	{
+	}
+
+	MultItem(const char *mi, int mv)
+	: mult_item(-2)
+	, mult_val(mv)
+	, back_ref(mi)
+	{
+	}
 };
 
 /// Description of an item in the game
@@ -102,8 +145,7 @@ public:
 		 int fy,
 		 int sm,
 		 const std::vector<HitchItem> &hi,
-		 int mit,
-		 int mv
+		 const std::vector<MultItem> &mits
 	)
 	: name(n)
 	, names(p)
@@ -129,11 +171,21 @@ public:
 	, fly(fy)
 	, swim(sm)
 	, hitchItems(hi)
-	, mult_item(mit)
-	, mult_val(mv)
+	, mult_item(-1)
+	, mult_val(0)
+	, mult_items(mits)
 	{
+		if (!mult_items.empty())
+		{
+			mult_item = mult_items[0].mult_item;
+			mult_val = mult_items[0].mult_val;
+		}
 	}
 
+	///@return the productivity increase for item 'item_idx'
+	int findMultVal(int item_idx) const;
+
+public: // data
 	const char *name;  ///< full name of the item
 	const char *names; ///< plural
 	const char *abr;   ///< short form
@@ -177,6 +229,7 @@ public:
 
 	int mult_item; ///< index of item which can increase production
 	int mult_val;  ///< number of additional items produced
+	std::vector<MultItem> mult_items;
 };
 extern std::vector<ItemType> ItemDefs;
 
@@ -348,7 +401,7 @@ extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
 int ParseAllItems(const AString *token);
-int ParseEnabledItem(const AString *);
+int ParseEnabledItem(const AString &);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);

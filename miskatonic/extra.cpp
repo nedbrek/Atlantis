@@ -74,11 +74,11 @@ int Game::SetupFaction( Faction *pFac )
 	// faction_leader->combat = S_FIRE;
 
 	// Special wizard items
-	faction_leader->items.SetNum(I_WIZARDSTAFF, 1);
-	pFac->DiscoverItem(I_WIZARDSTAFF, 0, 1);
+	const int wiz_staff_idx = ParseEnabledItem("wizard staff");
+	faction_leader->items.SetNum(wiz_staff_idx, 1);
+	pFac->DiscoverItem(wiz_staff_idx, 0, 1);
 
-	const AString wiz_robe("wizard robe");
-	const int wiz_robe_idx = ParseEnabledItem(&wiz_robe);
+	const int wiz_robe_idx = ParseEnabledItem("wizard robe");
 	if (wiz_robe_idx != -1)
 	{
 		faction_leader->items.SetNum(wiz_robe_idx, 1);
@@ -182,19 +182,16 @@ Faction* Game::CheckVictory()
 void Game::ModifyTablesPerRuleset(void)
 {
 	if (Globals->APPRENTICES_EXIST)
-	   	EnableSkill(S_MANIPULATE);
+		EnableSkill(S_MANIPULATE);
 
-	if ((Globals->UNDERDEEP_LEVELS > 0) || (Globals->UNDERWORLD_LEVELS > 1))
+	if (Globals->UNDERDEEP_LEVELS > 0 || Globals->UNDERWORLD_LEVELS > 1)
 	{
-		EnableItem(I_MUSHROOM);
-		EnableItem(I_HEALPOTION);
 		EnableItem(I_ROUGHGEM);
 		EnableItem(I_GEMS);
 		EnableItem(I_MWOLF);
 		EnableItem(I_MSPIDER);
 		EnableItem(I_MOLE);
 		EnableSkill(S_GEMCUTTING);
-		EnableSkill(S_MONSTERTRAINING);
 	}
 
 	if (!Globals->GATES_EXIST)
@@ -214,166 +211,9 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
 
-	// Races
-	DisableItem(I_VIKING);
-	DisableItem(I_BARBARIAN);
-	DisableItem(I_PLAINSMAN);
-	DisableItem(I_NORTHLING);
-	DisableItem(I_NOMAD);
-	DisableItem(I_TRIBESMAN);
-	DisableItem(I_DARKLING);
-	DisableItem(I_SEAELF);
-	DisableItem(I_TRIBALELF);
-	DisableItem(I_ICEDWARF);
-	DisableItem(I_DESERTDWARF);
-	DisableItem(I_MAN);
-	DisableItem(I_FAIRY);
-	DisableItem(I_URUK);
-	DisableItem(I_DROWMAN);
-	DisableItem(I_MERC);
-	DisableItem(I_TITAN);
-	DisableItem(I_AMAZON);
-	DisableItem(I_MOUNTAINMAN);
-
-	// Weapons
-	// Iron
-	EnableItem(I_PICK);
-	EnableItem(I_DAGGER);
-	EnableItem(I_SPEAR);
-	EnableItem(I_AXE);
-	EnableItem(I_HAMMER);
-	EnableItem(I_MACE);
-	EnableItem(I_SWORD);
-	EnableItem(I_2HSWORD);
-	EnableItem(I_HALBERD);
-	EnableItem(I_MAUL);
-	// Mithril
-	EnableItem(I_MDAGGER);
-	EnableItem(I_MSPEAR);
-	EnableItem(I_MAXE);
-	EnableItem(I_MHAMMER);
-	EnableItem(I_MMACE);
-	EnableItem(I_MSWORD);
-	EnableItem(I_M2HSWORD);
-	EnableItem(I_MHALBERD);
-	EnableItem(I_MMAUL);
-	// Admantium
-	EnableItem(I_ADAGGER);
-	EnableItem(I_ASPEAR);
-	EnableItem(I_AAXE);
-	EnableItem(I_AHAMMER);
-	EnableItem(I_AMACE);
-	EnableItem(I_ASWORD);
-	EnableItem(I_A2HSWORD);
-	EnableItem(I_AHALBERD);
-	EnableItem(I_AMAUL);
-	// Ranged
-	EnableItem(I_SHORTBOW);
-	EnableItem(I_BOW);
-	EnableItem(I_LONGBOW);
-	EnableItem(I_CROSSBOW);
-	EnableItem(I_HEAVYCROSSBOW);
-
-	// Enchanted
-	EnableItem(I_EPICK);
-	EnableItem(I_EDAGGER);
-	EnableItem(I_ESPEAR);
-	EnableItem(I_EAXE);
-	EnableItem(I_EHAMMER);
-	EnableItem(I_EMACE);
-	EnableItem(I_ESWORD);
-	EnableItem(I_E2HSWORD);
-	EnableItem(I_EHALBERD);
-	EnableItem(I_EMAUL);
-	EnableItem(I_EMDAGGER);
-	EnableItem(I_EMSPEAR);
-	EnableItem(I_EMAXE);
-	EnableItem(I_EMHAMMER);
-	EnableItem(I_EMMACE);
-	EnableItem(I_EMSWORD);
-	EnableItem(I_EM2HSWORD);
-	EnableItem(I_EMHALBERD);
-	EnableItem(I_EMMAUL);
-	EnableItem(I_EADAGGER);
-	EnableItem(I_EASPEAR);
-	EnableItem(I_EAAXE);
-	EnableItem(I_EAHAMMER);
-	EnableItem(I_EAMACE);
-	EnableItem(I_EASWORD);
-	EnableItem(I_EA2HSWORD);
-	EnableItem(I_EAHALBERD);
-	EnableItem(I_EAMAUL);
-	EnableItem(I_ESHORTBOW);
-	EnableItem(I_EBOW);
-	EnableItem(I_ELONGBOW);
-	EnableItem(I_ECROSSBOW);
-	EnableItem(I_EHEAVYCROSSBOW);
-
-	// Armor
-	EnableItem(I_PADDEDARMOR);
-	EnableItem(I_LEATHERARMOR);
-	// Iron
-	EnableItem(I_SCALEARMOR);
-	EnableItem(I_MAILARMOR);
-	EnableItem(I_PLATEMAILARMOR);
-	EnableItem(I_PLATEARMOR);
-	// Mithril
-	EnableItem(I_MSCALEARMOR);
-	EnableItem(I_MMAILARMOR);
-	EnableItem(I_MPLATEMAILARMOR);
-	EnableItem(I_MPLATEARMOR);
-
-	DisableItem(I_CHAINARMOR);
-	DisableItem(I_CLOTHARMOR);
-	DisableItem(I_MPLATE);
-	DisableItem(I_DOUBLEBOW);
-
-	// Resources
-	EnableItem(I_ADMANTIUM);
-
-	// Trade Items
-	DisableItem(I_VODKA);
-	DisableItem(I_CAVIAR);
-	DisableItem(I_ROSES);
-	DisableItem(I_TAROTCARDS);
-	DisableItem(I_CHOCOLATE);
-
-	// Mounts
-	EnableItem(I_MWOLF);
-	EnableItem(I_MSPIDER);
-	EnableItem(I_MOLE);
-	EnableItem(I_CAMEL);
-
-	// Misc Items
-	EnableItem(I_HARP);
-	EnableItem(I_MUSHROOM);
-	EnableItem(I_HEALPOTION);
-	EnableItem(I_GLIDER);
-	EnableItem(I_NET);
-	EnableItem(I_LASSO);
-	EnableItem(I_BAG);
-	EnableItem(I_SPINNING);
-
 	// Skills
 	EnableSkill(S_CAMELTRAINING);
 	EnableSkill(S_MONSTERTRAINING);
-
-	// Monsters
-	EnableItem(I_DROW);
-	EnableItem(I_HYDRA);
-	EnableItem(I_STORMGIANT);
-	EnableItem(I_CLOUDGIANT);
-	EnableItem(I_ILLYRTHID);
-	EnableItem(I_SORCERERS);
-	EnableItem(I_MAGICIANS);
-	EnableItem(I_DARKMAGE);
-	EnableItem(I_WARRIORS);
-	EnableItem(I_ICEDRAGON);
-
-	EnableItem(I_PIRATES);
-	EnableItem(I_KRAKEN);
-	EnableItem(I_MERFOLK);
-	EnableItem(I_ELEMENTAL);
 
 	// Lairs
 	EnableObject(O_ISLE);

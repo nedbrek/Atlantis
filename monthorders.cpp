@@ -810,7 +810,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 	}
 
 	const ItemType &item = ItemDefs[o->item];
-	const int input = ItemDefs[o->item].pInput[0].item;
+	const int input = item.pInput.empty() ? -1 : item.pInput[0].item;
 	if (input == -1)
 	{
 		u->Error(AString("PRODUCE: ") + item.abr + ": not present in this region.");
@@ -1094,7 +1094,7 @@ void Game::RunProduceOrders(ARegion *r)
 							// peek at first order
 							ProduceOrder *o = &q->orders_[0];
 							const ItemType &item = ItemDefs[o->item];
-							if (item.pInput[0].item == -1)
+							if (item.pInput.empty() || item.pInput[0].item == -1)
 							{
 								u->Error(AString("PRODUCE: ") + item.abr + ": can't use multiple PRODUCE commands with raw materials.");
 								q->orders_.pop_front();

@@ -548,10 +548,11 @@ AString* ItemDescription(int item, int full)
 		unsigned last = -1;
 		for (int i = ItemDefs.size() - 1; i > 0; --i)
 		{
-			if (ItemDefs[i].flags & ItemType::DISABLED)
+			const ItemType &itm = ItemDefs[i];
+			if (itm.flags & ItemType::DISABLED)
 				continue;
 
-			if (ItemDefs[i].mult_item == item)
+			if (itm.findMultVal(item) != -1)
 			{
 				last = i;
 				break;
@@ -561,37 +562,39 @@ AString* ItemDescription(int item, int full)
 		int comma = 0;
 		for (unsigned i = 0; i < ItemDefs.size(); ++i)
 		{
-		   if (ItemDefs[i].flags & ItemType::DISABLED)
+			const ItemType &itm = ItemDefs[i];
+		   if (itm.flags & ItemType::DISABLED)
 				continue;
 
-		   if (ItemDefs[i].mult_item == item)
+			const int mult_val = itm.findMultVal(item);
+			if (mult_val == -1)
+				continue;
+
+			if (comma)
 			{
-			   if (comma)
+				if (last == i)
 				{
-				   if (last == i)
-					{
-					   if (comma > 1)
-							*temp += ",";
+					if (comma > 1)
+						*temp += ",";
 
-					   *temp += " and ";
-				   }
-					else
-					{
-					   *temp += ", ";
-				   }
-			   }
-			   comma++;
-
-			   if (i == I_SILVER)
-				{
-				   *temp += "entertainment";
-			   }
+					*temp += " and ";
+				}
 				else
 				{
-				   *temp += ItemDefs[i].names;
-			   }
-			   *temp += AString(" by ") + ItemDefs[i].mult_val;
-		   }
+					*temp += ", ";
+				}
+			}
+			comma++;
+
+			if (i == I_SILVER)
+			{
+				*temp += "entertainment";
+			}
+			else
+			{
+				*temp += itm.names;
+			}
+			*temp += AString(" by ") + mult_val;
 		}
 		*temp += ".";
 	}
