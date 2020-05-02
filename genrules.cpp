@@ -1355,7 +1355,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	cap = ItemDefs[I_HORSE].ride - ItemDefs[I_HORSE].weight;
 	temp += cap;
 	temp += " and the weight of the man and other items is ";
-	int weight = ItemDefs[I_MAN].weight + ItemDefs[I_SWORD].weight +
+	const int sword_idx = ParseEnabledItem("sword");
+	int weight = ItemDefs[I_MAN].weight + ItemDefs[sword_idx].weight +
 			ItemDefs[I_CHAINARMOR].weight;
 	temp += weight;
 	if(cap > weight)
@@ -2129,25 +2130,37 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 		if (ItemDefs[i].type & IT_TOOL)
 		{
-			for (unsigned j = 0; j < ItemDefs.size(); j++)
+			for (unsigned j = 0; j < ItemDefs.size(); ++j)
 			{
-				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-				if(ItemDefs[j].mult_item != int(i)) continue;
-				if(!(ItemDefs[j].type & IT_NORMAL)) continue;
-				const int k = ItemDefs[j].pSkill;
-				if(k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
+				if (ItemDefs[j].flags & ItemType::DISABLED)
 					continue;
+
+				if (!(ItemDefs[j].type & IT_NORMAL))
+					continue; // don't reveal items better than normal
+
+				const int k = ItemDefs[j].pSkill;
+				if (k != -1 && (SkillDefs[k].flags & SkillType::DISABLED))
+					continue;
+
+				const int mult_val = ItemDefs[j].findMultVal(i);
+				if (mult_val == -1)
+					continue;
+
 				last = 0;
 				for (unsigned k = 0; k < ItemDefs[j].pInput.size(); ++k)
 				{
 					const int l = ItemDefs[j].pInput[k].item;
-					if(l != -1 &&
-							!(ItemDefs[l].flags & ItemType::DISABLED) &&
-							!(ItemDefs[l].type & IT_NORMAL))
+					if (l != -1 &&
+					    !(ItemDefs[l].flags & ItemType::DISABLED) &&
+					    !(ItemDefs[l].type & IT_NORMAL))
+					{
 						last = 1;
+					}
 				}
-				if(last == 1) continue;
-				temp += AString("+") + ItemDefs[j].mult_val +
+				if (last == 1)
+					continue;
+
+				temp += AString("+") + mult_val +
 					" bonus when producing " + ItemDefs[j].names + ".<BR>";
 			}
 		}
@@ -2159,12 +2172,13 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.Enclose(0, "CENTER");
 	temp = "All items except silver and trade goods are produced with the ";
 	temp += f.Link("#produce", "PRODUCE") + " order.";
-	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
+	if (sword_idx != -1 && !(ItemDefs[sword_idx].flags & ItemType::DISABLED))
+	{
 		last = -1;
 		temp2 = "";
-		for (unsigned i = 0; i < ItemDefs[I_SWORD].pInput.size(); ++i)
+		for (unsigned i = 0; i < ItemDefs[sword_idx].pInput.size(); ++i)
 		{
-			const int j = ItemDefs[I_SWORD].pInput[i].item;
+			const int j = ItemDefs[sword_idx].pInput[i].item;
 			if(j == -1) continue;
 			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 			if(last == -1) {
@@ -2176,7 +2190,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			last = j;
 		}
 		if(last != -1) temp2 += ItemDefs[last].names;
-		const int j = ItemDefs[I_SWORD].pSkill;
+		const int j = ItemDefs[sword_idx].pSkill;
 		if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
 			temp += " Example: PRODUCE SWORDS will produce as many swords "
 				"as possible during the month, provided that the unit has "
@@ -2192,18 +2206,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 	temp = "If an item requires raw materials, then the specified "
 	    "amount of each material is consumed for each item produced. ";
-	if (!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED))
+
+	const int lbow_idx = ParseEnabledItem("longbow");
+	const ItemType *lbow_item = lbow_idx != - 1 ? &ItemDefs[lbow_idx] : nullptr;
+	if (lbow_item && !(lbow_item->flags & ItemType::DISABLED))
 	{
 		last = -1;
 		temp2 = "";
 		int k = 0;
-		for (unsigned i = 0; i < ItemDefs[I_LONGBOW].pInput.size(); ++i)
+		for (unsigned i = 0; i < lbow_item->pInput.size(); ++i)
 		{
-			const int j = ItemDefs[I_LONGBOW].pInput[i].item;
+			const int j = lbow_item->pInput[i].item;
 			if(j == -1) continue;
 			if(ItemDefs[j].flags & ItemType::DISABLED) continue;
 			if(last == -1) {
-				k = ItemDefs[I_LONGBOW].pInput[i].amt;
+				k = lbow_item->pInput[i].amt;
 				last = j;
 				continue;
 			}
@@ -2212,7 +2229,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp2 += ItemDefs[last].names;
 			temp2 += " and ";
 			last = j;
-			k = ItemDefs[I_LONGBOW].pInput[i].amt;
+			k = lbow_item->pInput[i].amt;
 		}
 
 		if (last != -1)
@@ -2220,7 +2237,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			temp2 += AString(5*k);
 			temp2 += " units of ";
 			temp2 += ItemDefs[last].names;
-			const int j = ItemDefs[I_LONGBOW].pSkill;
+			const int j = lbow_item->pSkill;
 			if (!(SkillDefs[j].flags & SkillType::DISABLED))
 			{
 				temp += "Thus to produce 5 longbows (a supply of arrows is "
@@ -2230,56 +2247,20 @@ int Game::GenRules(const AString &rules, const AString &css,
 			}
 		}
 	}
-	temp += "The higher ones skill, the more productive each man-month "
-		"of work";
-	if (!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
-			(ItemDefs[I_LONGBOW].pMonths == 1) &&
-			(ItemDefs[I_LONGBOW].pOut == 1))
+	temp += "The higher ones skill, the more productive each man-month of work";
+
+	if (lbow_item && !(lbow_item->flags & ItemType::DISABLED) &&
+	    lbow_item->pMonths == 1 &&
+	    lbow_item->pOut == 1)
 	{
 		temp += "; thus, 5 longbows could be produced by a 5-man unit of "
 			"skill 1, or a 1-man unit of skill 5.";
-		if(!(ItemDefs[I_PLATEARMOR].flags & ItemType::DISABLED) &&
-			(ItemDefs[I_PLATEARMOR].pMonths==ItemDefs[I_PLATEARMOR].pLevel)) {
-			temp += " (Plate armor is an exception; a unit must have skill ";
-			temp += ItemDefs[I_PLATEARMOR].pLevel;
-			temp += " to be able to produce it at all, and each man can only "
-				"produce 1 plate armor per month.";
-			last = -1;
-			temp2 = "";
-			int k = 0;
-			for (unsigned i = 0; i < ItemDefs[I_PLATEARMOR].pInput.size(); ++i)
-			{
-				const int j = ItemDefs[I_PLATEARMOR].pInput[i].item;
-				if(j == -1) continue;
-				if(ItemDefs[j].flags & ItemType::DISABLED) continue;
-				if(last == -1) {
-					last = j;
-					k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
-					continue;
-				}
-				temp2 += AString(k);
-				temp2 += " units of ";
-				temp2 += ItemDefs[last].names;
-				temp2 += " and ";
-				last = j;
-				k = ItemDefs[I_PLATEARMOR].pInput[i].amt;
-			}
-			if(last != -1) {
-				temp2 += AString(k);
-				temp2 += " units of ";
-				temp2 += ItemDefs[last].names;
-			}
-			const int j = ItemDefs[I_PLATEARMOR].pSkill;
-			if(last != -1 && !(SkillDefs[j].flags & SkillType::DISABLED)) {
-				temp += " Plate armor also takes ";
-				temp += temp2;
-				temp += " to produce.";
-			}
-			temp += ")";
-		}
+		temp += " Items that require multiple man-months are produced at the"
+		   " rate of (total skill levels in unit) / (man-months for 1 item).";
 	} else {
 		temp += ".";
 	}
+
 	if (!(ItemDefs[I_FOOD].flags & ItemType::DISABLED)) {
 		temp += " Production of food works slightly differently; each worker "
 				"will only use one unit of material, but will produce "
@@ -2292,6 +2273,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"of skill levels.";
 	}
 	f.Paragraph(temp);
+
 	temp = "Items which increase production may increase production of "
 		"advanced items in addition to the basic items listed.  Some of "
 		"them also increase production of other tools.  Read the skill "
@@ -3264,7 +3246,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Paragraph(temp);
 	temp = "";
-	if(!(ItemDefs[I_SWORD].flags & ItemType::DISABLED)) {
+	if (sword_idx != -1 && !(ItemDefs[sword_idx].flags & ItemType::DISABLED))
+	{
 		temp += "Possession of a sword confers a ";
 		if(WeaponDefs[WEAPON_SWORD].attackBonus > -1) temp += "+";
 		temp += WeaponDefs[WEAPON_SWORD].attackBonus;
@@ -3302,8 +3285,9 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = "Ranged weapons are slightly different from melee weapons.  The "
 		"target will generally not get any sort of combat bonus to defense "
 		"against a ranged attack. ";
-	if(!(ItemDefs[I_LONGBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED)) {
+	if (lbow_item && !(lbow_item->flags & ItemType::DISABLED) &&
+	    !(SkillDefs[S_LONGBOW].flags & SkillType::DISABLED))
+	{
 		temp += "The skill check to hit with a long bow is made against an "
 			"effective defense of ";
 		temp += -(WeaponDefs[WEAPON_LONGBOW].attackBonus);
@@ -3311,12 +3295,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 			"chance of getting an effective attack, has a 1:2 chance of "
 			"hitting a target. ";
 	}
-	if(!(ItemDefs[I_CROSSBOW].flags & ItemType::DISABLED) &&
-			!(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED)) {
+
+	const int xbow_idx = ParseEnabledItem("crossbow");
+	if (xbow_idx != -1 && !(ItemDefs[xbow_idx].flags & ItemType::DISABLED) &&
+	    !(SkillDefs[S_CROSSBOW].flags & SkillType::DISABLED))
+	{
 		temp += "A crossbow is an easier weapon to use, so the chance to hit "
-			"is calculated against a defense of ";
+		   "is calculated against a defense of ";
 		temp += -(WeaponDefs[WEAPON_CROSSBOW].attackBonus);
-		if(WeaponDefs[WEAPON_CROSSBOW].numAttacks < 0) {
+		if (WeaponDefs[WEAPON_CROSSBOW].numAttacks < 0)
+		{
 			temp += "; on the other hand, a crossbow can only fire once "
 				"every ";
 			temp += -(WeaponDefs[WEAPON_CROSSBOW].numAttacks);

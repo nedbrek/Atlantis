@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 82 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 83 )
 
 class Aorders;
 class ExchangeOrder;
@@ -49,6 +49,8 @@ public:
 
 	// used in main
 	void ModifyTablesPerRuleset(); // enable/disable parts of the data tables
+	void resolveBackRefs();
+
 	int NewGame(int seed);
 	int OpenGame();
 	int RunGame();

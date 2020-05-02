@@ -49,6 +49,50 @@ Game::~Game()
 	maxppunits = 0;
 }
 
+void Game::resolveBackRefs()
+{
+	for (auto &i : ItemDefs)
+	{
+		//if (i.flags & ItemType::DISABLED)
+			//continue;
+
+		for (auto &m : i.pInput)
+		{
+			if (m.back_ref)
+			{
+				const int item_idx = ParseEnabledItem(m.back_ref);
+				m.item = item_idx;
+			}
+		}
+		for (auto &m : i.mInput)
+		{
+			if (m.back_ref)
+			{
+				const int item_idx = ParseEnabledItem(m.back_ref);
+				m.item = item_idx;
+			}
+		}
+		for (auto &m : i.hitchItems)
+		{
+			if (m.back_ref)
+			{
+				const int item_idx = ParseEnabledItem(m.back_ref);
+				m.item = item_idx;
+			}
+		}
+		for (auto &m : i.mult_items)
+		{
+			if (m.back_ref)
+			{
+				const int item_idx = ParseEnabledItem(m.back_ref);
+				m.mult_item = item_idx;
+
+				i.mult_item = item_idx; // TODO: remove me
+			}
+		}
+	}
+}
+
 int Game::TurnNumber()
 {
 	return (year-1)*12 + month + 1;
@@ -2490,7 +2534,9 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	u->SetMen(guard_race, num);
 
 	// give them swords
-	u->items.SetNum(I_SWORD, num);
+	const int sword_idx = ParseEnabledItem("sword");
+	if (sword_idx != -1)
+		u->items.SetNum(sword_idx, num);
 
 	// if invincible, give amulets
 	if (IV) u->items.SetNum(I_AMULETOFI, num);
@@ -2505,7 +2551,11 @@ void Game::CreateCityMon(ARegion *pReg, int percent, int needmage)
 	{
 		// plate, if enabled
 		if (Globals->START_CITY_GUARDS_PLATE)
-			u->items.SetNum(I_PLATEARMOR, num);
+		{
+			const int plate_idx = ParseEnabledItem("plate armor");
+			if (plate_idx != -1)
+				u->items.SetNum(plate_idx, num);
+		}
 
 		// super observant
 		u->SetSkill(S_OBSERVATION, 10);
@@ -2655,13 +2705,19 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 				u->SetSkill(S_TACTICS, Globals->START_CITY_TACTICS);
 
 			if (Globals->START_CITY_GUARDS_PLATE)
-				u->items.SetNum(I_PLATEARMOR,men);
+			{
+				const int plate_idx = ParseEnabledItem("plate armor");
+				if (plate_idx != -1)
+					u->items.SetNum(plate_idx, men);
+			}
 		}
 		else
 		{
 			u->SetSkill(S_OBSERVATION, towntype + 1);
 		}
-		u->items.SetNum(I_SWORD, men);
+		const int sword_idx = ParseEnabledItem("sword");
+		if (sword_idx != -1)
+			u->items.SetNum(sword_idx, men);
 	}
 }
 

@@ -182,6 +182,7 @@ int main(int argc, const char *argv[])
 	}
 
 	game.ModifyTablesPerRuleset();
+	game.resolveBackRefs();
 
 	typedef void Handler(Game &, int, const char*[]);
 

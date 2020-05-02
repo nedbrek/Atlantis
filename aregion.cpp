@@ -511,7 +511,7 @@ void ARegion::SetupCityMarket()
 		if (item.type & IT_NORMAL)
 		{
 			// raw material
-			if (item.pInput[0].item == -1)
+			if (item.pInput.empty() || item.pInput[0].item == -1)
 			{
 				// check if the product can be produced in the region
 				bool canProduce = false;

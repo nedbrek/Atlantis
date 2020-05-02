@@ -2698,6 +2698,7 @@ int Unit::GetProductionBonus(int item)
 	const int men = GetMen();
 
 	int bonus = 0;
+
 	if (ItemDefs[item].mult_item != -1)
 	{
 		bonus = items.GetNum(ItemDefs[item].mult_item);

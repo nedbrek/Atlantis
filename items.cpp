@@ -28,6 +28,14 @@
 #include "gamedata.h"
 #include "fileio.h"
 #include "astring.h"
+#include <algorithm>
+
+Materials::Materials(const char *iabbr, int a)
+: item(-2)
+, amt(a)
+, back_ref(iabbr)
+{
+}
 
 const char *const ManType::ALIGN_STRS[ManType::NUM_ALIGN] =
 {
@@ -87,7 +95,7 @@ int ParseAllItems(const AString *token)
 	return -1;
 }
 
-int ParseEnabledItem(const AString *token)
+int ParseEnabledItem(const AString &token)
 {
 	for (unsigned i = 0; i < ItemDefs.size(); ++i)
 	{
@@ -98,18 +106,18 @@ int ParseEnabledItem(const AString *token)
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 		     ItemDefs[i].index == MONSTER_ILLUSION)
 		{
-			if (*token == (AString("i") + ItemDefs[i].name) ||
-			    *token == (AString("i") + ItemDefs[i].names) ||
-			    *token == (AString("i") + ItemDefs[i].abr))
+			if (token == (AString("i") + ItemDefs[i].name) ||
+			    token == (AString("i") + ItemDefs[i].names) ||
+			    token == (AString("i") + ItemDefs[i].abr))
 			{
 				return i;
 			}
 			continue;
 		}
 
-		if (*token == ItemDefs[i].name ||
-		    *token == ItemDefs[i].names ||
-		    *token == ItemDefs[i].abr)
+		if (token == ItemDefs[i].name ||
+		    token == ItemDefs[i].names ||
+		    token == ItemDefs[i].abr)
 		{
 			return i;
 		}
@@ -531,6 +539,15 @@ AString ShowSpecial(int special, const int level, const int expandLevel, const i
 bool IsSoldier(int item)
 {
 	return (ItemDefs[item].type & IT_MAN) || (ItemDefs[item].type & IT_MONSTER);
+}
+
+//----------------------------------------------------------------------------
+int ItemType::findMultVal(int item_idx) const
+{
+	auto i = std::find_if(mult_items.begin(), mult_items.end(), [item_idx](const MultItem &mi){ return mi.mult_item == item_idx; });
+	if (i != mult_items.end())
+		return i->mult_val;
+	return -1;
 }
 
 //----------------------------------------------------------------------------
