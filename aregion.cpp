@@ -49,6 +49,81 @@ public:
 };
 
 //----------------------------------------------------------------------------
+Product::Product(int p, int c, int a)
+: product(p)
+, chance(c)
+, amount(a)
+{
+}
+
+Product::Product(const char *item, int c, int a)
+: chance(c)
+, amount(a)
+{
+	const int item_idx = ParseEnabledItem(item);
+	if (item_idx == -1)
+	{
+		printf("Error parsing product: %s\n", item);
+	}
+	product = item_idx;
+}
+
+//----------------------------------------------------------------------------
+TerrainType::TerrainType(const char *n, int stype, int f, int p, int w, int e,
+    int mp, const std::vector<Product> &pds, const std::vector<int> &rcs, const std::vector<int> &crs, int wmf,
+    int sm, int bm, int h, int lc, const std::vector<int> &ls)
+: name(n)
+, similar_type(stype)
+, flags(f)
+, pop(p)
+, wages(w)
+, economy(e)
+, movepoints(mp)
+, prods(pds)
+, wmonfreq(wmf)
+, smallmon(sm)
+, bigmon(bm)
+, humanoid(h)
+, lairChance(lc)
+{
+	for (unsigned i = 0; i < rcs.size(); ++i)
+		races[i] = rcs[i];
+
+	for (unsigned i = 0; i < crs.size(); ++i)
+		coastal_races[i] = crs[i];
+
+	for (unsigned i = 0; i < ls.size(); ++i)
+		lairs[i] = ls[i];
+}
+
+TerrainType::TerrainType(const char *n, int stype, int f, int p, int w, int e,
+    int mp, const std::vector<Product> &pds, const std::vector<int> &rcs, const std::vector<int> &crs, int wmf,
+    const char *sm, const char *bm, const char *h, int lc, const std::vector<int> &ls)
+: TerrainType(n, stype, f, p, w, e, mp, pds, rcs, crs, wmf, -1, -1, -1, lc, ls)
+{
+	const int sm_idx = ParseEnabledItem(sm);
+	if (sm[0] != 0 && sm_idx == -1)
+	{
+		printf("Error parsing small monster: %s\n", sm);
+	}
+	smallmon = sm_idx;
+
+	const int bm_idx = ParseEnabledItem(bm);
+	if (bm[0] != 0 && bm_idx == -1)
+	{
+		printf("Error parsing big monster: %s\n", bm);
+	}
+	bigmon = bm_idx;
+
+	const int h_idx = ParseEnabledItem(h);
+	if (h[0] != 0 && h_idx == -1)
+	{
+		printf("Error parsing humanoid: %s\n", h);
+	}
+	humanoid = h_idx;
+}
+
+//----------------------------------------------------------------------------
 const char* weatherString(int w)
 {
 	static const char *strs[] = {
@@ -515,9 +590,7 @@ void ARegion::SetupCityMarket()
 			{
 				// check if the product can be produced in the region
 				bool canProduce = false;
-				for (unsigned c = 0;
-				     c < (sizeof(TerrainDefs[type].prods)/sizeof(Product));
-				     ++c)
+				for (unsigned c = 0; c < TerrainDefs[type].prods.size(); ++c)
 				{
 					if (i == TerrainDefs[type].prods[c].product)
 					{
@@ -805,7 +878,7 @@ void ARegion::SetupProds()
 		}
 	}
 
-	for (unsigned c = 0; c < sizeof(typer->prods)/sizeof(Product); ++c)
+	for (unsigned c = 0; c < typer->prods.size(); ++c)
 	{
 		const int item = typer->prods[c].product;
 		if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED))

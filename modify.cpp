@@ -132,9 +132,8 @@ void Game::ClearTerrainItems(int terrain)
 {
 	if(terrain < 0 || terrain > R_NUM-1) return;
 
-	for(unsigned int c = 0;
-			c < sizeof(TerrainDefs[terrain].prods)/sizeof(Product);
-			c++) {
+	for(unsigned int c = 0; c < TerrainDefs[terrain].prods.size(); c++)
+	{
 		TerrainDefs[terrain].prods[c].product = -1;
 		TerrainDefs[terrain].prods[c].chance = 0;
 		TerrainDefs[terrain].prods[c].amount = 0;
@@ -144,7 +143,7 @@ void Game::ClearTerrainItems(int terrain)
 void Game::ModifyTerrainItems(int terrain, int i, int p, int c, int a)
 {
 	if(terrain < 0 || terrain > (R_NUM -1)) return;
-	if(i < 0 || i >= (int)(sizeof(TerrainDefs[terrain].prods)/sizeof(Product)))
+	if(i < 0 || i >= (int)TerrainDefs[terrain].prods.size())
 		return;
 	if(p < -1 || p > (int)ItemDefs.size()-1) p = -1;
 	if(c < 0 || c > 100) c = 0;
