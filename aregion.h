@@ -60,6 +60,9 @@ struct Product
 	int product;
 	int chance;
 	int amount;
+
+	Product(int p, int c, int a);
+	Product(const char *item, int c, int a);
 };
 
 //----------------------------------------------------------------------------
@@ -67,6 +70,19 @@ struct Product
 class TerrainType
 {
 public:
+	TerrainType(const char *name, int similar_type, int flags, int pop,
+	    int wages, int economy, int movepoints, const std::vector<Product> &prods,
+	    const std::vector<int> &races, const std::vector<int> &coastal_races,
+	    int wmonfreq, const char *smallmon, const char *bigmon,
+	    const char *humanoid, int lairChance, const std::vector<int> &lairs);
+
+	TerrainType(const char *name, int similar_type, int flags, int pop,
+	    int wages, int economy, int movepoints, const std::vector<Product> &prods,
+	    const std::vector<int> &races, const std::vector<int> &coastal_races,
+	    int wmonfreq, int smallmon, int bigmon, int humanoid, int lairChance,
+	    const std::vector<int> &lairs);
+
+public: // data
 	const char *name;
 	int similar_type;
 
@@ -81,7 +97,7 @@ public:
 	int wages;
 	int economy;
 	int movepoints;
-	Product prods[7];
+	std::vector<Product> prods;
 
 	// Race information
 	// A hex near water will have either one of the normal races or one

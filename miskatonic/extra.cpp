@@ -279,7 +279,7 @@ void Game::ModifyTablesPerRuleset(void)
 	ModifyTerrainCoastRace(R_FOREST, 0, I_WOODELF);
 	ModifyTerrainCoastRace(R_FOREST, 1, I_HIGHELF);
 
-	ModifyTerrainItems(R_FOREST, 5, I_MWOLF, 5, 5);
+	ModifyTerrainItems(R_FOREST, 6, I_MWOLF, 5, 5);
 
 	// MYSTFOREST
 	// Not in Use
