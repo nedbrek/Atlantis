@@ -72,15 +72,9 @@ class TerrainType
 public:
 	TerrainType(const char *name, int similar_type, int flags, int pop,
 	    int wages, int economy, int movepoints, const std::vector<Product> &prods,
-	    const std::vector<int> &races, const std::vector<int> &coastal_races,
+	    const std::vector<const char*> &races, const std::vector<const char*> &coastal_races,
 	    int wmonfreq, const char *smallmon, const char *bigmon,
 	    const char *humanoid, int lairChance, const std::vector<int> &lairs);
-
-	TerrainType(const char *name, int similar_type, int flags, int pop,
-	    int wages, int economy, int movepoints, const std::vector<Product> &prods,
-	    const std::vector<int> &races, const std::vector<int> &coastal_races,
-	    int wmonfreq, int smallmon, int bigmon, int humanoid, int lairChance,
-	    const std::vector<int> &lairs);
 
 public: // data
 	const char *name;

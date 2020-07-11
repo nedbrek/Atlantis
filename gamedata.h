@@ -203,30 +203,6 @@ enum ItemDef
 	I_HARP,
 	// Generic processed food
 	I_FOOD,
-	// Additional items for Miskatonic
-	I_PONY,
-	I_MBOAR,
-	// Races
-	I_HIGHELF,
-	I_WOODELF,
-	I_HILLDWARF,
-	I_HALFLING,
-	I_CENTAURMAN,
-	I_MOUNTAINDWARF,
-	I_GNOME,
-	I_GREYELF,
-	I_HUMAN,
-	I_LIZARDMAN,
-	I_HALFORC,
-	I_MINOTAUR,
-	I_ORC,
-	I_HOBGOBLIN,
-	I_GNOLL,
-	I_OGREMAN,
-	I_GOBLINMAN,
-	I_UNDERDWARF,
-	I_DARKELF,
-	I_KOBOLDMAN,
 };
 
 /// Different types of men who can be recruited
@@ -531,7 +507,7 @@ enum SkillDef
 	S_HUNTING,
 	S_FISHING,
 	S_HERB_LORE,
-	S_HORSETRAINING,
+	S_HORSE_TRAINING,
 	S_WEAPONSMITH,
 	S_ARMORER,
 	S_CARPENTER,
@@ -707,9 +683,9 @@ enum ObjectDef
 	O_ATEMPLE,
 	O_HTOWER,
 	// Tzargs monster lairs
-	O_MAGETOWER,
+	O_MAGICIANS_TOWER,
 	O_DARKTOWER,
-	O_GIANTCASTLE,
+	O_GIANTS_CASTLE,
 	O_ILAIR,
 	O_ICECAVE,
 	O_BOG,

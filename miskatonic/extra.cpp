@@ -33,32 +33,35 @@
 #include "gameio.h"
 #include "astring.h"
 
-int Game::SetupFaction( Faction *pFac )
+int Game::SetupFaction(Faction *pFac)
 {
-    pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 100;
+	pFac->unclaimed = Globals->START_MONEY + TurnNumber() * 100;
 
-	if(pFac->noStartLeader)
+	if (pFac->noStartLeader)
 		return 1;
 
-    ARegion *reg = NULL;
-	if(!Globals->MULTI_HEX_NEXUS) {
-		reg = (ARegion *)(regions.First());
-	} else {
+	ARegion *reg = NULL;
+	if (!Globals->MULTI_HEX_NEXUS)
+	{
+		reg = (ARegion*)(regions.First());
+	}
+	else
+	{
 		ARegionArray *pArr = regions.GetRegionArray(ARegionArray::LEVEL_NEXUS);
-		while(!reg) {
+		while (!reg) {
 			reg = pArr->GetRegion(getrandom(pArr->x), getrandom(pArr->y));
 		}
 	}
 
 	// Setup Faction Leader
-    Unit *faction_leader = GetNewUnit(pFac);
+	Unit *faction_leader = GetNewUnit(pFac);
 
-    faction_leader->SetMen(I_FACTIONLEADER, 1);
+	faction_leader->SetMen(I_FACTIONLEADER, 1);
 	pFac->DiscoverItem(I_FACTIONLEADER, 0, 1);
 
 	// Flags
-    faction_leader->reveal = REVEAL_FACTION;
-	faction_leader->SetFlag(FLAG_BEHIND,1);
+	faction_leader->reveal = REVEAL_FACTION;
+	faction_leader->SetFlag(FLAG_BEHIND, 1);
 
 	// Skills
 	faction_leader->type = U_MAGE;
@@ -136,27 +139,27 @@ int Game::SetupFaction( Faction *pFac )
 
 	faction_leader->MoveUnit(reg->GetDummy());
 
-	Unit *leaders = GetNewUnit( pFac );
+	Unit *leaders = GetNewUnit(pFac);
 
-    leaders->SetMen(I_LEADERS, 2);
+	leaders->SetMen(I_LEADERS, 2);
 	pFac->DiscoverItem(I_LEADERS, 0, 1);
 
 	// Flags
-    leaders->reveal = REVEAL_FACTION;
-	leaders->SetFlag(FLAG_BEHIND,1);
+	leaders->reveal = REVEAL_FACTION;
+	leaders->SetFlag(FLAG_BEHIND, 1);
 
 	leaders->MoveUnit(reg->GetDummy());
 
-    return( 1 );
+	return 1;
 }
 
 Faction* Game::CheckVictory()
 {
 	ARegion *reg = NULL;
 	forlist(&regions) {
-		ARegion *r = (ARegion *)elem;
+		ARegion *r = (ARegion*)elem;
 		forlist(&r->objects) {
-			Object *obj = (Object *)elem;
+			Object *obj = (Object*)elem;
 			if(obj->type != O_BKEEP) continue;
 			if(obj->units.Num()) return NULL;
 			reg = r;
@@ -200,7 +203,7 @@ void Game::ModifyTablesPerRuleset(void)
 	if (Globals->NEXUS_IS_CITY)
 	{
 		ClearTerrainRaces(R_NEXUS);
-		ModifyTerrainRace(R_NEXUS, 0, I_HIGHELF);
+		ModifyTerrainRace(R_NEXUS, 0, "HELF");
 
 		ClearTerrainItems(R_NEXUS);
 		ModifyTerrainItems(R_NEXUS, 0, I_HERBS, 100, 20);
@@ -210,10 +213,6 @@ void Game::ModifyTablesPerRuleset(void)
 		ModifyTerrainItems(R_NEXUS, 4, I_IRONWOOD, 100, 10);
 		ModifyTerrainEconomy(R_NEXUS, 1000, 15, 50, 2);
 	}
-
-	// Skills
-	EnableSkill(S_CAMELTRAINING);
-	EnableSkill(S_MONSTERTRAINING);
 
 	// Lairs
 	EnableObject(O_ISLE);
@@ -245,9 +244,9 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_HTOWER);
 	EnableObject(O_HPTOWER);
 
-	EnableObject(O_MAGETOWER);
+	EnableObject(O_MAGICIANS_TOWER);
 	EnableObject(O_DARKTOWER);
-	EnableObject(O_GIANTCASTLE);
+	EnableObject(O_GIANTS_CASTLE);
 	EnableObject(O_ILAIR);
 	EnableObject(O_ICECAVE);
 	EnableObject(O_BOG);
@@ -260,91 +259,6 @@ void Game::ModifyTablesPerRuleset(void)
 	EnableObject(O_ALCHEMISTLAB);
 	EnableObject(O_OASIS);
 	EnableObject(O_GEMAPPRAISER);
-
-	// OCEAN
-	// no changes
-
-	// PLAIN
-	ClearTerrainRaces(R_PLAIN);
-	ModifyTerrainRace(R_PLAIN, 0, I_HUMAN);
-	ModifyTerrainRace(R_PLAIN, 1, I_HIGHELF);
-	ModifyTerrainRace(R_PLAIN, 2, I_HALFLING);
-	ModifyTerrainRace(R_PLAIN, 3, I_CENTAURMAN);
-
-	ModifyTerrainItems(R_PLAIN, 1, I_WHORSE, 5, 5);
-
-	// FOREST
-	ClearTerrainRaces(R_FOREST);
-	ModifyTerrainRace(R_FOREST, 0, I_WOODELF);
-	ModifyTerrainCoastRace(R_FOREST, 0, I_WOODELF);
-	ModifyTerrainCoastRace(R_FOREST, 1, I_HIGHELF);
-
-	ModifyTerrainItems(R_FOREST, 6, I_MWOLF, 5, 5);
-
-	// MYSTFOREST
-	// Not in Use
-
-	// MOUNTAIN
-	ClearTerrainRaces(R_MOUNTAIN);
-	ModifyTerrainRace(R_MOUNTAIN, 0, I_MOUNTAINDWARF);
-	ModifyTerrainRace(R_MOUNTAIN, 1, I_ORC);
-
-	ModifyTerrainItems(R_MOUNTAIN, 5, I_MWOLF, 5, 5);
-
-	// HILL
-	// No changes needed
-
-	// SWAMP
-	ClearTerrainRaces(R_SWAMP);
-	ModifyTerrainRace(R_SWAMP, 0, I_LIZARDMAN);
-	ModifyTerrainRace(R_SWAMP, 1, I_ORC);
-	ModifyTerrainCoastRace(R_SWAMP, 0, I_LIZARDMAN);
-	ModifyTerrainCoastRace(R_SWAMP, 1, I_GOBLINMAN);
-	ModifyTerrainCoastRace(R_SWAMP, 1, I_HUMAN);
-
-	// JUNGLE
-	ClearTerrainRaces(R_SWAMP);
-	ModifyTerrainRace(R_SWAMP, 0, I_LIZARDMAN);
-	ModifyTerrainRace(R_SWAMP, 1, I_WOODELF);
-	ModifyTerrainCoastRace(R_SWAMP, 0, I_HUMAN);
-	ModifyTerrainCoastRace(R_SWAMP, 1, I_GOBLINMAN);
-
-	// DESERT
-	ClearTerrainRaces(R_DESERT);
-	ModifyTerrainRace(R_DESERT, 0, I_HUMAN);
-	ModifyTerrainRace(R_DESERT, 1, I_GNOLL);
-
-	// TUNDRA
-	ClearTerrainRaces(R_TUNDRA);
-	ModifyTerrainRace(R_TUNDRA, 0, I_HUMAN);
-	ModifyTerrainRace(R_TUNDRA, 1, I_GNOLL);
-
-	ModifyTerrainItems(R_TUNDRA, 1, I_MWOLF, 10, 15);
-
-	// Using only R_TUNDRA and R_CERAN_TUNDRA1
-
-	// CAVERNS
-	ClearTerrainRaces(R_CAVERN);
-	ModifyTerrainRace(R_CAVERN, 0, I_UNDERDWARF);
-	ModifyTerrainRace(R_CAVERN, 1, I_KOBOLDMAN);
-	ModifyTerrainRace(R_CAVERN, 2, I_DARKELF);
-
-	// UNDERFOREST
-	ClearTerrainRaces(R_UFOREST);
-	ModifyTerrainRace(R_UFOREST, 0, I_GREYELF);
-	ModifyTerrainRace(R_UFOREST, 1, I_DARKELF);
-
-	// TUNNELS
-	// No changes
-
-	// GROTTO
-	// No changes
-
-	// DEEPFOREST
-	// No changes
-
-	// CHASM
-	// No changes
 
 	ModifyObjectFlags(O_BKEEP, ObjectType::NEVERDECAY);
 	ModifyObjectFlags(O_DCLIFFS, ObjectType::CANENTER|ObjectType::NEVERDECAY);

@@ -1089,7 +1089,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 							}
 							else
 							{
-								const int it = ParseAllItems(pTemp);
+								const int it = ParseAllItems(*pTemp);
 								if (it == -1)
 								{
 									Awrite(AString("Must specify a valid ") +
@@ -1507,7 +1507,7 @@ void Game::EditGameUnitItems(Unit *pUnit)
 		}
 
 		// handles full name, plural, and abbr
-		const int itemNum = ParseAllItems(pToken.get());
+		const int itemNum = ParseAllItems(*pToken);
 		if (itemNum == -1)
 		{
 			Awrite(AString("No such item: ") + *pToken);

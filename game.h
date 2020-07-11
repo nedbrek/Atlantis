@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 84 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 85 )
 
 class Aorders;
 class ExchangeOrder;
@@ -168,7 +168,7 @@ private: // methods
 	void ModifyObjectManpower(int ob, int prot, int cap, int sail, int mages);
 
 	void ClearTerrainRaces(int t);
-	void ModifyTerrainRace(int t, int i, int r);
+	void ModifyTerrainRace(int t, int i, const char *r);
 	void ModifyTerrainCoastRace(int t, int i, int r);
 	void ClearTerrainItems(int t);
 	void ModifyTerrainItems(int t, int i, int p, int c, int a);

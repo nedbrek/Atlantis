@@ -1,4 +1,4 @@
- // START A3HEADER
+// START A3HEADER
 //
 // This source file is part of the Atlantis PBM game program.
 // Copyright (C) 1995-1999 Geoff Dunbar
@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 27 ),   // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 28 ),   // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -198,7 +198,7 @@ static GameDefs g = {
 	50,	// UPKEEP_FOOD_VALUE
 	1,	// PREVENT_SAIL_THROUGH
 	0,	// ALLOW_TRIVIAL_PORTAGE
-    1,  // DISABLE_FIND_EMAIL_COMMAND
+	1,  // DISABLE_FIND_EMAIL_COMMAND
 };
 
 GameDefs * Globals = &g;

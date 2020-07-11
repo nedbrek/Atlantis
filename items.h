@@ -400,7 +400,7 @@ public:
 extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
-int ParseAllItems(const AString *token);
+int ParseAllItems(const AString &token);
 int ParseEnabledItem(const AString &);
 int ParseBattleItem(int);
 

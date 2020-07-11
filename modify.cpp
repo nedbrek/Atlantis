@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "game.h"
+#include "astring.h"
 #include "items.h"
 #include "gamedata.h"
 #include "object.h"
@@ -109,8 +110,9 @@ void Game::ClearTerrainRaces(int t)
 	}
 }
 
-void Game::ModifyTerrainRace(int t, int i, int r)
+void Game::ModifyTerrainRace(int t, int i, const char *rname)
 {
+	int r = ParseEnabledItem(rname);
 	if(t < 0 || t > (R_NUM -1)) return;
 	if(i < 0 || i >= (int)(sizeof(TerrainDefs[t].races)/sizeof(int))) return;
 	if(r < -1 || r > (int)ItemDefs.size()-1) r = -1;
