@@ -60,8 +60,8 @@ Product::Product(const char *item, int c, int a)
 : chance(c)
 , amount(a)
 {
-	const int item_idx = ParseEnabledItem(item);
-	if (item_idx == -1)
+	const int item_idx = ParseAllItems(item);
+	if (item[0] != 0 && item_idx == -1)
 	{
 		printf("Error parsing product: %s\n", item);
 	}
@@ -70,8 +70,8 @@ Product::Product(const char *item, int c, int a)
 
 //----------------------------------------------------------------------------
 TerrainType::TerrainType(const char *n, int stype, int f, int p, int w, int e,
-    int mp, const std::vector<Product> &pds, const std::vector<int> &rcs, const std::vector<int> &crs, int wmf,
-    int sm, int bm, int h, int lc, const std::vector<int> &ls)
+    int mp, const std::vector<Product> &pds, const std::vector<const char*> &rcs, const std::vector<const char*> &crs, int wmf,
+    const char *sm, const char *bm, const char *h, int lc, const std::vector<int> &ls)
 : name(n)
 , similar_type(stype)
 , flags(f)
@@ -81,26 +81,26 @@ TerrainType::TerrainType(const char *n, int stype, int f, int p, int w, int e,
 , movepoints(mp)
 , prods(pds)
 , wmonfreq(wmf)
-, smallmon(sm)
-, bigmon(bm)
-, humanoid(h)
+, smallmon(-1)
+, bigmon(-1)
+, humanoid(-1)
 , lairChance(lc)
 {
 	for (unsigned i = 0; i < rcs.size(); ++i)
-		races[i] = rcs[i];
+	{
+		const int race = ParseAllItems(rcs[i]);
+		races[i] = race;
+	}
 
 	for (unsigned i = 0; i < crs.size(); ++i)
-		coastal_races[i] = crs[i];
+	{
+		const int race = ParseAllItems(crs[i]);
+		coastal_races[i] = race;
+	}
 
 	for (unsigned i = 0; i < ls.size(); ++i)
 		lairs[i] = ls[i];
-}
 
-TerrainType::TerrainType(const char *n, int stype, int f, int p, int w, int e,
-    int mp, const std::vector<Product> &pds, const std::vector<int> &rcs, const std::vector<int> &crs, int wmf,
-    const char *sm, const char *bm, const char *h, int lc, const std::vector<int> &ls)
-: TerrainType(n, stype, f, p, w, e, mp, pds, rcs, crs, wmf, -1, -1, -1, lc, ls)
-{
 	const int sm_idx = ParseEnabledItem(sm);
 	if (sm[0] != 0 && sm_idx == -1)
 	{

@@ -133,7 +133,7 @@ AString* ShowSkill::Report(Faction *f)
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of herb production.";
 			break;
-		case S_HORSETRAINING:
+		case S_HORSE_TRAINING:
 			if(level > 1) break;
 			*str += "This skill deals with all aspects of horse production.";
 			break;

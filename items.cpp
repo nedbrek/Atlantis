@@ -65,7 +65,7 @@ static AString DefType(int atype)
 	return atype == NUM_ATTACK_TYPES ? "all" : AttType(atype);
 }
 
-int ParseAllItems(const AString *token)
+int ParseAllItems(const AString &token)
 {
 	//foreach item definition
 	for (unsigned i = 0; i < ItemDefs.size(); ++i)
@@ -74,9 +74,9 @@ int ParseAllItems(const AString *token)
 		if ((ItemDefs[i].type & IT_MONSTER) &&
 		     ItemDefs[i].index == MONSTER_ILLUSION)
 		{
-			if (*token == (AString("i") + ItemDefs[i].name) ||
-			    *token == (AString("i") + ItemDefs[i].names) ||
-			    *token == (AString("i") + ItemDefs[i].abr))
+			if (token == (AString("i") + ItemDefs[i].name) ||
+			    token == (AString("i") + ItemDefs[i].names) ||
+			    token == (AString("i") + ItemDefs[i].abr))
 			{
 				return i;
 			}
@@ -84,9 +84,9 @@ int ParseAllItems(const AString *token)
 		}
 
 		// normal check
-		if (*token == ItemDefs[i].name ||
-		    *token == ItemDefs[i].names ||
-		    *token == ItemDefs[i].abr)
+		if (token == ItemDefs[i].name ||
+		    token == ItemDefs[i].names ||
+		    token == ItemDefs[i].abr)
 		{
 			return i;
 		}
