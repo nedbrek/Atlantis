@@ -107,6 +107,24 @@ Unit* UnitId::find(AList &l, int f) const
 	return Unit::findByFaction(l, alias, f);
 }
 
+Unit* UnitId::find(const std::vector<Unit*> &l, int f) const
+{
+	if (unitnum == -1)
+		return nullptr;
+
+	if (unitnum > 0)
+	{
+		return Unit::findByNum(l, unitnum);
+	}
+
+	if (faction)
+	{
+		return Unit::findByFaction(l, alias, faction);
+	}
+
+	return Unit::findByFaction(l, alias, f);
+}
+
 UnitPtr* GetUnitList(AList *list, Unit *u)
 {
 	forlist(list)
@@ -174,6 +192,7 @@ Unit::Unit(int seq, Faction *f, int a)
 
 Unit::~Unit()
 {
+	delete joinorders;
 	delete monthorders;
 	delete presentMonthOrders;
 	delete attackorders;
@@ -188,7 +207,18 @@ Unit* Unit::findByNum(AList &l, int num)
 		if (((Unit*)elem)->num == num)
 			return (Unit*)elem;
 
-	return NULL;
+	return nullptr;
+}
+
+Unit* Unit::findByNum(const std::vector<Unit*> &l, int num)
+{
+	for (auto &u : l)
+	{
+		if (u->num == num)
+			return u;
+	}
+
+	return nullptr;
 }
 
 Unit* Unit::findByFaction(AList &l, int alias, int faction)
@@ -212,6 +242,27 @@ Unit* Unit::findByFaction(AList &l, int alias, int faction)
 	}
 
 	return NULL;
+}
+
+Unit* Unit::findByFaction(const std::vector<Unit*> &l, int alias, int faction)
+{
+	// First search for units with the 'formfaction'
+	for (auto &u : l)
+	{
+		if (u->alias == alias &&
+		    u->formfaction->num == faction)
+			return u;
+	}
+
+	// Now search against their current faction
+	for (auto &u : l)
+	{
+		if (u->alias == alias &&
+		    u->faction->num == faction)
+			return u;
+	}
+
+	return nullptr;
 }
 
 void Unit::SetMonFlags()
@@ -641,9 +692,34 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 		temp += StudyableSkills();
 	}
 
+	const bool in_fleet = object->type == O_ARMY && !object->objects.empty();
+	if (describe || in_fleet)
+	{
+		temp += AString("; ");
+	}
+	if (in_fleet)
+	{
+		Object *sub = object->findUnitSubObject(this);
+		if (sub)
+		{
+			if (sub->GetOwner() == this)
+			{
+				temp += "Captain of ";
+				temp += *sub->name;
+			}
+			else
+			{
+				temp += "Sailing in ";
+				temp += *sub->name;
+			}
+		}
+	}
+
 	if (describe)
 	{
-		temp += AString("; ") + *describe;
+		if (in_fleet)
+			temp += ". ";
+		temp += *describe;
 	}
 
 	temp += ".";
@@ -797,8 +873,9 @@ void Unit::ClearCastOrders()
 	delete teleportorders; teleportorders = NULL;
 }
 
-void Unit::DefaultOrders(Object *obj)
+void Unit::DefaultOrders()
 {
+	Object *obj = object;
 	ClearOrders();
 
 	if (type == U_WMON)
@@ -1008,9 +1085,8 @@ int Unit::canConsume(int itemId, int hint)
 	{
 		Object *o = (Object*)elem;
 		//foreach unit in the object
-		forlist(&o->units)
+		for (auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u != this && (u->faction != faction || !u->GetFlag(FLAG_SHARE)))
 				continue;
 
@@ -1055,9 +1131,8 @@ void Unit::consume(int itemId, int num)
 	{
 		Object *o = (Object*)elem;
 		//foreach unit in the object
-		forlist(&o->units)
+		for (auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u == this || u->faction != faction || !u->GetFlag(FLAG_SHARE))
 				continue;
 
@@ -2001,39 +2076,272 @@ int Unit::CanWalk(int weight)
 	return (WalkingCapacity() >= weight) ? 1 : 0;
 }
 
-int Unit::MoveType()
+MoveType Unit::moveType()
 {
 	const int weight = items.Weight();
-
 	// priority: fly, ride, walk
 	if (CanFly (weight)) return M_FLY;
 	if (CanRide(weight)) return M_RIDE;
-
 	// Check if we should be able to 'swim'
 	// (This should become it's own M_TYPE sometime)
 	if (TerrainDefs[object->region->type].similar_type == R_OCEAN && CanSwim())
-		return M_WALK;
-
+		return M_WALK; // TODO: make swim
 	return CanWalk(weight) ? M_WALK : M_NONE;
 }
 
-int Unit::CalcMovePoints()
+int Unit::CalcMovePoints(MoveType mt)
 {
-	switch (MoveType())
+	switch (mt)
 	{
 		case M_NONE: return 0;
-
+		case M_SWIM:
 		case M_WALK: return Globals->FOOT_SPEED;
-
 		case M_RIDE: return Globals->HORSE_SPEED;
-
 		case M_FLY:
 			if (GetSkill(S_SUMMON_WIND)) return Globals->FLY_SPEED + 2;
-
 			return Globals->FLY_SPEED;
+		case M_SAIL: return Globals->SHIP_SPEED;
+		case M_MAX: return 0;
+	}
+	return 0;
+}
+
+AString Unit::calcMovePoints()
+{
+	int weight = 0;
+	int fly_cap = 0;
+	int ride_cap = 0;
+	int walk_cap = 0;
+	int swim_cap = 0;
+
+	if (ObjectIsShip(object->type))
+	{
+		start_move_points = 0;
+		move_type = M_NONE;
+		if (object->incomplete > 0)
+		{
+			return "SAIL: Ship is not finished.";
+		}
+
+		// ship capacity
+		const ObjectType &obj_def = ObjectDefs[object->type];
+		// sum up sailors
+		int have_sail = 0;
+
+		// sum up weight
+		for (auto &u : object->getUnits())
+		{
+			weight += u->items.Weight();
+			if (u->monthorders && u->monthorders->type == O_SAIL)
+			{
+				have_sail += u->GetSkill(S_SAILING) * u->GetMen();
+				u->Practise(S_SAILING);
+			}
+
+			const int wind_level = u->GetSkill(S_SUMMON_WIND);
+			if (wind_level == 0)
+				continue;
+
+			const int req_level = summonWindLevel(object->type);
+			if (wind_level > req_level)
+			{
+				start_move_points = 2;
+				if (u->movepoints == 0) // only do it once
+				{
+					u->Event("Casts Summon Wind to aid the ship's progress.");
+					u->Practise(S_SUMMON_WIND);
+				}
+			}
+		}
+		// count captain as sailors (but don't double count)
+		if (!monthorders || monthorders->type != O_SAIL)
+		{
+			have_sail += GetSkill(S_SAILING) * GetMen();
+			Practise(S_SAILING);
+		}
+
+		if (have_sail < obj_def.sailors)
+		{
+			start_move_points = 0;
+			return "SAIL: Not enough sailors.";
+		}
+
+		const int ship_cap = obj_def.capacity;
+		if (ship_cap < weight)
+		{
+			start_move_points = 0;
+			return "SAIL: Ship is overloaded.";
+		}
+
+		move_type = M_SAIL;
+		start_move_points += Globals->SHIP_SPEED;
+		return "";
+	}
+	//else
+
+	if (object->type == O_ARMY)
+	{
+		// sum up weight (and capacity)
+		// sum up sailors
+		int have_sail = 0;
+		std::map<int, unsigned> suwi_mages; // map from level to count
+		unsigned total_suwi_mages = 0;
+		for (auto &u : object->getUnits())
+		{
+			weight += u->items.Weight();
+			fly_cap += FlyingCapacity();
+			ride_cap += RidingCapacity();
+			walk_cap += WalkingCapacity();
+			swim_cap += SwimmingCapacity();
+
+			const int wind_level = u->GetSkill(S_SUMMON_WIND);
+			if (wind_level > 0)
+			{
+				++suwi_mages[wind_level]; // add a mage at this level
+				++total_suwi_mages;
+			}
+
+			if (u->monthorders && u->monthorders->type == O_SAIL)
+			{
+				have_sail += u->GetSkill(S_SAILING) * u->GetMen();
+				u->Practise(S_SAILING);
+			}
+		}
+
+		// if fleet
+		if (!object->objects.empty())
+		{
+			if (!monthorders || monthorders->type != O_SAIL)
+			{
+				// count owner as sailors
+				have_sail += GetSkill(S_SAILING) * GetMen();
+				Practise(S_SAILING);
+			}
+
+			// sum up sailors needed
+			int need_sail = 0;
+			// sum up fleet capacity
+			int ship_cap = 0;
+
+			std::map<int, unsigned> need_suwi;
+			for (Object *op : object->objects)
+			{
+				if (op->incomplete > 0)
+				{
+					move_type = M_NONE;
+					start_move_points = 0;
+					return AString("SAIL: Ship ") + *op->name + " is not finished.";
+				}
+
+				++need_suwi[summonWindLevel(op->type)];
+
+				const ObjectType &obj_def = ObjectDefs[op->type];
+				need_sail += obj_def.sailors;
+				ship_cap += obj_def.capacity;
+			}
+
+			if (weight > ship_cap)
+			{
+				move_type = M_NONE;
+				start_move_points = 0;
+				return "SAIL: Ship is overloaded.";
+			}
+
+			if (have_sail < need_sail)
+			{
+				move_type = M_NONE;
+				start_move_points = 0;
+				return "SAIL: Not enough sailors.";
+			}
+
+			move_type = M_SAIL;
+
+			// apply SUWI
+			bool fail_suwi = true;
+			if (total_suwi_mages >= object->objects.size())
+			{
+				while (1)
+				{
+					// start with highest level we have
+					auto i = suwi_mages.end();
+					if (i == suwi_mages.begin())
+					{
+						fail_suwi = false; // we made it!
+						break; // done
+					}
+					--i;
+
+					const int suwi_level = i->first;
+					if (need_suwi[suwi_level] > i->second)
+					{
+						break; // not enough mages at this level
+					}
+					// pull off mages needed
+					suwi_mages[suwi_level] -= need_suwi[suwi_level];
+
+					// shift mages down
+					if (suwi_level > 1)
+					{
+						suwi_mages[suwi_level - 1] += suwi_mages[suwi_level];
+					}
+					suwi_mages.erase(i);
+				}
+			}
+			const int suwi_boost = fail_suwi ? 0 : 2;
+			start_move_points = Globals->SHIP_SPEED + suwi_boost;
+			return "";
+		}
+	}
+	else // just this unit
+	{
+		weight = items.Weight();
+		fly_cap = FlyingCapacity();
+		ride_cap = RidingCapacity();
+		walk_cap = WalkingCapacity();
+		swim_cap = SwimmingCapacity();
 	}
 
-	return 0;
+	// priority: fly, ride, walk
+	if (fly_cap >= weight)
+	{
+		move_type = M_FLY;
+		start_move_points = Globals->FLY_SPEED;
+
+		// apply SUWI (TODO? parameter?)
+		if (GetSkill(S_SUMMON_WIND))
+		{
+			start_move_points += 2;
+		}
+
+		return "";
+	}
+
+	if (ride_cap >= weight)
+	{
+		move_type = M_RIDE;
+		start_move_points = Globals->HORSE_SPEED;
+		return "";
+	}
+
+	// Check if we should be able to 'swim'
+	// (This should become it's own M_TYPE sometime)
+	if (TerrainDefs[object->region->type].similar_type == R_OCEAN && swim_cap >= weight)
+	{
+		move_type = M_WALK; // TODO: enable swim
+		start_move_points = Globals->FOOT_SPEED;
+		return "";
+	}
+
+	if (walk_cap >= weight)
+	{
+		move_type = M_WALK;
+		start_move_points = Globals->FOOT_SPEED;
+		return "";
+	}
+
+	move_type = M_NONE;
+	start_move_points = 0;
+	return "MOVE: Unit is overloaded and cannot move.";
 }
 
 int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
@@ -2081,9 +2389,9 @@ int Unit::CanMoveTo(ARegion *r1, ARegion *r2)
 	}
 
 	// check move cost
-	const int mt = MoveType();
-	const int mp = CalcMovePoints() - movepoints;
-	if (mp < r2->MoveCost(mt, r1, dir, 0))
+	const MoveType mt = moveType();
+	const int mp_avail = CalcMovePoints(mt) - movepoints;
+	if (mp_avail < r2->MoveCost(mt, r1, dir, 0))
 		return 0;
 
 	return 1;
@@ -2626,13 +2934,13 @@ void Unit::MoveUnit(Object *toobj)
 {
 	// notify current object we are leaving
 	if (object)
-		object->units.Remove(this);
+		object->removeUnit(this, true);
 
 	object = toobj;
 
 	// back pointer from object
 	if (toobj)
-		toobj->units.Add(this);
+		toobj->addUnit(this);
 }
 
 void Unit::Event(const AString &s)

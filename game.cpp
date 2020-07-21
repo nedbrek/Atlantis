@@ -110,9 +110,8 @@ void Game::DefaultWorkOrder()
 		forlist(&r->objects)
 		{
 			Object *o = (Object*)elem;
-			forlist(&o->units)
+			for(auto &u : o->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (u->monthorders || u->faction->IsNPC() ||
 				      (Globals->TAX_PILLAGE_MONTH_LONG &&
 				       u->taxing != TAX_NONE))
@@ -158,7 +157,7 @@ AString Game::GetXtraMap(ARegion *reg, int type)
 			if ((ObjectDefs[o->type].flags & ObjectType::CANENTER) != 0)
 				continue; // player structure
 
-			if (o->units.First())
+			if (o->getUnits().front())
 				return "*"; // occupied lair
 
 			return "."; // unoccupied lair
@@ -562,9 +561,8 @@ int Game::OpenGame()
 			forlist(&r->objects)
 			{
 				Object *o = (Object*)elem;
-				forlist(&o->units)
+				for(auto &u : o->getUnits())
 				{
-					Unit *u = (Unit*)elem;
 					forlist(&u->items)
 					{
 						Item *item = (Item*)elem;
@@ -848,9 +846,8 @@ Unit* Game::ParseGMUnit(AString *tag, Faction *pFac)
 		forlist(&reg->objects)
 		{
 			Object *obj = (Object *)elem;
-			forlist(&obj->units)
+			for(auto &u : obj->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (u->faction->num == pFac->num && u->gm_alias == gma)
 				{
 					return u; // found it
@@ -1640,18 +1637,14 @@ void Game::ClearOrders(Faction *f)
 	forlist(&regions)
 	{
 		ARegion *r = (ARegion*)elem;
-		forlist(&r->objects)
+		r->applyToUnits([f](Unit *u)
 		{
-			Object *o = (Object*)elem;
-			forlist(&o->units)
+			if (u->faction == f)
 			{
-				Unit *u = (Unit*)elem;
-				if (u->faction == f)
-				{
-					u->ClearOrders();
-				}
+				u->ClearOrders();
 			}
 		}
+		);
 	}
 }
 
@@ -1704,31 +1697,24 @@ void Game::MakeFactionReportLists()
 			}
 		}
 
+		// units present
+		reg->applyToUnits([&vector](Unit *unit)
 		{
-			// units present
-			forlist(&reg->objects)
-			{
-				Object *obj = (Object*)elem;
-
-				forlist(&obj->units)
-				{
-					Unit *unit = (Unit*)elem;
-					vector.SetFaction(unit->faction->num, unit->faction);
-				}
-			}
+			vector.SetFaction(unit->faction->num, unit->faction);
 		}
+		);
 
 		for (int i = 0; i < vector.vectorsize; ++i)
 		{
 			Faction *fp = vector.GetFaction(i);
-			if (fp)
-			{
-				// why do regions have a race with zero pop?
-				if (reg->race != -1 && reg->population > 0)
-					fp->DiscoverItem(reg->race, 0, 1);
+			if (!fp)
+				continue;
 
-				fp->present_regions.Add(new ARegionPtr(reg));
-			}
+			// why do regions have a race with zero pop?
+			if (reg->race != -1 && reg->population > 0)
+				fp->DiscoverItem(reg->race, 0, 1);
+
+			fp->present_regions.Add(new ARegionPtr(reg));
 		}
 	}
 }
@@ -1822,16 +1808,12 @@ void Game::SetupUnitSeq()
 	forlist(&regions)
 	{
 		ARegion *r = (ARegion*)elem;
-		forlist(&r->objects)
+		r->applyToUnits([&max](Unit *u)
 		{
-			Object *o = (Object*)elem;
-			forlist(&o->units)
-			{
-				Unit *u = (Unit*)elem;
-				if (u && u->num > max)
-					max = u->num;
-			}
+			if (u && u->num > max)
+				max = u->num;
 		}
+		);
 	}
 	unitseq = max+1;
 }
@@ -1907,9 +1889,8 @@ void Game::SetupUnitNums()
 		forlist(&r->objects)
 		{
 			Object *o = (Object*)elem;
-			forlist(&o->units)
+			for(auto &u : o->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				const int i = u->num;
 
 				if (i > 0 && unsigned(i) < maxppunits)
@@ -1993,16 +1974,12 @@ void Game::CountAllMages()
 		forlist(&regions)
 		{
 			ARegion *r = (ARegion*)elem;
-			forlist(&r->objects)
+			r->applyToUnits([](Unit *u)
 			{
-				Object *o = (Object*)elem;
-				forlist(&o->units)
-				{
-					Unit *u = (Unit*)elem;
-					if (u->type == U_MAGE)
-						++u->faction->nummages;
-				}
+				if (u->type == U_MAGE)
+					++u->faction->nummages;
 			}
+			);
 		}
 	}
 }
@@ -2067,16 +2044,12 @@ void Game::CountAllApprentices()
 		forlist(&regions)
 		{
 			ARegion *r = (ARegion*)elem;
-			forlist(&r->objects)
+			r->applyToUnits([](Unit *u)
 			{
-				Object *o = (Object*)elem;
-				forlist(&o->units)
-				{
-					Unit *u = (Unit*)elem;
-					if (u->type == U_APPRENTICE)
-						u->faction->numapprentices++;
-				}
+				if (u->type == U_APPRENTICE)
+					u->faction->numapprentices++;
 			}
+			);
 		}
 	}
 }
@@ -2090,9 +2063,8 @@ int Game::CountApprentices(Faction *pFac)
 		forlist(&r->objects)
 		{
 			Object *o = (Object*)elem;
-			forlist(&o->units)
+			for(auto &u : o->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (u->faction == pFac && u->type == U_APPRENTICE)
 					++i;
 			}
@@ -2616,9 +2588,8 @@ void Game::AdjustCityMons(ARegion *r)
 	forlist(&r->objects)
 	{
 		Object *o = (Object*)elem;
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->type == U_GUARD || u->type == U_GUARDMAGE)
 			{
 				// existing guards are adjusted

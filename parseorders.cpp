@@ -695,6 +695,9 @@ Order* Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 		case O_FORGET:
 			ProcessForgetOrder(unit, o, pCheck);
 			break;
+		case O_JOIN:
+			ProcessJoinOrder(unit, o, pCheck);
+			break;
 		case O_WITHDRAW:
 			ProcessWithdrawOrder(unit, o, pCheck);
 			break;
@@ -788,6 +791,40 @@ Order* Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 	}
 	return NULL;
+}
+
+void Game::ProcessJoinOrder(Unit *u, AString *o, OrdersCheck *pCheck)
+{
+	if (u->enter_ > 0) {
+		ParseError(pCheck, u, 0, "JOIN: Warning: Overwriting ENTER order");
+		u->enter_ = 0;
+	}
+
+	UnitId *t = ParseUnit(o);
+	if (!t)
+	{
+		ParseError(pCheck, u, 0, "JOIN: Invalid unit.");
+		return;
+	}
+
+	// end of error checking
+	if (pCheck)
+		return;
+
+	// optional argument
+	bool overload = true;
+	bool merge = false;
+	AString *token = o->gettoken();
+	if (token)
+	{
+		if (*token == "noverload")
+			overload = false;
+		else if (*token == "merge")
+			merge = true;
+	}
+
+	delete u->joinorders;
+	u->joinorders = new JoinOrder(t, overload, merge);
 }
 
 void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
@@ -2626,6 +2663,29 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
+	if (*token == "ship")
+	{
+		delete token;
+		token = o->gettoken();
+		const int item = token->value();
+
+		delete token;
+
+		if (pCheck)
+			return; // just checking
+
+		GiveOrder *order = new GiveOrder;
+		order->item = item;
+		order->amount = 1;
+		order->except = 0;
+		order->limit = M_NONE;
+		order->target = t;
+		order->give_ship = true;
+
+		unit->giveorders.Add(order);
+		return;
+	}
+
 	int amt = 0;
 	if (*token == "unit")
 	{
@@ -2779,17 +2839,17 @@ void Game::ProcessGiveOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		token2.reset(o->gettoken());
 	}
 
-	if (!pCheck)
-	{
-		GiveOrder *order = new GiveOrder;
-		order->item = item;
-		order->target = t;
-		order->amount = amt;
-		order->except = excpt;
-		order->limit = limit;
+	if (pCheck)
+		return; // just checking
 
-		unit->giveorders.Add(order);
-	}
+	GiveOrder *order = new GiveOrder;
+	order->item = item;
+	order->amount = amt;
+	order->except = excpt;
+	order->limit = limit;
+	order->target = t;
+
+	unit->giveorders.Add(order);
 }
 
 void Game::ProcessDescribeOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
@@ -3304,8 +3364,8 @@ Unit* Game::ProcessFormOrder(Unit *former, AString *o, OrdersCheck *pCheck)
 
 	Unit *temp = GetNewUnit(former->faction, an);
 	temp->CopyFlags(former);
-	temp->DefaultOrders(former->object);
 	temp->MoveUnit(former->object);
+	temp->DefaultOrders();
 	temp->former = former;
 	return temp;
 }
@@ -3436,7 +3496,7 @@ void Game::ProcessMoveOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 
-	if ((u->monthorders && u->monthorders->type != O_SAIL) ||
+	if ((u->monthorders && u->monthorders->type != O_MOVE) ||
 	    (Globals->TAX_PILLAGE_MONTH_LONG &&
 	     (u->taxing == TAX_TAX || u->taxing == TAX_PILLAGE)))
 	{
@@ -3452,18 +3512,22 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (Globals->TAX_PILLAGE_MONTH_LONG)
 		u->taxing = TAX_NONE;
 
+	AString *t = o->gettoken();
+	if (!t)
+	{
+		// SAIL (help)
+		u->monthorders = new SailOrder;
+		return;
+	}
+
 	if (!u->monthorders)
 	{
-		u->monthorders = new SailOrder;
+		u->monthorders = new MoveOrder;
 	}
-	SailOrder *m = (SailOrder*)u->monthorders;
+	MoveOrder *m = (MoveOrder*)u->monthorders;
 
-	for (;;)
+	while (t)
 	{
-		AString *t = o->gettoken();
-		if (!t)
-			return;
-
 		int d = ParseDir(t);
 		delete t;
 		if (d == -1)
@@ -3480,6 +3544,8 @@ void Game::ProcessSailOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 			x->dir = d;
 			m->dirs.Add(x);
 		}
+
+		t = o->gettoken();
 	}
 }
 

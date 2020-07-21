@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 85 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 86 )
 
 class Aorders;
 class ExchangeOrder;
@@ -182,6 +182,7 @@ private: // methods
 
 	void ParseOrders(int faction, Aorders *ordersFile, OrdersCheck *pCheck);
 	Order* ProcessOrder(int orderNum, Unit *unit, AString *order, OrdersCheck *pCheck, int at_value);
+	void ProcessJoinOrder(Unit *,AString *, OrdersCheck *pCheck);
 	void ProcessMoveOrder(Unit *,AString *, OrdersCheck *pCheck);
 	void ProcessAdvanceOrder(Unit *,AString *, OrdersCheck *pCheck);
 	Unit *ProcessFormOrder(Unit *former, AString *order, OrdersCheck *pCheck);
@@ -330,6 +331,7 @@ private: // methods
 	void RemoveEmptyObjects();
 	void RunEnterOrders();
 	void Do1EnterOrder(ARegion *,Object *,Unit *);
+	void Do1JoinOrder(ARegion *,Object *,Unit *);
 	void RunPromoteOrders();
 	void Do1PromoteOrder(Object *,Unit *);
 	void Do1EvictOrder(Object *,Unit *);

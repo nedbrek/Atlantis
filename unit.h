@@ -28,6 +28,7 @@
 #include "skills.h"
 #include "items.h"
 #include "helper.h"
+#include "movetype.h"
 class Ainfile;
 class Aoutfile;
 class ARegion;
@@ -35,6 +36,7 @@ class Areport;
 class AttackOrder;
 class CastOrder;
 class EvictOrder;
+class JoinOrder;
 class Object;
 class Order;
 class TeleportOrder;
@@ -118,6 +120,7 @@ public:
 
 	///@return Unit indicated by 'alias' and 'f'
 	Unit* find(AList &l, int f) const;
+	Unit* find(const std::vector<Unit*> &l, int f) const;
 
 private: // data
 	int unitnum; ///< 0 -> new unit
@@ -141,7 +144,13 @@ public:
 	Unit* findByFaction(AList &l, int alias, int faction);
 
 	static
+	Unit* findByFaction(const std::vector<Unit*> &l, int alias, int faction);
+
+	static
 	Unit* findByNum(AList &l, int num);
+
+	static
+	Unit* findByNum(const std::vector<Unit*> &l, int num);
 
 	/// set flags to make unit into monsters
 	void SetMonFlags();
@@ -184,7 +193,7 @@ public:
 	void ClearCastOrders();
 
 	/// clear orders and populate with defaults
-	void DefaultOrders(Object *obj);
+	void DefaultOrders();
 
 	/// change name to 's', delete s
 	void SetName(AString *s);
@@ -329,11 +338,8 @@ public:
 	int CanSwim();
 	int CanReallySwim(int weight = 0);
 
-	///@return highest move possible
-	int MoveType();
-
-	///@return movement points corresponding to MoveType()
-	int CalcMovePoints();
+	///set start_move_points corresponding to move_type
+	AString calcMovePoints();
 
 	///@return 1 if there is really some movement (0 for exits)
 	int CanMoveTo(ARegion *r1, ARegion *r2);
@@ -399,7 +405,11 @@ public: // data
 	int reveal;
 	int flags;
 	int taxing;
-	int movepoints;
+
+	MoveType move_type = M_NONE; ///< move type available
+	int start_move_points = 0;   ///< starting move points
+	int movepoints = 0;          ///< points used
+
 	int canattack;
 	int nomove;
 	SkillList skills;
@@ -434,6 +444,8 @@ public: // data
 	Order *monthorders;
 	AttackOrder *attackorders;
 	EvictOrder *evictorders;
+	JoinOrder *joinorders = nullptr;
+
 	ARegion *advancefrom;
 
 	AList exchangeorders;
@@ -450,6 +462,12 @@ protected:
 
 	AString SpoilsReport();
 	void SkillStarvation();
+
+	///@return highest move possible
+	MoveType moveType();
+
+	///@return movement points corresponding to MoveType()
+	int CalcMovePoints(MoveType mt);
 };
 
 //----------------------------------------------------------------------------

@@ -4133,6 +4133,12 @@ static ObjectType ot[NOBJECTS] =
 	 I_ROOTSTONE,640,S_BUILDING,5,
 	 0,0,0,
 	 -1,-1},
+	{"Army",
+	 ObjectType::NEVERDECAY | ObjectType::CANENTER | ObjectType::CANMODIFY,
+	 0,0,0,0,
+	 -1,0,0,-1,
+	 0, 0, 0,
+	 -1, -1},
 };
 
 ObjectType *const ObjectDefs = ot;

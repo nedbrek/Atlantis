@@ -163,6 +163,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.Enclose(1, "UL");
 		f.TagText("LI", f.Link("#playing_factions", "Factions"));
 		f.TagText("LI", f.Link("#playing_units", "Units"));
+		f.TagText("LI", f.Link("#armies_fleets", "Armies and Fleets"));
 		f.TagText("LI", f.Link("#playing_turns", "Turns"));
 		f.Enclose(0, "UL");
 	}
@@ -350,6 +351,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("LI", f.Link("#give", "give"));
 		f.TagText("LI", f.Link("#guard", "guard"));
 		f.TagText("LI", f.Link("#hold", "hold"));
+		f.TagText("LI", f.Link("#join", "join"));
 		f.TagText("LI", f.Link("#leave", "leave"));
 		f.TagText("LI", f.Link("#move", "move"));
 		f.TagText("LI", f.Link("#name", "name"));
@@ -769,6 +771,21 @@ int Game::GenRules(const AString &rules, const AString &css,
 	}
 	f.Paragraph(temp);
 
+	// armies and fleets
+	f.LinkRef("armies_fleets");
+	f.TagText("h3", "Armies and Fleets:");
+	temp = "Units can ";
+	temp += f.Link("#join", "JOIN");
+	temp += " together to form an army. An army with boats is a fleet.";
+	f.Paragraph(temp);
+
+	temp = "All units in an army/fleet move according to the orders of its";
+	temp += " commander (the first unit in the report). Units in a fleet can"
+	" perform other monthly tasks. Units on foot will spend their month "
+	"marching (when the army is moving).";
+	f.Paragraph(temp);
+
+	// playing turns
 	f.LinkRef("playing_turns");
 	f.TagText("H3", "Turns:");
 	temp = "Each turn, the Atlantis server takes the orders file that "
@@ -4508,6 +4525,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("H4", "GIVE [unit] ALL [item class]");
 	f.TagText("H4", "GIVE [unit] UNIT");
 	f.TagText("H4", "GIVE [unit] [quantity or ALL] LIMIT [movement type]");
+	f.TagText("H4", "GIVE [unit] SHIP [ship number]");
 	temp = "The first form of the GIVE order gives a quantity of an item to "
 	   "another unit. The second form of the GIVE order will give all of "
 	   "a given item to another unit.  The third form will give all of an "
@@ -4515,6 +4533,11 @@ int Game::GenRules(const AString &rules, const AString &css,
 	   "form will give all items of a specific type to another unit.  The "
 	   "fifth form of the GIVE order gives the entire unit to the "
 	   "specified unit's faction.";
+	f.Paragraph(temp);
+	temp = "The GIVE SHIP form transfers a ship from the giving unit to the "
+	   "receiving unit. The giving unit will leave the ship (if possible)."
+	   " The receiving unit will be made captain of the ship (unless it is in "
+	   "another ship).";
 	f.Paragraph(temp);
 	temp = "Any GIVE order (except GIVE UNIT) can have a LIMIT clause."
 	    " The movement types accepted are: WALK, RIDE, FLY, SWIM, and SAIL."
@@ -4585,6 +4608,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "GUARD 1";
 	f.CommandExample(temp, temp2);
 
+	//---hold
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("hold");
 	f.TagText("H4", "HOLD [flag]");
@@ -4598,6 +4622,16 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "HOLD 1";
 	f.CommandExample(temp, temp2);
 
+	//---join
+	f.ClassTagText("DIV", "rule", "");
+	f.LinkRef("join");
+	f.TagText("H4", "JOIN [unit]");
+	f.TagText("H4", "JOIN [unit] MERGE");
+	temp = "Join unit into an army/fleet. The second form will cause the "
+	"captain of a ship to bring his ship, and all the units in it.";
+	f.Paragraph(temp);
+
+	//---leave
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("leave");
 	f.TagText("H4", "LEAVE");
@@ -4615,6 +4649,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "LEAVE";
 	f.CommandExample(temp, temp2);
 
+	//---move
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("move");
 	f.TagText("H4", "MOVE [dir] ...");
@@ -5348,6 +5383,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp = f.Link("#leave", "LEAVE") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#enter", "ENTER") + " orders are processed.";
+	f.TagText("LI", temp);
+	temp = f.Link("#join", "JOIN") + " orders are processed.";
 	f.TagText("LI", temp);
 	temp = f.Link("#promote", "PROMOTE") + " orders are processed.";
 	f.TagText("LI", temp);

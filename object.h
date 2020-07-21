@@ -29,6 +29,7 @@
 class Ainfile;
 class Aoutfile;
 class ARegion;
+class ARegionList;
 class Areport;
 class AString;
 class Faction;
@@ -83,13 +84,14 @@ int ParseObject(AString *token);
 
 ///@return 1 if object has capacity, else 0
 int ObjectIsShip(int);
+int summonWindLevel(int ship_type);
 
 /// Instance of an object in a region
 class Object : public AListElem
 {
 public:
 	/// constructor
-	Object(ARegion *region);
+	explicit Object(ARegion *region);
 	/// destructor
 	~Object();
 
@@ -122,6 +124,7 @@ public:
 
 	///@return 1 if this has some capacity
 	int IsBoat();
+	bool hasBoats() const;
 
 	///@return 1 if this can protect units
 	int IsBuilding();
@@ -144,19 +147,34 @@ public:
 	/// move object to 'toreg'
 	void MoveObject(ARegion *toreg);
 
+	void addUnit(Unit *u);
+	void prependUnit(Unit *u);
+	void removeUnit(Unit *u, bool remove_from_sub);
+	std::vector<Unit*> getUnits() { return units; }
+
+	Object* findUnitSubObject(Unit *u);
+
+	void DoDecayClicks(ARegionList *pRegs);
+
+	bool canFly() const;
+
 public: // data
 	AString *name; ///< type name
 	AString *describe; ///< user description
 	ARegion *region; ///< region location
 	int inner; ///< contains inner location
-	int num; ///< quantity
+	int num; ///< id
 	int type; ///< index into global table
 	int incomplete; ///< still under construction
 	int capacity; ///< protection capcity (in battle)
 	int runes; ///< (bool?) has been protected with runes
 	int prevdir; ///< previous direction (trivial portage?)
 	int mages; ///< maximum number of mages that can be inside
-	AList units; ///< units inside
+	std::vector<Object*> objects; ///< objects inside this object
+	Object *parent = nullptr;
+
+private: // data
+	std::vector<Unit*> units; ///< units inside
 };
 
 #endif

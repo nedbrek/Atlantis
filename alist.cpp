@@ -108,7 +108,7 @@ AListElem* AList::get(AListElem *e)
 			return temp;
 		temp = temp->next;
 	}
-	return 0;
+	return nullptr;
 }
 
 bool AList::remove(AListElem *e)
