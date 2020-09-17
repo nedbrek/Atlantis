@@ -156,12 +156,14 @@ int Game::SetupFaction(Faction *pFac)
 Faction* Game::CheckVictory()
 {
 	ARegion *reg = NULL;
-	forlist(&regions) {
+	forlist(&regions)
+	{
 		ARegion *r = (ARegion*)elem;
-		forlist(&r->objects) {
+		forlist(&r->objects)
+		{
 			Object *obj = (Object*)elem;
 			if(obj->type != O_BKEEP) continue;
-			if(obj->units.Num()) return NULL;
+			if(obj->getUnits().size()) return NULL;
 			reg = r;
 			break;
 		}
@@ -171,11 +173,13 @@ Faction* Game::CheckVictory()
 
 	{
 		// Now see find the first faction guarding the region
-		forlist(&reg->objects) {
+		forlist(&reg->objects)
+		{
 			Object *o = reg->GetDummy();
-			forlist(&o->units) {
-				Unit *u = (Unit *)elem;
-				if(u->guard == GUARD_GUARD) return u->faction;
+			for(auto &u : o->getUnits())
+			{
+				if (u->guard == GUARD_GUARD)
+					return u->faction;
 			}
 		}
 	}

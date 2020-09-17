@@ -26,6 +26,7 @@
 // END A3HEADER
 #include "alist.h"
 #include "astring.h"
+#include "movetype.h"
 #include <deque>
 class ARegion;
 class UnitId;
@@ -66,6 +67,7 @@ enum
 	O_GIVE,
 	O_GUARD,
 	O_HOLD,
+	O_JOIN,
 	O_LEAVE,
 	O_MOVE,
 	O_NAME,
@@ -95,18 +97,6 @@ enum
 	O_WITHDRAW,
 	O_WORK,
 	NORDERS
-};
-
-//----------------------------------------------------------------------------
-enum MoveType
-{
-	M_NONE,
-	M_WALK,
-	M_RIDE,
-	M_FLY,
-	M_SAIL,
-	M_SWIM,
-	M_MAX
 };
 
 //----------------------------------------------------------------------------
@@ -159,6 +149,19 @@ public:
 	const AString t_;
 };
 
+/// Join another unit
+class JoinOrder : public Order
+{
+public:
+	JoinOrder(UnitId *target, bool overload, bool merge);
+	~JoinOrder();
+
+public: // data
+	UnitId *target;
+	bool overload;
+	bool merge;
+};
+
 /// Move to adjacent hex or enter/leave an object
 class MoveOrder : public Order
 {
@@ -166,7 +169,7 @@ public:
 	MoveOrder(int t = O_MOVE);
 	~MoveOrder();
 
-	int advancing;
+	int advancing = 0;
 	AList dirs;
 };
 
@@ -194,6 +197,7 @@ public:
 	MoveType limit = M_NONE;
 
 	UnitId *target = nullptr;
+	bool give_ship = false;
 };
 
 /// Increase skill

@@ -140,28 +140,33 @@ void Game::GrowWMons(int rate)
 
 void Game::GrowLMons( int rate )
 {
-    forlist(&regions) {
-        ARegion * r = (ARegion *) elem;
-        //
-        // Don't make lmons in guarded regions
-        //
-        if (r->IsGuarded()) continue;
+	forlist(&regions)
+	{
+		ARegion *r = (ARegion*)elem;
+		// Don't make lmons in guarded regions
+		if (r->IsGuarded())
+			continue;
         
-        forlist(&r->objects) {
-            Object * obj = (Object *) elem;
-            if (obj->units.Num()) continue;
-            int montype = ObjectDefs[obj->type].monster;
-			int grow=!(ObjectDefs[obj->type].flags&ObjectType::NOMONSTERGROWTH);
-            if ((montype != -1) && grow) {
-                if (getrandom(100) < rate) {
-                    MakeLMon( obj );
-                }
-            }
-        }
-    }
+		forlist(&r->objects)
+		{
+			Object *obj = (Object*)elem;
+			if (obj->getUnits().size())
+				continue;
+
+			const int montype = ObjectDefs[obj->type].monster;
+			const bool grow = !(ObjectDefs[obj->type].flags & ObjectType::NOMONSTERGROWTH);
+  			if (montype != -1 && grow)
+  			{
+				if (getrandom(100) < rate)
+				{
+					MakeLMon(obj);
+				}
+			}
+		}
+	}
 }
 
-int Game::MakeWMon( ARegion *pReg )
+int Game::MakeWMon(ARegion *pReg)
 {
 	if(!Globals->WANDERING_MONSTERS_EXIST) return 0;
 

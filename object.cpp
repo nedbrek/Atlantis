@@ -32,6 +32,9 @@
 #include "gamedefs.h"
 #include "fileio.h"
 #include "astring.h"
+#include "gameio.h"
+#include <algorithm>
+#include <map>
 
 int ParseObject(AString *token)
 {
@@ -75,6 +78,8 @@ Object::Object(ARegion *reg)
 
 Object::~Object()
 {
+	if (!objects.empty())
+		std::cerr << "Warning sub-objects not empty for " << name << std::endl;
 	delete name;
 	delete describe;
 	region = NULL;
@@ -101,9 +106,19 @@ void Object::Writeout(Aoutfile *f)
 	else
 		f->PutInt(-1);
 	f->PutInt(runes);
-	f->PutInt(units.Num());
-	forlist ((&units))
-		((Unit*)elem)->Writeout(f);
+	f->PutInt(units.size());
+	for (auto &u : units)
+		u->Writeout(f);
+
+	f->PutInt(objects.size());
+	{
+		for (auto op : objects)
+		{
+			op->Writeout(f);
+			//delete op;
+		}
+	}
+	objects.clear();
 }
 
 void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
@@ -147,6 +162,18 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 		temp->MoveUnit(this);
 	}
 	mages = ObjectDefs[type].maxMages;
+
+	if (v >= MAKE_ATL_VER(4, 2, 86))
+	{
+		const int num_objects = f->GetInt();
+		for (int i = 0; i < num_objects; ++i)
+		{
+			Object *op = new Object(region);
+			op->Readin(f, facs, v);
+			op->parent = this;
+			objects.push_back(op);
+		}
+	}
 }
 
 void Object::SetName(AString *s)
@@ -193,6 +220,22 @@ void Object::SetDescribe(AString *s)
 int Object::IsBoat()
 {
 	return ObjectIsShip(type);
+}
+
+bool Object::hasBoats() const
+{
+	if (ObjectIsShip(type))
+		return true;
+
+	if (type != O_ARMY)
+		return false;
+
+	for (auto op : objects)
+	{
+		if (ObjectIsShip(op->type))
+			return true;
+	}
+	return false;
 }
 
 int Object::IsBuilding()
@@ -247,10 +290,15 @@ Unit* Object::ForbiddenBy(ARegion *reg, Unit *u)
 
 Unit* Object::GetOwner()
 {
-	Unit *owner = (Unit*)units.First();
-	while (owner && !owner->GetMen())
+	if (units.empty())
+		return nullptr;
+
+	auto i = units.begin();
+	Unit *owner = *i;
+	while (i != units.end() && !(**i).GetMen())
 	{
-		owner = (Unit*)units.Next(owner);
+		owner = *i;
+		++i;
 	}
 
 	return owner;
@@ -287,7 +335,28 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	if (type != O_DUMMY)
 	{
-		AString temp = AString("+ ") + *name + " : " + ob->name;
+		bool is_fleet = false;
+		AString temp = AString("+ ") + *name + " : ";
+		if (type != O_ARMY || objects.empty())
+			temp += ob->name;
+		else
+		{
+			is_fleet = true;
+			temp += "Fleet";
+			std::map<int, unsigned> obj_ct;
+			for (Object *op : objects)
+			{
+				obj_ct[op->type]++;
+			}
+			for (const auto &mi : obj_ct)
+			{
+				temp += ", ";
+				temp += AString(mi.second);
+				temp += " ";
+				temp += ObjectDefs[mi.first].name;
+			}
+		}
+
 		if (incomplete > 0)
 		{
 			temp += AString(", needs ") + incomplete;
@@ -311,8 +380,29 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 		if (runes)
 			temp += ", engraved with Runes of Warding";
 
+		if (is_fleet || describe)
+			temp += AString("; ");
+
+		if (is_fleet)
+		{
+			bool first = true;
+			for (const auto &op : objects)
+			{
+				if (!first)
+					temp += ", ";
+				temp += *op->name;
+				temp += " ";
+				temp += ObjectDefs[op->type].name;
+
+				first = false;
+			}
+		}
 		if (describe)
-			temp += AString("; ") + *describe;
+		{
+			if (is_fleet)
+				temp += ". ";
+			temp += *describe;
+		}
 
 		if (!(ob->flags & ObjectType::CANENTER))
 			temp += ", closed to player units";
@@ -323,9 +413,8 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 	}
 
 	//foreach unit in this
-	forlist ((&units))
+	for (const auto &u : units)
 	{
-		Unit *const u = (Unit*)elem;
 		if (u->faction == fac)
 		{
 			// self-report
@@ -363,14 +452,96 @@ void Object::SetPrevDir(int newdir)
 
 void Object::MoveObject(ARegion *toreg)
 {
-	region->objects.Remove(this);
+	region->objects.remove(this);
+
 	region = toreg;
-	toreg->objects.Add(this);
+	for (auto o : objects)
+	{
+		o->region = toreg;
+	}
+
+	toreg->objects.push_back(this);
 }
 
 int Object::IsRoad()
 {
 	return (O_ROADN <= type && type <= O_ROADS) ? 1 : 0;
+}
+
+void Object::addUnit(Unit *u)
+{
+	units.push_back(u);
+}
+
+void Object::prependUnit(Unit *u)
+{
+	units.insert(units.begin(), u);
+}
+
+void Object::removeUnit(Unit *u, bool remove_from_sub)
+{
+	units.erase(std::remove(units.begin(), units.end(), u));
+
+	if (!remove_from_sub)
+		return;
+
+	// check sub-objects
+	for (auto o : objects)
+	{
+		o->units.erase(std::remove(o->units.begin(), o->units.end(), u));
+	}
+}
+
+Object* Object::findUnitSubObject(Unit *u)
+{
+	Object *ret = nullptr;
+	for (auto o : objects)
+	{
+		for(auto &ou : o->units)
+		{
+			if (ou == u)
+				ret = o;
+		}
+	}
+	return ret;
+}
+
+void Object::DoDecayClicks(ARegionList *pRegs)
+{
+	if (ObjectDefs[type].flags & ObjectType::NEVERDECAY)
+		return;
+
+	int clicks = getrandom(region->GetMaxClicks()) + region->PillageCheck();
+
+	if (clicks > ObjectDefs[type].maxMonthlyDecay)
+		clicks = ObjectDefs[type].maxMonthlyDecay;
+
+	incomplete += clicks;
+
+	if (incomplete > 0)
+	{
+		// trigger decay event
+		region->RunDecayEvent(this, pRegs);
+	}
+
+	// apply to subojects
+	for (auto o : objects)
+		o->DoDecayClicks(pRegs);
+}
+
+bool Object::canFly() const
+{
+	if (type == O_ARMY && !objects.empty())
+	{
+		// all ships must fly
+		for (Object *op : objects)
+		{
+			if (op->type != O_BALLOON)
+				return false;
+		}
+		return true;
+	}
+	return type == O_BALLOON; // TODO: generalize
 }
 
 AString* ObjectDescription(int obj)

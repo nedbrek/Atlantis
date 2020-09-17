@@ -28,6 +28,7 @@
 #include "market.h"
 #include "gamedefs.h"
 #include "alist.h"
+#include <functional>
 class Areport;
 class Faction;
 class Object;
@@ -291,6 +292,8 @@ public:
 	int IsStartingCity();
 	int IsSafeRegion();
 	int CanBeStartingCity(ARegionArray *pRA);
+
+	// just used for mapping; just check if there is an inner region
 	int HasShaft();
 
 	///@return 1 if this region has a road in any direction, else 0
@@ -307,8 +310,6 @@ public:
 	int GetRoadDirection(int realDirection);
 
 	int GetRealDirComp(int realDirection) const;
-	void DoDecayCheck(ARegionList *pRegs);
-	void DoDecayClicks(Object *o, ARegionList *pRegs);
 	void RunDecayEvent(Object *o, ARegionList *pRegs);
 	int PillageCheck() const;
 
@@ -325,6 +326,15 @@ public:
 	void ZeroNeighbors();
 	void SetLoc(int x, int y, int z);
 
+	// used in object decay
+	int GetMaxClicks() const;
+
+	/// apply 'f' to all units
+	void applyToUnits(const std::function<void(Unit*)> &f);
+
+	/// apply 'f' to all units, until reaching false
+	void continueUnits(const std::function<bool(Unit*)> &f);
+
 private: // methods
 	void SetupPop();
 	void SetupProds();
@@ -339,7 +349,6 @@ private: // methods
 	void WriteEconomy(Areport *f, Faction *fac, int present);
 	void WriteExits(Areport *f, ARegionList *pRegs, bool *exits_seen) const;
 
-	int GetMaxClicks() const;
 	AString GetDecayFlavor() const;
 
 	/// apply variable economy effects

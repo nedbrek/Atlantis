@@ -504,8 +504,8 @@ void ARegion::WriteTemplateHeader( Areport *f,
         int sawgate = 0;
         forlist(&objects) {
             Object *o = (Object *) elem;
-            forlist(&o->units) {
-                Unit *u = (Unit *) elem;
+            for (auto &u : o->getUnits())
+            {
                 if (!sawgate && u->faction == fac &&
                     u->GetSkill(S_GATE_LORE))
                 {

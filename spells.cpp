@@ -1741,11 +1741,13 @@ void Game::RunTeleportOrders()
 			int foundone = 1;
 			while (foundone) {
 				foundone = 0;
-				forlist(&o->units) {
-					Unit * u = (Unit *) elem;
-					if (u->teleportorders) {
+				for (auto &u : o->getUnits())
+				{
+					if (u->teleportorders)
+					{
 						foundone = 1;
-						switch (u->teleportorders->spell) {
+						switch (u->teleportorders->spell)
+						{
 							case S_GATE_LORE:
 								RunGateJump(r,o,u);
 								break;

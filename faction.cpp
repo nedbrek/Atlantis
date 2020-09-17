@@ -1536,9 +1536,8 @@ int Faction::CanCatch(ARegion *r, Unit *t)
 	forlist(&r->objects)
 	{
 		Object *o = (Object*)elem;
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u == t && o->type != O_DUMMY)
 				return 1;
 
@@ -1567,9 +1566,8 @@ int Faction::CanSee(ARegion *r, Unit *u, int practise)
 		Object *obj = (Object*)elem;
 		const bool dummy = (obj->type == O_DUMMY);
 
-		forlist((&obj->units))
+		for(auto &temp : obj->getUnits())
 		{
-			Unit *temp = (Unit*)elem;
 			if (u == temp && !dummy)
 				retval = 1;
 

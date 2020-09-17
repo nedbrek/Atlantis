@@ -473,7 +473,7 @@ std::vector<ItemType> ItemDefs = {
 	 15,0,0,0,
 	 {},
 	 {}},
-	{"wolf","wolves","WOLF",
+	{"wolf","wolves","WLF",
 	 ItemType::CANTGIVE,
 	 -1,0,0,0, {},
 	 S_WOLF_LORE,1,0, {},
@@ -617,7 +617,7 @@ std::vector<ItemType> ItemDefs = {
 	 10,0,0,0,
 	 {},
 	 {}},
-	{"ogre","ogres","OGRE",
+	{"ogre","ogres","OGR",
 	 ItemType::CANTGIVE,
 	 -1,0,0,0, {},
 	 -1,0,0, {},
@@ -817,7 +817,7 @@ std::vector<ItemType> ItemDefs = {
 	 15,15,15,0,
 	 {},
 	 {}},
-	{"wolf","wolves","WOLF",
+	{"wolf","wolves","WLF",
 	 ItemType::CANTGIVE,
 	 -1,0,0,0, {},
 	 S_CREATE_PHANTASMAL_BEASTS,1,0, {},
@@ -3782,7 +3782,7 @@ static ObjectType ot[NOBJECTS] =
 	 -1,0,-1,0,
 	 0,0,0,
 	 -1,-1},
-	{"Lair",
+	{"Clearing",
 	 ObjectType::NEVERDECAY,
 	 0,0,0,0,
 	 -1,0,-1,0,
@@ -4133,6 +4133,12 @@ static ObjectType ot[NOBJECTS] =
 	 I_ROOTSTONE,640,S_BUILDING,5,
 	 0,0,0,
 	 -1,-1},
+	{"Army",
+	 ObjectType::NEVERDECAY | ObjectType::CANENTER | ObjectType::CANMODIFY,
+	 0,0,0,0,
+	 -1,0,0,-1,
+	 0, 0, 0,
+	 -1, -1},
 };
 
 ObjectType *const ObjectDefs = ot;
@@ -4172,7 +4178,7 @@ static TerrainType td[R_NUM] = {
 	  {"YEW",25,5},{"MBOAR",60,10},{"MWOL",5,5}},
 	 {"WELF","","",""},
 	 {"WELF","HELF",""},
-	 2,"WOLF","TREN","KOBO",
+	 2,"WLF","TREN","KOBO",
 	 10,{O_LAIR,O_RUIN,O_CRYPT,-1,-1,-1}},
 	{"mountain", R_MOUNTAIN, TerrainType::FLYINGMOUNTS,
 	 400,12,20,2,
@@ -4180,7 +4186,7 @@ static TerrainType td[R_NUM] = {
 	  {"ADMT",5,5},{"MWOL",5,5},{"",0,0}},
 	 {"MDWA","ORC","",""},
 	 {"","",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 15,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,O_GIANTS_CASTLE}},
 	{"swamp", R_SWAMP, TerrainType::FLYINGMOUNTS,
 	 200,11,10,2,
@@ -4270,7 +4276,7 @@ static TerrainType td[R_NUM] = {
 	  {"ADMT",5,5},{"",0,0},{"",0,0}},
 	 {"BARB","HDWA","ORC",""},
 	 {"VIKI","SELF",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 15,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,O_GIANTS_CASTLE}},
 
 	 // Additional terrains for Miskatonic
@@ -4308,7 +4314,7 @@ static TerrainType td[R_NUM] = {
 	  {"YEW",25,5},{"MWOL",50,5},{"STON",10,4}},
 	 {"WELF","GBLN","",""},
 	 {"HELF","",""},
-	 2,"WOLF","TREN","KOBO",
+	 2,"WLF","TREN","KOBO",
 	 10,{O_LAIR,O_RUIN,O_CRYPT,-1,-1,-1}},
 	 //R_CERAN_FOREST2
 	{"forest", R_FOREST, TerrainType::FLYINGMOUNTS,
@@ -4317,7 +4323,7 @@ static TerrainType td[R_NUM] = {
 	  {"YEW",25,5},{"MWOL",35,5},{"MBOAR",40,5}},
 	 {"WELF","","",""},
 	 {"HELF","",""},
-	 2,"WOLF","TREN","KOBO",
+	 2,"WLF","TREN","KOBO",
 	 10,{O_LAIR,O_RUIN,O_CRYPT,-1,-1,-1}},
 	 //R_CERAN_FOREST3
 	{"forest", R_FOREST, TerrainType::FLYINGMOUNTS,
@@ -4326,7 +4332,7 @@ static TerrainType td[R_NUM] = {
 	  {"YEW",25,5},{"MBOAR",40,5},{"MUSH",10,10}},
 	 {"WELF","GNOL","",""},
 	 {"HELF","HUMN",""},
-	 8,"WOLF","TREN","KOBO",
+	 8,"WLF","TREN","KOBO",
 	 10,{O_LAIR,O_RUIN,O_CRYPT,-1,-1,-1}},
 	 //R_CERAN_MYSTFOREST
 	{"mystforest", R_CERAN_MYSTFOREST, TerrainType::FLYINGMOUNTS,
@@ -4335,7 +4341,7 @@ static TerrainType td[R_NUM] = {
 	  {"YEW",50,10},{"MBOAR",30,10},{"",0,0}},
 	 {"WELF","","",""},
 	 {"WELF","SELF",""},
-	 8,"WOLF","TREN","KOBO",
+	 8,"WLF","TREN","KOBO",
 	 15,{O_LAIR,O_RUIN,O_CRYPT,O_CAVE,O_MAGICIANS_TOWER,-1}},
 	 //R_CERAN_MYSTFOREST1
 	{"mystforest", R_CERAN_MYSTFOREST, TerrainType::FLYINGMOUNTS,
@@ -4362,7 +4368,7 @@ static TerrainType td[R_NUM] = {
 	  {"ADMT",5,5},{"MWOL",10,5},{"HERB",25,10}},
 	 {"MDWA","ORC","HGOB",""},
 	 {"GNOL","GBLN",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 10,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,O_GIANTS_CASTLE}},
 	 //R_CERAN_MOUNTAIN2
 	{"mountain", R_MOUNTAIN, TerrainType::FLYINGMOUNTS,
@@ -4371,7 +4377,7 @@ static TerrainType td[R_NUM] = {
 	  {"ADMT",5,5},{"PONY",50,15},{"WOOD",10,4}},
 	 {"MDWA","ORC","OGER",""},
 	 {"HGOB","",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 10,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,O_GIANTS_CASTLE}},
 	 //R_CERAN_MOUNTAIN3
 	{"mountain", R_MOUNTAIN, TerrainType::FLYINGMOUNTS,
@@ -4380,7 +4386,7 @@ static TerrainType td[R_NUM] = {
 	  {"ADMT",5,5},{"MWOL",20,10},{"PONY",40,10}},
 	 {"MDWA","ORC","",""},
 	 {"GBLN","",""},
-	 4,"GRIZ","ROC","OGRE",
+	 4,"GRIZ","ROC","OGR",
 	 10,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,O_GIANTS_CASTLE}},
 	 //R_CERAN_HILL
 	{"hill", R_CERAN_HILL, TerrainType::FLYINGMOUNTS,
@@ -4389,7 +4395,7 @@ static TerrainType td[R_NUM] = {
 	  {"HERB",10,10},{"MWOL",45,20},{"PONY",30,20}},
 	 {"HGOB","ORC","OGER","HDWA"},
 	 {"GBLN","GNOM",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 12,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,-1}},
 	 //R_CERAN_HILL1
 	{"hill", R_CERAN_HILL, TerrainType::FLYINGMOUNTS,
@@ -4398,7 +4404,7 @@ static TerrainType td[R_NUM] = {
 	  {"HERB",10,6},{"MWOL",15,20},{"MBOAR",50,15}},
 	 {"HGOB","ORC","GNOM","HDWA"},
 	 {"HLNG","HUMN",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 12,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,-1}},
 	 //R_CERAN_HILL2
 	{"hill", R_CERAN_HILL, TerrainType::FLYINGMOUNTS,
@@ -4407,7 +4413,7 @@ static TerrainType td[R_NUM] = {
 	  {"HORS",10,5},{"MWOL",10,20},{"",0,0}},
 	 {"HGOB","ORC","HDWA",""},
 	 {"GBLN","",""},
-	 2,"GRIZ","ROC","OGRE",
+	 2,"GRIZ","ROC","OGR",
 	 12,{O_LAIR,O_RUIN,O_CAVE,O_CRYPT,O_MAGICIANS_TOWER,-1}},
 	 //R_CERAN_SWAMP1
 	{"swamp", R_SWAMP, TerrainType::FLYINGMOUNTS,

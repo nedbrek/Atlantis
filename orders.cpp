@@ -61,6 +61,7 @@ const char *const od[] =
 	"give",
 	"guard",
 	"hold",
+	"join",
 	"leave",
 	"move",
 	"name",
@@ -134,6 +135,19 @@ ExchangeOrder::ExchangeOrder()
 }
 
 ExchangeOrder::~ExchangeOrder()
+{
+	delete target;
+}
+
+JoinOrder::JoinOrder(UnitId *t, bool over, bool m)
+: Order(O_JOIN)
+, target(t)
+, overload(over)
+, merge(m)
+{
+}
+
+JoinOrder::~JoinOrder()
 {
 	delete target;
 }

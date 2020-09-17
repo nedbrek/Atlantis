@@ -1140,7 +1140,12 @@ void ARegion::PostTurn(ARegionList *pRegs)
 			UpdateTown();
 
 		if (Globals->DECAY)
-			DoDecayCheck(pRegs);
+		{
+			forlist(&objects)
+			{
+				((Object*)elem)->DoDecayClicks(pRegs);
+			}
+		}
 
 		// now, reset population based stuff
 		// recover Wages
@@ -1177,46 +1182,8 @@ void ARegion::PostTurn(ARegionList *pRegs)
 	earthlore  = 0;
 	clearskies = 0;
 
-	forlist(&objects)
-	{
-		Object *o = (Object*)elem;
-		forlist(&o->units)
-		{
-			Unit *u = (Unit*)elem;
-			u->PostTurn(this);
-		}
-	}
-}
-
-void ARegion::DoDecayCheck(ARegionList *pRegs)
-{
-	forlist(&objects)
-	{
-		Object *o = (Object*)elem;
-		if (!(ObjectDefs[o->type].flags & ObjectType::NEVERDECAY))
-		{
-			DoDecayClicks(o, pRegs);
-		}
-	}
-}
-
-void ARegion::DoDecayClicks(Object *o, ARegionList *pRegs)
-{
-	if (ObjectDefs[o->type].flags & ObjectType::NEVERDECAY)
-		return;
-
-	int clicks = getrandom(GetMaxClicks()) + PillageCheck();
-
-	if (clicks > ObjectDefs[o->type].maxMonthlyDecay)
-		clicks = ObjectDefs[o->type].maxMonthlyDecay;
-
-	o->incomplete += clicks;
-
-	if (o->incomplete > 0)
-	{
-		// trigger decay event
-		RunDecayEvent(o, pRegs);
-	}
+	// do post turn processing
+	applyToUnits([this](Unit *u) { u->PostTurn(this); });
 }
 
 void ARegion::RunDecayEvent(Object *o, ARegionList *pRegs)
@@ -1600,13 +1567,10 @@ Unit* findReceiver(ARegion *r, Unit *u, Item *ip, bool in_ocean)
 	forlist((&r->objects))
 	{
 		Object *obj = (Object*)elem;
-		if (!obj)
-			continue;
 
 		//foreach unit in the object
-		forlist((&obj->units))
+		for(auto &ru : obj->getUnits())
 		{
-			Unit *ru = (Unit*)elem;
 			if (ru->faction->num != u->faction->num)
 				continue; // must be same faction
 
@@ -1692,6 +1656,12 @@ Object* ARegion::GetObject(int num)
 		Object *o = (Object*)elem;
 		if (o->num == num)
 			return o;
+
+		for (Object *op : o->objects)
+		{
+			if (op->num == num)
+				return o;
+		}
 	}
 
 	return NULL;
@@ -1775,8 +1745,8 @@ int ARegion::Present(Faction *f)
 		Object *obj = (Object*)elem;
 
 		//foreach unit in object
-		forlist((&obj->units))
-			if (((Unit*)elem)->faction == f)
+		for(auto &u : obj->getUnits())
+			if (u->faction == f)
 				return 1;
 	}
 	return 0;
@@ -1792,10 +1762,8 @@ AList* ARegion::PresentFactions()
 		Object *obj = (Object*)elem;
 
 		//foreach unit
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			if (!GetFaction2(facs, u->faction->num))
 			{
 				FactionPtr *p = new FactionPtr;
@@ -1929,9 +1897,8 @@ int ARegion::CanMakeAdv(Faction *fac, int item)
 	forlist(&objects)
 	{
 		Object *o = (Object*)elem;
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == fac)
 			{
 				if (u->GetSkill(skill_id) >= skill_level)
@@ -2012,24 +1979,18 @@ void ARegion::WriteProducts(Areport *f, Faction *fac, int present)
 
 int ARegion::HasItem(Faction *fac, int item)
 {
-	//foreach object in this region
-	forlist(&objects)
+	bool has_item = false;
+	continueUnits([&has_item, fac, item](Unit *u)
 	{
-		Object *o = (Object*)elem;
-
-		//foreach unit in the object
-		forlist(&o->units)
+		if (u->faction == fac && u->items.GetNum(item))
 		{
-			Unit *u = (Unit*)elem;
-
-			if (u->faction == fac)
-			{
-				if (u->items.GetNum(item))
-					return 1;
-			}
+			has_item = true;
+			return false;
 		}
+		return true;
 	}
-	return 0;
+	);
+	return has_item ? 1 : 0;
 }
 
 void ARegion::WriteMarkets(Areport *f, Faction *fac, int present)
@@ -2300,9 +2261,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month, ARegionList *pReg
 		forlist(&objects)
 		{
 			Object *o = (Object*)elem;
-			forlist(&o->units)
+			for(auto &u : o->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (!sawgate && (u->faction == fac && u->GetSkill(S_GATE_LORE)))
 				{
 					sawgate = true;
@@ -2323,9 +2283,8 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month, ARegionList *pReg
 	forlist(&objects)
 	{
 		Object *o = (Object*)elem;
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == fac && u->GetSkill(S_MIND_READING) > 2)
 			{
 				detfac = 1;
@@ -2389,9 +2348,8 @@ void ARegion::WriteTemplate(Areport *f, Faction *fac, ARegionList *pRegs, int mo
 	{
 		Object *o = (Object*)elem;
 		//foreach unit
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction != fac)
 				continue;
 
@@ -2509,9 +2467,8 @@ int ARegion::GetTrueSight(Faction *f, int usepassers)
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == f)
 			{
 				const int temp = u->GetSkill(S_TRUE_SEEING);
@@ -2558,9 +2515,8 @@ int ARegion::GetObservation(Faction *f, int usepassers)
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == f)
 			{
 				const int temp = u->GetSkill(S_OBSERVATION);
@@ -2652,9 +2608,8 @@ Unit* ARegion::Forbidden(Unit *u)
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u2 : obj->getUnits())
 		{
-			Unit *u2 = (Unit*)elem;
 			if (u2->Forbids(this, u))
 				return u2;
 		}
@@ -2668,9 +2623,8 @@ Unit* ARegion::ForbiddenByAlly(Unit *u)
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u2 : obj->getUnits())
 		{
-			Unit *u2 = (Unit*)elem;
 			if (u->faction->GetAttitude(u2->faction->num) == A_ALLY &&
 			    u2->Forbids(this, u))
 				return u2;
@@ -2684,9 +2638,8 @@ int ARegion::HasCityGuard()
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->type == U_GUARD && u->GetSoldiers() &&
 			    u->guard == GUARD_GUARD)
 			{
@@ -2704,9 +2657,8 @@ void ARegion::NotifySpell(Unit *caster, int spell, ARegionList *pRegs)
 	forlist((&objects))
 	{
 		Object *o = (Object*)elem;
-		forlist((&o->units))
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == caster->faction)
 				continue;
 
@@ -2738,9 +2690,8 @@ void ARegion::NotifyCity(Unit *caster, const AString &oldname, const AString &ne
 	forlist((&objects))
 	{
 		Object *o = (Object*)elem;
-		forlist((&o->units))
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (u->faction == caster->faction)
 				continue;
 
@@ -2768,9 +2719,8 @@ int ARegion::CanTax(Unit *u)
 	forlist((&objects))
 	{
 		Object *obj = (Object*)elem;
-		forlist((&obj->units))
+		for(auto &u2 : obj->getUnits())
 		{
-			Unit *u2 = (Unit*)elem;
 			if (u2->guard == GUARD_GUARD && u2->IsAlive())
 				if (u2->GetAttitude(this, u) <= A_NEUTRAL)
 					return 0;
@@ -2781,25 +2731,25 @@ int ARegion::CanTax(Unit *u)
 
 int ARegion::CanPillage(Unit *u)
 {
-	forlist(&objects)
+	bool allow_pillage = true;
+	continueUnits([&allow_pillage, u](Unit *u2)
 	{
-		Object *obj = (Object*)elem;
-		forlist(&obj->units)
-		{
-			Unit *u2 = (Unit*)elem;
 			if (u2->guard == GUARD_GUARD && u2->IsAlive() &&
 			    u2->faction != u->faction)
-				return 0;
-		}
+			{
+				allow_pillage = false;
+				return false;
+			}
+			return true;
 	}
-	return 1;
+	);
+	return allow_pillage ? 1 : 0;
 }
 
 int ARegion::ForbiddenShip(Object *ship)
 {
-	forlist(&ship->units)
+	for(auto &u : ship->getUnits())
 	{
-		Unit *u = (Unit*)elem;
 		if (Forbidden(u))
 			return 1;
 	}
@@ -2808,15 +2758,9 @@ int ARegion::ForbiddenShip(Object *ship)
 
 void ARegion::DefaultOrders()
 {
-	forlist((&objects))
-	{
-		Object *obj = (Object*)elem;
-		forlist((&obj->units))
-			((Unit*)elem)->DefaultOrders(obj);
-	}
+	applyToUnits([](Unit *u) { u->DefaultOrders(); });
 }
 
-// just used for mapping; just check if there is an inner region
 int ARegion::HasShaft()
 {
 	forlist(&objects)
@@ -2830,35 +2774,58 @@ int ARegion::HasShaft()
 
 int ARegion::IsGuarded()
 {
-	forlist(&objects)
+	bool found_guard = false;
+	continueUnits([&found_guard](Unit *u)
 	{
-		Object *o = (Object*)elem;
-		forlist(&o->units)
-		{
-			Unit *u = (Unit*)elem;
-			if (u->guard == GUARD_GUARD)
-				return 1;
-		}
+		if (u->guard != GUARD_GUARD)
+			return true;
+
+		found_guard = true;
+		return false;
 	}
-	return 0;
+	);
+
+	return found_guard ? 1 : 0;
 }
 
 int ARegion::CountWMons()
 {
 	int count = 0;
+
+	applyToUnits(
+		[&count](Unit *u)
+		{
+			if (u->type == U_WMON)
+				++count;
+		}
+	);
+
+	return count;
+}
+
+void ARegion::applyToUnits(const std::function<void(Unit*)> &f)
+{
 	forlist(&objects)
 	{
 		Object *o = (Object*)elem;
-		forlist(&o->units)
+		for(auto &u : o->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-			if (u->type == U_WMON)
-			{
-				++count;
-			}
+			f(u);
 		}
 	}
-	return count;
+}
+
+void ARegion::continueUnits(const std::function<bool(Unit*)> &f)
+{
+	forlist(&objects)
+	{
+		Object *o = (Object*)elem;
+		for(auto &u : o->getUnits())
+		{
+			if (!f(u))
+				return;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -3030,9 +2997,8 @@ Location* ARegionList::FindUnit(int i)
 		forlist((&reg->objects))
 		{
 			Object *obj = (Object*)elem;
-			forlist((&obj->units))
+			for(auto &u : obj->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (u->num == i)
 				{
 					Location *retval = new Location;

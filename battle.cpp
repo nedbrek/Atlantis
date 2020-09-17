@@ -508,9 +508,8 @@ void Game::GetDFacs(ARegion *r, Unit *t, AList &facs)
 		Object *obj = (Object*)elem;
 
 		// foreach unit in the object
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
 			if (!u->IsAlive())
 				continue;
 
@@ -538,10 +537,8 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 		Object *obj = (Object*)elem;
 
 		// foreach unit in the object
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			if (!u->IsAlive() || !u->canattack)
 				continue;
 
@@ -692,13 +689,11 @@ void Game::GetSides(ARegion *r, AList &afacs, AList &dfacs, AList &atts,
 		{
 			Object *o = (Object*)elem;
 
-			forlist(&o->units)
+			for(auto &u : o->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				int add = 0;
-
-#define ADD_ATTACK  1
-#define ADD_DEFENSE 2
+				constexpr int ADD_ATTACK = 1;
+				constexpr int ADD_DEFENSE = 2;
 
 				// first, can the unit be involved in the battle at all?
 				if (u->IsAlive() && (i == -1 || u->GetFlag(FLAG_HOLDING) == 0))

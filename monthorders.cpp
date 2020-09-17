@@ -53,7 +53,7 @@ void Game::RunSailOrders()
 
 			// if owner is not sailing
 			if (!u || !u->monthorders || u->monthorders->type != O_SAIL ||
-			    !o->IsBoat())
+			    !o->hasBoats())
 			{
 				tmpError = 2;
 			}
@@ -73,22 +73,17 @@ void Game::RunSailOrders()
 			if (!tmpError)
 				continue;
 
-			forlist(&o->units)
+			for(auto &u2 : o->getUnits())
 			{
-				Unit *u2 = (Unit*)elem;
 				if (u2->monthorders && u2->monthorders->type == O_SAIL)
 				{
-					delete u2->monthorders;
-					u2->monthorders = NULL;
+					//delete u2->monthorders;
+					//u2->monthorders = NULL;
 
 					switch (tmpError)
 					{
 						case 1:
 							u2->Error("SAIL: Ship is not finished.");
-							break;
-
-						case 2:
-							u2->Error("SAIL: Owner must sail ship.");
 							break;
 					}
 				}
@@ -106,6 +101,21 @@ void Game::RunSailOrders()
 	}
 }
 
+int summonWindLevel(int ship_type)
+{
+	switch (ship_type)
+	{
+	case O_LONGBOAT:
+		return 0; // longboat is easy
+
+	case O_CLIPPER:
+	case O_BALLOON:
+		return 1; // slightly harder
+	}
+	// everything else
+	return 2; // default to 2
+}
+
 /// helper for RunSailOrders
 ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 {
@@ -115,10 +125,8 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 	int slr = 0; // effective sailors (sum of men * skill)
 
 	//foreach unit on the ship
-	forlist(&ship->units)
+	for(auto &unit : ship->getUnits())
 	{
-		Unit *unit = (Unit*)elem;
-
 		// sailing clears the guard bit
 		if (unit->guard == GUARD_GUARD)
 			unit->guard = GUARD_NONE;
@@ -144,18 +152,7 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 		if (!wind_level)
 			continue;
 
-		int req_level = 2;
-		switch (ship->type)
-		{
-		case O_LONGBOAT:
-			req_level = 0;
-			break;
-
-		case O_CLIPPER:
-		case O_BALLOON:
-			req_level = 1;
-			break;
-		}
+		const int req_level = summonWindLevel(ship->type);
 
 		if (wind_level > req_level)
 		{
@@ -305,14 +302,12 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING)
 			{
 				// everyone onboard gets to see the sights
-				forlist(&ship->units)
+				for(auto &unit : ship->getUnits())
 				{
-					Unit *unit = (Unit*)elem;
-					Farsight *f;
 					// note the hex being left
 					forlist(&reg->passers)
 					{
-						f = (Farsight*)elem;
+						Farsight *f = (Farsight*)elem;
 						if (f->unit == unit)
 						{
 							// we moved into here this turn
@@ -321,7 +316,7 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 					}
 
 					// and mark the hex being entered
-					f = new Farsight;
+					Farsight *f = new Farsight;
 					f->faction = unit->faction;
 					f->level = 0;
 					f->unit = unit;
@@ -342,9 +337,8 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 
 	// clear out everyone's orders
 	{
-		forlist(&ship->units)
+		for(auto &unit : ship->getUnits())
 		{
-			Unit *unit = (Unit*)elem;
 			if (!moveok)
 			{
 				unit->alias = 0;
@@ -355,8 +349,8 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 				if ((!moveok && unit->monthorders->type == O_MOVE) ||
 				    unit->monthorders->type == O_SAIL)
 				{
-					delete unit->monthorders;
-					unit->monthorders = NULL;
+					//delete unit->monthorders;
+					//unit->monthorders = NULL;
 				}
 			}
 		}
@@ -378,10 +372,8 @@ void Game::RunTeachOrders()
 			Object *obj = (Object*)elem;
 
 			//foreach unit in the object
-			forlist((&obj->units))
+			for(auto &u : obj->getUnits())
 			{
-				Unit *u = (Unit*)elem;
-
 				if (u->monthorders && u->monthorders->type == O_TEACH)
 				{
 					Do1TeachOrder(r, u);
@@ -710,10 +702,8 @@ void Game::RunBuildHelpers(ARegion *r)
 		Object *obj = (Object*)elem;
 
 		//foreach unit in the object
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			// if unit is not building
 			if (!u->monthorders || u->monthorders->type != O_BUILD)
 				continue; // done
@@ -1064,9 +1054,8 @@ void Game::RunProduceOrders(ARegion *r)
 			Object *obj = (Object*)elem;
 
 			//foreach unit in the object
-			forlist((&obj->units))
+			for(auto &u : obj->getUnits())
 			{
-				Unit *u = (Unit*)elem;
 				if (!u->monthorders)
 					continue;
 
@@ -1196,10 +1185,8 @@ int Game::FindAttemptedProd(ARegion *r, Production *p)
 	{
 		Object *obj = (Object*)elem;
 
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			if (u->monthorders)
 			{
 				attempted += ValidProd(u, r, p);
@@ -1230,10 +1217,8 @@ void Game::RunAProduction(ARegion *r, Production *p)
 		Object *obj = (Object*)elem;
 
 		//foreach unit in the object
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			if (!u->monthorders || u->monthorders->type != O_PRODUCE)
 				continue;
 
@@ -1298,10 +1283,8 @@ void Game::RunStudyOrders(ARegion *r)
 	{
 		Object *obj = (Object*)elem;
 
-		forlist((&obj->units))
+		for(auto &u : obj->getUnits())
 		{
-			Unit *u = (Unit*)elem;
-
 			if (u->monthorders && u->monthorders->type == O_STUDY)
 			{
 				Do1StudyOrder(u, obj);
@@ -1466,10 +1449,8 @@ void Game::RunMoveOrders()
 					Object *obj = (Object*)elem;
 
 					//foreach unit
-					forlist(&obj->units)
+					for(auto &unit : obj->getUnits())
 					{
-						Unit *unit = (Unit*)elem;
-
 						Object *tempobj = obj;
 						DoMoveEnter(unit, region, &tempobj);
 					}
@@ -1491,10 +1472,9 @@ void Game::RunMoveOrders()
 				Object *obj = (Object*)elem;
 
 				//foreach unit
-				forlist(&obj->units)
+				const auto units = obj->getUnits();
+				for(auto &unit : units)
 				{
-					Unit *unit = (Unit*)elem;
-
 					if (phase == unit->movepoints && unit->monthorders &&
 					    (unit->monthorders->type == O_MOVE ||
 					     unit->monthorders->type == O_ADVANCE) &&
@@ -1631,9 +1611,28 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 {
 	MoveOrder *o = (MoveOrder*)unit->monthorders;
 
+	const bool in_boat = ObjectIsShip(unit->object->type);
+	const bool in_army = unit->object->type == O_ARMY;
+	const bool in_fleet = in_army && !unit->object->objects.empty();
+	const bool has_ship = in_fleet || in_boat;
+	const bool in_move_obj = in_army || in_boat;
+
 	// moving clears guard bit
 	if (unit->guard == GUARD_GUARD)
-		unit->guard = GUARD_NONE;
+	{
+		if (in_move_obj)
+		{
+			// apply to all units
+			for (auto &u : unit->object->getUnits())
+			{
+				u->guard = GUARD_NONE;
+			}
+		}
+		else
+		{
+			unit->guard = GUARD_NONE;
+		}
+	}
 
 	if (o->advancing)
 		unit->guard = GUARD_ADVANCE;
@@ -1652,8 +1651,36 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 		return loc;
 	}
 
+	if (in_move_obj && unit->object->GetOwner() != unit)
+	{
+		AString msg1 = "MOVE: Only the ";
+		AString title = "general";
+		AString msg2 = " can move a";
+		AString suffix;
+		if (in_army)
+		{
+			if (in_fleet)
+			{
+				title = "admiral";
+				suffix = " fleet.";
+			}
+			else
+				suffix = "n army.";
+		}
+		else
+		{
+			title = "captain";
+			suffix = " ship.";
+		}
+		unit->Error(msg1 + title + msg2 + suffix);
+
+		delete unit->monthorders;
+		unit->monthorders = NULL;
+		return loc;
+	}
+
 	// pop first move order
-	MoveDir *x = (MoveDir*)o->dirs.First();
+	MoveDir *x = (MoveDir*)o->dirs.front();
 	const int i = x->dir;
 	o->dirs.Remove(x);
 	delete x;
@@ -1677,7 +1704,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	}
 
 	// simple barriers to entry
-	if (TerrainDefs[region->type].similar_type == R_OCEAN &&
+	if (!has_ship && TerrainDefs[region->type].similar_type == R_OCEAN &&
 	    (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER)))
 	{
 		unit->Error(AString("MOVE: Can't move while in the ocean."));
@@ -1692,15 +1719,16 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 		startmove = 1;
 
 	// calculate movement cost
-	const int movetype = unit->MoveType();
+	AString move_fail_msg = unit->calcMovePoints();
+	const MoveType movetype = unit->move_type;
 	AString road;
 	const int cost = newreg->MoveCost(movetype, region, i, &road);
 
-	if (region->type != R_NEXUS && unit->CalcMovePoints() - unit->movepoints < cost)
+	if (region->type != R_NEXUS && unit->start_move_points - unit->movepoints < cost)
 	{
-		if (unit->MoveType() == M_NONE)
+		if (movetype == M_NONE)
 		{
-			unit->Error("MOVE: Unit is overloaded and cannot move.");
+			unit->Error(move_fail_msg);
 			delete unit->monthorders;
 			unit->monthorders = NULL;
 			return loc;
@@ -1745,7 +1773,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	//else, unit has sufficient movement points
 
 	// check moving into ocean
-	if (TerrainDefs[newreg->type].similar_type == R_OCEAN)
+	if (!has_ship && TerrainDefs[newreg->type].similar_type == R_OCEAN)
 	{
 		if (!unit->CanSwim() || unit->GetFlag(FLAG_NOCROSS_WATER))
 		{
@@ -1759,6 +1787,83 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 		{
 			unit->Event(AString("Cannot swim out to sea: ") + newreg->ShortPrint(&regions) + ".");
 			delete unit->monthorders;
+			unit->monthorders = nullptr;
+			return loc;
+		}
+	}
+
+	// check for crossing land
+	if (has_ship && !unit->object->canFly())
+	{
+		if (!newreg->IsCoastal())
+		{
+			unit->Error("SAIL: Can't sail inland.");
+			delete unit->monthorders;
+			unit->monthorders = nullptr;
+			return loc;
+		}
+
+		// can't slide along coast (must return to ocean)
+		if (TerrainDefs[region->type].similar_type != R_OCEAN &&
+			 TerrainDefs[newreg->type].similar_type != R_OCEAN)
+		{
+			unit->Error("SAIL: Can't sail inland.");
+			delete unit->monthorders;
+			unit->monthorders = nullptr;
+			return loc;
+		}
+
+		// check for sailing THROUGH land! always allow retracing steps
+		if (Globals->PREVENT_SAIL_THROUGH &&
+			 TerrainDefs[region->type].similar_type != R_OCEAN &&
+			 unit->object->prevdir != -1 &&
+			 unit->object->prevdir != region->GetRealDirComp(i))
+		{
+			int d1 = region->GetRealDirComp(unit->object->prevdir);
+			int d2 = i;
+			if (d1 > d2)
+			{
+				int tmp = d1;
+				d1 = d2;
+				d2 = tmp;
+			}
+
+			int blocked1 = 0;
+			for (int k = d1+1; k < d2; ++k)
+			{
+				ARegion *land1 = region->neighbors[k];
+				if (!land1 || TerrainDefs[land1->type].similar_type != R_OCEAN)
+					blocked1 = 1;
+			}
+
+			int blocked2 = 0;
+			const int sides = NDIRS - 2 - (d2 - d1 - 1);
+			for (int l = d2+1; l <= d2 + sides; ++l)
+			{
+				int dl = l;
+				if (dl >= NDIRS)
+					dl -= NDIRS;
+
+				ARegion *land2 = region->neighbors[dl];
+				if (!land2 || TerrainDefs[land2->type].similar_type != R_OCEAN)
+					blocked2 = 1;
+			}
+
+			if (blocked1 && blocked2)
+			{
+				unit->Error(AString("SAIL: Could not sail ") + DirectionStrs[i] + " from " +
+				    region->ShortPrint(&regions) + ". Cannot sail through land.");
+				delete unit->monthorders;
+				unit->monthorders = NULL;
+				return loc;
+			}
+		}
+
+		if (newreg->ForbiddenShip(unit->object))
+		{
+			unit->faction->Event(*unit->object->name + AString(" is stopped by guards in ") +
+			    newreg->ShortPrint(&regions) + AString("."));
+			delete unit->monthorders;
 			unit->monthorders = NULL;
 			return loc;
 		}
@@ -1768,7 +1873,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	{
 		unit->Event("Monsters don't move into guarded towns.");
 		delete unit->monthorders;
-		unit->monthorders = NULL;
+		unit->monthorders = nullptr;
 		return loc;
 	}
 
@@ -1782,7 +1887,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 		{
 			unit->Event(AString("Can't ADVANCE: ") + *(newreg->name) + " is guarded by " + *(ally->name) + ", an ally.");
 			delete unit->monthorders;
-			unit->monthorders = NULL;
+			unit->monthorders = nullptr;
 			return loc;
 		}
 	}
@@ -1802,12 +1907,36 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	// clear the unit's alias out, so as not to interfere with TEACH
 	unit->alias = 0;
 
-	unit->movepoints += cost;
-	unit->MoveUnit(newreg->GetDummy());
+	// increase unit(s) movepoints
+	if (in_move_obj)
+	{
+		for (auto &u : unit->object->getUnits())
+		{
+			u->movepoints += cost;
+		}
+	}
+	else
+	{
+		unit->movepoints += cost;
+	}
+
+	if (unit->object == nullptr || (unit->object->type != O_ARMY && !ObjectIsShip(unit->object->type)))
+	{
+		unit->MoveUnit(newreg->GetDummy());
+	}
+	else // move the object
+	{
+		unit->object->MoveObject(newreg);
+	}
+	unit->object->SetPrevDir(i);
 
 	AString temp;
 	switch (movetype)
 	{
+	case M_NONE:
+		return loc;
+
+	case M_SWIM:
 	case M_WALK:
 		// swimming is walking on the ocean
 		if (TerrainDefs[newreg->type].similar_type == R_OCEAN)
@@ -1823,6 +1952,13 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	case M_FLY:
 		temp = "Flies ";
 		break;
+
+	case M_SAIL:
+		temp = "Sails ";
+		break;
+
+	case M_MAX:
+		temp = "ERROR";
 	}
 
 	unit->Event(temp + AString("from ") + region->ShortPrint(&regions) + AString(" to ") + newreg->ShortPrint(&regions) + AString("."));
