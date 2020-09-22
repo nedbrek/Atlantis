@@ -807,7 +807,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	if (!(SkillDefs[S_ENTERTAINMENT].flags & SkillType::DISABLED))
 		temp += f.Link("#entertain", "ENTERTAIN") + ", ";
 	temp += f.Link("#move", "MOVE") + ", ";
-	if (Globals->TAX_PILLAGE_MONTH_LONG)
+	if (!Globals->DISABLE_PILLAGE && Globals->TAX_PILLAGE_MONTH_LONG)
 		temp += f.Link("#pillage", "PILLAGE") + ", ";
 	temp += f.Link("#produce", "PRODUCE") + ", ";
 	if (!(SkillDefs[S_SAILING].flags & SkillType::DISABLED))
@@ -2925,24 +2925,29 @@ int Game::GenRules(const AString &rules, const AString &css,
 		"taxers would tax more than the available tax income, the tax "
 		"income is split evenly among all taxers.";
 	f.Paragraph(temp);
-	if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
-		temp = "War factions ";
-	else
-		temp = "Factions ";
-	temp += "may also pillage a region. To do this requires the faction to "
-		"have enough combat ready men in the region to tax half of the "
-		"available money in the region. The total amount of money that can "
-		"be pillaged will then be shared out between every combat ready "
-		"unit that issues the ";
-	temp += f.Link("#pillage", "PILLAGE") + " order. The amount of money "
-		"collected is equal to twice the available tax money. However, the "
-		"economy of the region will be seriously damaged by pillaging, and "
-		"will only slowly recover over time.  Note that ";
-	temp += f.Link("#pillage", "PILLAGE") + " comes before " +
-		f.Link("#tax", "TAX") + ", so a unit performing " +
-		f.Link("#tax", "TAX") + " will collect no money in that region that "
-		"month.";
-	f.Paragraph(temp);
+
+	if (!Globals->DISABLE_PILLAGE)
+	{
+		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_FACTION_TYPES)
+			temp = "War factions ";
+		else
+			temp = "Factions ";
+		temp += "may also pillage a region. To do this requires the faction to "
+			"have enough combat ready men in the region to tax half of the "
+			"available money in the region. The total amount of money that can "
+			"be pillaged will then be shared out between every combat ready "
+			"unit that issues the ";
+		temp += f.Link("#pillage", "PILLAGE") + " order. The amount of money "
+			"collected is equal to twice the available tax money. However, the "
+			"economy of the region will be seriously damaged by pillaging, and "
+			"will only slowly recover over time.  Note that ";
+		temp += f.Link("#pillage", "PILLAGE") + " comes before " +
+			f.Link("#tax", "TAX") + ", so a unit performing " +
+			f.Link("#tax", "TAX") + " will collect no money in that region that "
+			"month.";
+		f.Paragraph(temp);
+	}
+
 	temp = "It is possible to safeguard one's tax income in regions one "
 		"controls.  Units which have the Guard flag set (using the ";
 	temp += f.Link("#guard", "GUARD") + " order) will block " +
@@ -4923,20 +4928,30 @@ int Game::GenRules(const AString &rules, const AString &css,
 	temp2 = "PASSWORD xyzzy";
 	f.CommandExample(temp, temp2);
 
+	//---pillage
 	f.ClassTagText("DIV", "rule", "");
 	f.LinkRef("pillage");
 	f.TagText("H4", "PILLAGE");
-	temp = "Use force to extort as much money as possible from the region. "
-		"Note that the ";
-	temp += f.Link("#tax", "TAX") + " order and the PILLAGE order are ";
-	temp += "mutually exclusive; a unit may only attempt to do one in a "
-		"turn.";
-	f.Paragraph(temp);
-	f.Paragraph("Example:");
-	temp = "Pillage the current hex.";
-	temp2 = "PILLAGE";
-	f.CommandExample(temp, temp2);
+	if (Globals->DISABLE_PILLAGE)
+	{
+		temp = "Pillaging is disabled for this game.";
+		f.Paragraph(temp);
+	}
+	else
+	{
+		temp = "Use force to extort as much money as possible from the region. "
+			"Note that the ";
+		temp += f.Link("#tax", "TAX") + " order and the PILLAGE order are ";
+		temp += "mutually exclusive; a unit may only attempt to do one in a "
+			"turn.";
+		f.Paragraph(temp);
+		f.Paragraph("Example:");
+		temp = "Pillage the current hex.";
+		temp2 = "PILLAGE";
+		f.CommandExample(temp, temp2);
+	}
 
+	//---prepare
 	if(Globals->USE_PREPARE_COMMAND) {
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("prepare");

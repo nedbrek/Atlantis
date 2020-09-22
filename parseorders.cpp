@@ -1717,6 +1717,11 @@ void Game::ProcessTaxOrder(Unit *u, OrdersCheck *pCheck)
 
 void Game::ProcessPillageOrder(Unit *u, OrdersCheck *pCheck)
 {
+	if (Globals->DISABLE_PILLAGE)
+	{
+		ParseError(pCheck, u, 0, "PILLAGE: Order disabled.");
+		return;
+	}
 	if (u->taxing == TAX_TAX)
 	{
 		ParseError(pCheck, u, 0, "PILLAGE: The unit is already taxing.");

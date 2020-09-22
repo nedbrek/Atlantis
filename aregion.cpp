@@ -763,14 +763,30 @@ void ARegion::SetupCityMarket()
 
 	buy1 = getrandom(numtrade); // TODO why twice?
 
-	while (buy1 == buy2)
-		buy2 = getrandom(numtrade);
+	// need 4 items to work
+	if (numtrade >= 4)
+	{
+		while (buy1 == buy2)
+			buy2 = getrandom(numtrade);
 
-	while (sell1 == buy1 || sell1 == buy2)
-		sell1 = getrandom(numtrade);
+		while (sell1 == buy1 || sell1 == buy2)
+			sell1 = getrandom(numtrade);
 
-	while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
-		sell2 = getrandom(numtrade);
+		while (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
+			sell2 = getrandom(numtrade);
+	}
+	else
+	{
+		if (buy1 == buy2) // buy1 dominates buy2
+			buy2 = -1;
+		if (buy1 == sell1) // buy1 dominates sell1
+			sell1 = -1;
+		if (buy2 == sell1) // sell1 dominates buy2
+			buy2 = -1;
+		// sell2 is last of all
+		if (sell2 == sell1 || sell2 == buy2 || sell2 == buy1)
+			sell2 = -1;
+	}
 
 	int tradebuy = 0;
 	int tradesell = 0;
