@@ -498,12 +498,7 @@ void Game::DrownUnits()
 				bool drown = false;
 				if (u->type == U_WMON)
 				{
-					// Make sure flying monsters only drown if we
-					// are in WFLIGHT_NONE mode
-					if (Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_NONE)
-						drown = true;
-					else
-						drown = !(u->CanSwim());
+					// don't drown monsters
 				}
 				else
 				{

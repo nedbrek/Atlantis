@@ -197,6 +197,7 @@ public:
 	int CITY_RENAME_COST; ///< cost is the city size (1, 2, 3) * this value (0 to disable)
 
 	int TAX_PILLAGE_MONTH_LONG; ///< make taxing and pillaging month-long actions
+	int DISABLE_PILLAGE; ///< disable pillage command
 
 	int MULTI_HEX_NEXUS; ///< enable multi-hex nexus
 
