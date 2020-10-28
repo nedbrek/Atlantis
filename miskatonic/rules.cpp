@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 31 ),   // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 32 ),   // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -148,6 +148,8 @@ static GameDefs g = {
 	1, // NEXUS_NO_EXITS
 	1,	// BATTLE_FACTION_INFO
 	0,	// ALLOW_WITHDRAW
+	2,	// WITHDRAW_LEADERS
+	1,	// WITHDRAW_FLEADERS
 	5000,	// CITY_RENAME_COST
 	1,	// TAX_PILLAGE_MONTH_LONG
 	1,	// DISABLE_PILLAGE

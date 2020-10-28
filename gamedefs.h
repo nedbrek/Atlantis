@@ -193,6 +193,8 @@ public:
 	int BATTLE_FACTION_INFO; ///< battle reports show faction
 
 	int ALLOW_WITHDRAW; ///< allow units to withdraw items (not just silver)
+	int WITHDRAW_LEADERS; ///< allow replacement of leaders
+	int WITHDRAW_FLEADERS; ///< allow replacement of faction leaders
 
 	int CITY_RENAME_COST; ///< cost is the city size (1, 2, 3) * this value (0 to disable)
 

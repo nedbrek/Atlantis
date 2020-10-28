@@ -85,14 +85,15 @@ void Game::RunOrders()
 	MidProcessTurn();
 	Awrite("Running QUIT Orders...");
 	RunQuitOrders();
+	if (Globals->ALLOW_WITHDRAW || Globals->WITHDRAW_LEADERS || Globals->WITHDRAW_FLEADERS)
+	{
+		Awrite("Running WITHDRAW Orders...");
+		DoWithdrawOrders();
+	}
 	Awrite("Removing Empty Units...");
 	DeleteEmptyUnits();
 	SinkUncrewedShips();
 	DrownUnits();
-	if(Globals->ALLOW_WITHDRAW) {
-		Awrite("Running WITHDRAW Orders...");
-		DoWithdrawOrders();
-	}
 	Awrite("Running Sail Orders...");
 	RunSailOrders();
 	Awrite("Running Move Orders...");
@@ -2493,16 +2494,64 @@ void Game::DoWithdrawOrders()
 
 int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 {
-	int itm = o->item;
-	int amt = o->amount;
-	int cost = (ItemDefs[itm].baseprice *5/2)*amt;
-
 	if (r->type == R_NEXUS)
 	{
 		u->Error("WITHDRAW: Withdraw does not work in the Nexus.");
 		return 1;
 	}
 
+	const int itm = o->item;
+	const int amt = o->amount;
+
+	if (itm == I_LEADERS)
+	{
+		const int num_leaders = countItemFaction(I_LEADERS, u->faction->num);
+		if (num_leaders + amt > Globals->WITHDRAW_LEADERS)
+		{
+			u->Error(AString("WITHDRAW LEADERS: ") + amt + " more leaders would put you over the maximum.");
+			return 0;
+		}
+
+		if (u->GetMen() > 0)
+		{
+			u->Error("WITHDRAW LEADERS: Unit has men already.");
+			return 0;
+		}
+
+		if (amt == 1)
+			u->Event("A new leader arises!");
+		else
+			u->Event(AString(amt) + " new leaders arise!");
+
+		u->items.SetNum(I_LEADERS, amt);
+		return 0;
+	}
+
+	if (itm == I_FACTIONLEADER)
+	{
+		const int num_leaders = countItemFaction(I_FACTIONLEADER, u->faction->num);
+		if (num_leaders + amt > Globals->WITHDRAW_FLEADERS)
+		{
+			u->Error(AString("WITHDRAW FLEAD: ") + amt + " more faction leaders would put you over the maximum.");
+			return 0;
+		}
+
+		if (u->GetMen() > 0)
+		{
+			u->Error("WITHDRAW FLEAD: Unit has men already.");
+			return 0;
+		}
+
+		if (amt == 1)
+			u->Event("A new leader for your faction arises!");
+		else
+			u->Event(AString(amt) + " new faction leaders arise!");
+
+		u->items.SetNum(I_FACTIONLEADER, amt);
+		return 0;
+	}
+
+	const int cost = (ItemDefs[itm].baseprice *5/2)*amt;
 	if (cost > u->faction->unclaimed)
 	{
 		u->Error(AString("WITHDRAW: Too little unclaimed silver to withdraw ") +
@@ -2511,7 +2560,7 @@ int Game::DoWithdrawOrder(ARegion *r, Unit *u, WithdrawOrder *o)
 	}
 	u->faction->unclaimed -= cost;
 	u->Event(AString("Withdraws ") + ItemString(o->item,amt) + ".");
-	u->items.SetNum(itm,u->items.GetNum(itm) + amt);
+	u->items.SetNum(itm, u->items.GetNum(itm) + amt);
 	return 0;
 }
 

@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 87 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 88 )
 
 class Aorders;
 class ExchangeOrder;
@@ -126,6 +126,7 @@ private: // methods
 	void ClearOrders(Faction *);
 	void MakeFactionReportLists();
 	void CountAllMages();
+	int countItemFaction(int item_id, int faction_id);
 	void CountAllApprentices();
 	void WriteReport();
 	void DeleteDeadFactions();

@@ -2351,7 +2351,7 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 
 void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 {
-	if (!Globals->ALLOW_WITHDRAW)
+	if (!Globals->ALLOW_WITHDRAW && !Globals->WITHDRAW_LEADERS && !Globals->WITHDRAW_FLEADERS)
 	{
 		ParseError(pCheck, unit, 0, "WITHDRAW is not a valid order.");
 		return;
@@ -2380,22 +2380,33 @@ void Game::ProcessWithdrawOrder(Unit *unit, AString *o, OrdersCheck *pCheck)
 		}
 	}
 
-	int item = ParseGiveableItem(token);
+	const int item = ParseGiveableItem(token);
 	delete token;
 
-	if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED))
+	if (item == -1 || (ItemDefs[item].flags & ItemType::DISABLED) ||
+	    item == I_SILVER)
 	{
 		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
 		return;
 	}
 
-	if (!(ItemDefs[item].type & IT_NORMAL))
+	if (item == I_LEADERS)
 	{
-		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
-		return;
+		if (!Globals->WITHDRAW_LEADERS)
+		{
+			ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
+			return;
+		}
 	}
-
-	if (item == I_SILVER)
+	else if (item == I_FACTIONLEADER)
+	{
+		if (!Globals->WITHDRAW_FLEADERS)
+		{
+			ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
+			return;
+		}
+	}
+	else if (!(ItemDefs[item].type & IT_NORMAL))
 	{
 		ParseError(pCheck, unit, 0, "WITHDRAW: Invalid item.");
 		return;
