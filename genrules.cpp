@@ -383,7 +383,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.TagText("LI", f.Link("#turn", "turn"));
 		if (Globals->USE_WEAPON_ARMOR_COMMAND)
 			f.TagText("LI", f.Link("#weapon", "weapon"));
-		if (Globals->ALLOW_WITHDRAW)
+		if (Globals->ALLOW_WITHDRAW || Globals->WITHDRAW_LEADERS || Globals->WITHDRAW_FLEADERS)
 			f.TagText("LI", f.Link("#withdraw", "withdraw"));
 		f.TagText("LI", f.Link("#work", "work"));
 		f.Enclose(0, "UL");
@@ -5312,25 +5312,70 @@ int Game::GenRules(const AString &rules, const AString &css,
 		f.CommandExample(temp, temp2);
 	}
 
-	if(Globals->ALLOW_WITHDRAW) {
+	if (Globals->ALLOW_WITHDRAW || Globals->WITHDRAW_LEADERS || Globals->WITHDRAW_FLEADERS)
+	{
 		f.ClassTagText("DIV", "rule", "");
 		f.LinkRef("withdraw");
-		f.TagText("H4", "WITHDRAW [item]");
-		f.TagText("H4", "WITHDRAW [quantity] [item]");
-		temp = "Use unclaimed funds to aquire basic items that you need. "
-			"If you do not have sufficient unclaimed, or if you try "
-			"withdraw any other than a basic item, an error will be given. "
-			"Withdraw CANNOT be used in the Nexus (to prevent building "
-			"towers and such there).  The first form is the same as "
-			"WITHDRAW 1 [item] in the second form.";
-		f.Paragraph(temp);
-		f.Paragraph("Examples:");
-		temp = "Withdraw 5 stone.";
-		temp2 = "WITHDRAW 5 stone";
-		f.CommandExample(temp, temp2);
-		temp = "Withdraw 1 iron.";
-		temp2 = "WITHDRAW iron";
-		f.CommandExample(temp, temp2);
+
+		if (Globals->ALLOW_WITHDRAW)
+		{
+			f.TagText("H4", "WITHDRAW [item]");
+			f.TagText("H4", "WITHDRAW [quantity] [item]");
+			temp = "Use unclaimed funds to aquire basic items that you need. "
+				"If you do not have sufficient unclaimed, or if you try "
+				"withdraw any other than a basic item, an error will be given. "
+				"Withdraw CANNOT be used in the Nexus (to prevent building "
+				"towers and such there).  The first form is the same as "
+				"WITHDRAW 1 [item] in the second form.";
+			f.Paragraph(temp);
+			f.Paragraph("Examples:");
+			temp = "Withdraw 5 stone.";
+			temp2 = "WITHDRAW 5 stone";
+			f.CommandExample(temp, temp2);
+			temp = "Withdraw 1 iron.";
+			temp2 = "WITHDRAW iron";
+			f.CommandExample(temp, temp2);
+		}
+
+		if (Globals->WITHDRAW_LEADERS)
+		{
+			f.TagText("H4", "WITHDRAW LEAD");
+			f.TagText("H4", "WITHDRAW [quantity] LEAD");
+			temp = "If you lose one or more of your starting leaders, you can "
+			"request new ones. FORM a new unit, and issue the WITHDRAW command.";
+			f.Paragraph(temp);
+			f.Paragraph("Examples:");
+			temp = "Form unit with two leaders:";
+			temp2 = "FORM 1\n";
+			temp2 += "WITHDRAW 2 LEAD\n";
+			temp2 += "END";
+			f.CommandExample(temp, temp2);
+		}
+		if (Globals->WITHDRAW_FLEADERS)
+		{
+			f.TagText("H4", "WITHDRAW FLEAD");
+			f.TagText("H4", "WITHDRAW [quantity] FLEAD");
+			temp = "If you lose ";
+			if (Globals->WITHDRAW_FLEADERS > 1)
+			{
+				temp += "one or more of your starting faction leaders, you can request new ones";
+			}
+			else
+			{
+				temp += "your starting faction leader, you can request a new one";
+			}
+			temp += ". FORM a new unit, and issue the WITHDRAW command.";
+
+			f.Paragraph(temp);
+
+			f.Paragraph("Examples:");
+			temp = "Form unit with one faction leader:";
+			temp2 = "FORM 1\n";
+			temp2 += "WITHDRAW FLEAD\n";
+			temp2 += "END";
+			f.CommandExample(temp, temp2);
+		}
+
 	}
 
 	f.ClassTagText("DIV", "rule", "");
@@ -5470,7 +5515,8 @@ int Game::GenRules(const AString &rules, const AString &css,
 	f.TagText("LI", temp);
 	f.Enclose(0, "UL");
 	f.Enclose(0, "LI");
-	if (Globals->ALLOW_WITHDRAW) {
+	if (Globals->ALLOW_WITHDRAW || Globals->WITHDRAW_LEADERS || Globals->WITHDRAW_FLEADERS)
+	{
 		f.Enclose(1, "LI");
 		f.PutStr("Withdraw orders.");
 		f.Enclose(1, "UL");

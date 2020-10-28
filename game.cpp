@@ -1984,6 +1984,22 @@ void Game::CountAllMages()
 	}
 }
 
+int Game::countItemFaction(int item_id, int faction_id)
+{
+	int count = 0;
+	forlist(&regions)
+	{
+		ARegion *r = (ARegion*)elem;
+		r->applyToUnits([&count, item_id, faction_id](Unit *u)
+		{
+			if (u->faction->num == faction_id)
+				count += u->items.GetNum(item_id);
+		}
+		);
+	}
+	return count;
+}
+
 void Game::UnitFactionMap()
 {
 	Awrite("Opening units.txt");
