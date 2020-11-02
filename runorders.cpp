@@ -2829,7 +2829,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 	// Check there is enough to give
 	int amt = o->amount;
-	if (amt != -2 && amt > u->items.GetNum(o->item))
+	if (!o->give_ship && amt != -2 && amt > u->items.GetNum(o->item))
 	{
 		u->Error("GIVE: Not enough.");
 
@@ -3033,7 +3033,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 				}
 				// move the ship
 				to_obj->objects.push_back(sub_obj);
-				fm_obj->objects.erase(std::remove(fm_obj->objects.begin(), fm_obj->objects.end(), sub_obj));
+				fm_obj->objects.erase(std::remove(fm_obj->objects.begin(), fm_obj->objects.end(), sub_obj), fm_obj->objects.end());
 				return 0;
 			}
 			// else just a guy in a field
@@ -3081,15 +3081,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 
 		if (!ObjectIsShip(to_obj->type))
 		{
-			// push unit into ship
+			// pull unit from where it is
 			to_obj->removeUnit(t, true);
-			fm_obj->prependUnit(t);
 
-			// remove units on ship from army
-			for (auto &au : fm_obj->getUnits())
-			{
-				fm_obj->removeUnit(au, false); // leave unit in ship
-			}
+			// push unit into ship
+			fm_obj->prependUnit(t);
+			t->object = fm_obj;
 			return 0;
 		}
 		//else give only ship to one ship
