@@ -480,7 +480,7 @@ void Object::prependUnit(Unit *u)
 
 void Object::removeUnit(Unit *u, bool remove_from_sub)
 {
-	units.erase(std::remove(units.begin(), units.end(), u));
+	units.erase(std::remove(units.begin(), units.end(), u), units.end());
 
 	if (!remove_from_sub)
 		return;
