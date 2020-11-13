@@ -387,6 +387,11 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 		u->Error("STEAL: Invalid unit given.");
 		return;
 	}
+	if (tar->faction == u->faction)
+	{
+		u->Error("STEAL: Cannot steal from yourself.");
+		return;
+	}
 
 	// New RULE!! You can only steal from someone you can see.
 	if(!u->CanSee(r, tar)) {

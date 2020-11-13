@@ -1651,6 +1651,12 @@ void Unit::limitSkillMagic(unsigned max_no_magic)
 
 void Unit::AdjustSkills()
 {
+	// don't limit guards
+	if (type == U_GUARD)
+	{
+		return;
+	}
+
 	// if we are 100% leaders
 	if (IsLeader())
 	{
