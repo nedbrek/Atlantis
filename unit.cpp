@@ -2195,10 +2195,10 @@ AString Unit::calcMovePoints()
 		for (auto &u : object->getUnits())
 		{
 			weight += u->items.Weight();
-			fly_cap += FlyingCapacity();
-			ride_cap += RidingCapacity();
-			walk_cap += WalkingCapacity();
-			swim_cap += SwimmingCapacity();
+			fly_cap += u->FlyingCapacity();
+			ride_cap += u->RidingCapacity();
+			walk_cap += u->WalkingCapacity();
+			swim_cap += u->SwimmingCapacity();
 
 			const int wind_level = u->GetSkill(S_SUMMON_WIND);
 			if (wind_level > 0)
