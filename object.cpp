@@ -488,7 +488,7 @@ void Object::removeUnit(Unit *u, bool remove_from_sub)
 	// check sub-objects
 	for (auto o : objects)
 	{
-		o->units.erase(std::remove(o->units.begin(), o->units.end(), u));
+		o->units.erase(std::remove(o->units.begin(), o->units.end(), u), o->units.end());
 	}
 }
 
