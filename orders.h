@@ -234,6 +234,7 @@ public:
 	int skill; ///< -1 for none
 	int productivity;
 	int limit;
+	bool is_default = false;
 };
 
 /// Produce multiple items
