@@ -1910,9 +1910,30 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	// increase unit(s) movepoints
 	if (in_move_obj)
 	{
+		const bool land_army = in_army && unit->object->objects.empty();
 		for (auto &u : unit->object->getUnits())
 		{
 			u->movepoints += cost;
+
+			if (land_army && u != unit && u->monthorders)
+			{
+				if (u->monthorders->type == O_PRODUCE)
+				{
+					ProduceOrder *po = (ProduceOrder*)u->monthorders;
+					if (po->is_default)
+					{
+						delete u->monthorders;
+						u->monthorders = nullptr;
+					}
+				}
+
+				if (u->monthorders && u->monthorders->type != O_MOVE && u->monthorders->type != O_ADVANCE)
+				{
+					delete u->monthorders;
+					u->monthorders = nullptr;
+					u->Error("Can't perform monthly orders and move.");
+				}
+			}
 		}
 	}
 	else

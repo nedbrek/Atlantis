@@ -127,7 +127,7 @@ void Game::DefaultWorkOrder()
 				else
 				{
 					if (Globals->DEFAULT_WORK_ORDER)
-						ProcessWorkOrder(u, 0);
+						ProcessWorkOrder(u, 0, true);
 				}
 			}
 		}

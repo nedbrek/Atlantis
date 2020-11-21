@@ -787,7 +787,7 @@ Order* Game::ProcessOrder(int orderNum, Unit *unit, AString *o,
 			break;
 		case O_TEACH: return ProcessTeachOrder(unit, o, pCheck, at_value);
 		case O_WORK:
-			ProcessWorkOrder(unit, pCheck);
+			ProcessWorkOrder(unit, pCheck, false);
 			break;
 	}
 	return NULL;
@@ -2127,11 +2127,12 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	u->monthorders = p;
 }
 
-void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck)
+void Game::ProcessWorkOrder(Unit *u, OrdersCheck *pCheck, bool is_default)
 {
 	ProduceOrder *order = new ProduceOrder;
 	order->skill = -1;
 	order->item = I_SILVER;
+	order->is_default = is_default;
 
 	if (u->monthorders ||
 	   (Globals->TAX_PILLAGE_MONTH_LONG &&

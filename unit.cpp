@@ -926,6 +926,8 @@ void Unit::DefaultOrders()
 				ProduceOrder *order = new ProduceOrder;
 				order->skill = -1;
 				order->item = I_SILVER;
+				order->is_default = true;
+
 				monthorders = order;
 			}
 		}
