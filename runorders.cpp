@@ -3084,7 +3084,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			return 0;
 		}
 
-		if (!ObjectIsShip(to_obj->type))
+		if (to_obj->type != O_ARMY && !ObjectIsShip(to_obj->type))
 		{
 			// pull unit from where it is
 			to_obj->removeUnit(t, true);
