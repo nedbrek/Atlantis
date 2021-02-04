@@ -52,6 +52,9 @@ void ProcessLacandonTeleport(Unit *, AString *, OrdersCheck *pCheck);
 //
 int GetRegionInRange(ARegion *r, ARegion *tar, Unit *u, int spell);
 
+ARegion* getAlignmentGate(Unit *u);
+ARegion* getRandomGate(int zloc, bool leaving_nexus);
+
 //
 // Spell running
 //

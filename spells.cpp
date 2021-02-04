@@ -35,7 +35,7 @@ UnitId* ParseUnit(AString *s);
 void Game::ProcessCastOrder(Unit * u,AString * o, OrdersCheck *pCheck )
 {
 	int val;
-    AString * token = o->gettoken();
+	AString * token = o->gettoken();
     if (!token) {
         ParseError( pCheck, u, 0, "CAST: No skill given.");
         return;
@@ -511,7 +511,7 @@ void Game::ProcessCastPortalLore(Unit *u,AString *o, OrdersCheck *pCheck )
 	}
 }
 
-void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
+void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 
@@ -520,7 +520,9 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		return;
 	}
 
-	if ((*token) == "gate") {
+	if ((*token) == "gate")
+	{
+		// CAST Gate_Lore GATE <n>
 		delete token;
 		token = o->gettoken();
 
@@ -528,24 +530,29 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 			u->Error("CAST: Requires a target gate.");
 			return;
 		}
+		const int target_gate = token->value();
 
 		TeleportOrder *order;
 
+		// check for adding onto existing order
 		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
-				u->teleportorders->gate == token->value()) {
+		    u->teleportorders->gate == target_gate)
+		{
 			order = u->teleportorders;
-		} else {
+		}
+		else // new order
+		{
 			order = new TeleportOrder;
 			u->ClearCastOrders();
 			u->teleportorders = order;
 		}
 
-		order->gate = token->value();
+		order->gate = target_gate;
 		order->spell = S_GATE_LORE;
 		order->level = 3;
 
+		// check for extra args
 		delete token;
-
 		token = o->gettoken();
 
 		if (!token) return;
@@ -555,20 +562,25 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		}
 
 		UnitId *id = ParseUnit(o);
-		while(id) {
+		while (id) {
 			order->units.Add(id);
 			id = ParseUnit(o);
 		}
 		return;
 	}
 
-	if ((*token) == "random") {
+	if ((*token) == "random")
+	{
+		// CAST GATE RANDOM
 		TeleportOrder *order;
 
 		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
-				u->teleportorders->gate == -1 ) {
+		    u->teleportorders->gate == -1)
+		{
 			order = u->teleportorders;
-		} else {
+		}
+		else
+		{
 			order = new TeleportOrder;
 			u->ClearCastOrders();
 			u->teleportorders = order;
@@ -579,24 +591,66 @@ void Game::ProcessCastGateLore(Unit *u,AString *o, OrdersCheck *pCheck )
 		order->level = 1;
 
 		delete token;
-
 		token = o->gettoken();
 
 		if (!token) return;
 		if (!(*token == "units")) {
+			u->Error(AString("CAST GATE RANDOM: Invalid argument: ") + *token);
 			delete token;
 			return;
 		}
 
 		UnitId *id = ParseUnit(o);
-		while(id) {
+		while (id) {
 			order->units.Add(id);
 			id = ParseUnit(o);
 		}
 		return;
 	}
 
-	if ((*token) == "detect") {
+	if (*token == "alignment" || *token == "align")
+	{
+		// CAST GATE ALIGNMENT
+		TeleportOrder *order;
+
+		if (u->teleportorders && u->teleportorders->spell == S_GATE_LORE &&
+		    u->teleportorders->gate == -1)
+		{
+			order = u->teleportorders;
+		}
+		else
+		{
+			order = new TeleportOrder;
+			u->ClearCastOrders();
+			u->teleportorders = order;
+		}
+
+		order->gate = -1;
+		order->spell = S_GATE_LORE;
+		order->level = 1;
+		order->alignment_ = true;
+
+		delete token;
+		token = o->gettoken();
+
+		if (!token) return;
+		if (!(*token == "units")) {
+			u->Error(AString("CAST GATE ALIGN: Invalid argument: ") + *token);
+			delete token;
+			return;
+		}
+
+		UnitId *id = ParseUnit(o);
+		while (id) {
+			order->units.Add(id);
+			id = ParseUnit(o);
+		}
+		return;
+	}
+
+	if ((*token) == "detect")
+	{
+		// CAST GATE DETECT
 		delete token;
 		u->ClearCastOrders();
 		CastOrder *to = new CastOrder;
@@ -1499,79 +1553,166 @@ void Game::RunTeleport(ARegion *r,Object *o,Unit *u)
 	u->MoveUnit(tar->GetDummy());
 }
 
-void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
+ARegion* Game::getAlignmentGate(Unit *u)
 {
+	const ManType::Alignment tgt_align = ManType::Alignment(u->faction->alignments_);
+	std::vector<ARegion*> candidate_regions;
+
+	// foreach region
+	forlist(&regions)
+	{
+		ARegion *r = (ARegion*)elem;
+		if (r->type == R_NEXUS)
+			continue;
+		// check surface
+		if (r->zloc != ARegionArray::LEVEL_SURFACE)
+			continue;
+
+		if (r->population == 0 || r->race == -1)
+			continue; // no people
+
+		// check alignment
+		const ManType &mt = ManDefs[ItemDefs[r->race].index];
+		if (mt.align != ManType::NEUTRAL && mt.align != tgt_align)
+			continue;
+
+		// make sure no one is here
+		bool all_empty = true;
+		forlist(&r->objects)
+		{
+			Object *o = (Object*)elem;
+			if (o->getUnits().empty())
+			{
+				all_empty = false;
+				break;
+			}
+		}
+
+		if (all_empty)
+			candidate_regions.push_back(r);
+	}
+
+	if (candidate_regions.empty())
+		return nullptr;
+
+	return candidate_regions[getrandom(candidate_regions.size())];
+}
+
+ARegion* Game::getRandomGate(int zloc, bool leaving_nexus)
+{
+	// pick a random gate
+	int gatenum = getrandom(regions.numberofgates);
+	ARegion *tar = regions.FindGate(gatenum+1);
+
+	bool good = false;
+	if (tar && tar->zloc == zloc)
+		good = true;
+	if (tar && leaving_nexus && tar->zloc == ARegionArray::LEVEL_SURFACE)
+		good = true;
+
+	while (!good)
+	{
+		gatenum = getrandom(regions.numberofgates);
+		tar = regions.FindGate(gatenum+1);
+		if (tar && tar->zloc == zloc) good = true;
+		if (tar && leaving_nexus && tar->zloc == ARegionArray::LEVEL_SURFACE)
+			good = true;
+	}
+	return tar;
+}
+
+void Game::RunGateJump(ARegion *r, Object *o, Unit *u)
+{
+	// pull skill level
 	int level = u->GetSkill(S_GATE_LORE);
-	int nexgate = 0;
-	if( !level ) {
+	if (!level) {
 		u->Error( "CAST: Unit doesn't have that skill." );
 		return;
 	}
 
 	TeleportOrder *order = u->teleportorders;
 
+	// need level 3 for anything other than random (or detect)
 	if (order->gate != -1 && level < 3) {
 		u->Error("CAST: Unit Doesn't know Gate Lore at that level.");
 		return;
 	}
 
-	nexgate = Globals->NEXUS_GATE_OUT &&
-		(TerrainDefs[r->type].similar_type == R_NEXUS);
+	// are we gating out of the nexus?
+	const bool nexgate = Globals->NEXUS_GATE_OUT && (TerrainDefs[r->type].similar_type == R_NEXUS);
 	if (!r->gate && !nexgate) {
-		u->Error("CAST: There is no gate in that region.");
+		u->Error("CAST: There is no gate in this region.");
 		return;
 	}
 
+	// calculate max weight
 	int maxweight = 10;
-	if (order->gate != -1) level -= 2;
-	switch (level) {
-		case 1:
-			maxweight = 35;
-			break;
-		case 2:
-			maxweight = 150;
-			break;
-		case 3:
-		case 4:
-		case 5:
-			maxweight = 1000;
-			break;
+	//-- non-random jump is harder
+	if (order->gate != -1)
+		level -= 2;
+	switch (level)
+	{
+	case 1: maxweight =  35; break;
+	case 2: maxweight = 150; break;
+
+	case 3:
+	case 4:
+	case 5:
+		maxweight = 1000;
+		break;
 	}
 
+	// sum weight of everyone jumping
 	int weight = u->Weight();
 
 	forlist (&(order->units)) {
-		Unit *taru = r->GetUnitId((UnitId *) elem,u->faction->num);
-		if (taru && taru != u) weight += taru->Weight();
+		Unit *taru = r->GetUnitId((UnitId*)elem, u->faction->num);
+		// if target and it's not the caster, and (not leaving the nexus or the same faction)
+		if (taru && taru != u && (!nexgate || taru->faction == u->faction))
+			weight += taru->Weight();
 	}
 
 	if (weight > maxweight) {
-		u->Error( "CAST: That mage cannot carry that much weight through "
-				"a Gate." );
+		u->Error( "CAST: Mage cannot carry that much weight through a Gate." );
 		return;
 	}
 
 	ARegion *tar;
-	if (order->gate == -1) {
-		int good = 0;
-		int gatenum = getrandom(regions.numberofgates);
-		tar = regions.FindGate(gatenum+1);
+	// if random
+	if (order->gate == -1)
+	{
+		if (order->alignment_)
+		{
+			if (!nexgate)
+			{
+				u->Error("CAST GATE ALIGNMENT: Only works from the nexus.");
+				return;
+			}
+			if (u->faction->alignments_ == Faction::ALL_NEUTRAL)
+			{
+				u->Error("CAST GATE ALIGNMENT: Must choose good or evil before casting.");
+				return;
+			}
 
-		if(tar && tar->zloc == r->zloc) good = 1;
-		if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
-			good = 1;
-
-		while( !good ) {
-			gatenum = getrandom(regions.numberofgates);
-			tar = regions.FindGate(gatenum+1);
-			if(tar && tar->zloc == r->zloc) good = 1;
-			if(tar && nexgate && tar->zloc == ARegionArray::LEVEL_SURFACE)
-				good = 1;
+			tar = getAlignmentGate(u);
+			if (!tar)
+			{
+				u->Error("CAST GATE ALIGNMENT: The world is full!");
+				// reset alignment
+				u->faction->alignments_ = Faction::ALL_NEUTRAL;
+				return;
+			}
+		}
+		else
+		{
+			tar = getRandomGate(r->zloc, nexgate);
 		}
 
 		u->Event("Casts Random Gate Jump.");
 		u->Practise(S_GATE_LORE);
-	} else {
+	}
+	else
+	{
 		if (order->gate < 1 || order->gate > regions.numberofgates) {
 			u->Error("CAST: No such target gate.");
 			return;
@@ -1587,48 +1728,57 @@ void Game::RunGateJump(ARegion *r,Object *o,Unit *u)
 		u->Practise(S_GATE_LORE);
 	}
 
-	int comma = 0;
+	bool comma = false;
 	AString unitlist; {
-		forlist(&(order->units)) {
-			Location *loc = r->GetLocation((UnitId *) elem,u->faction->num);
-			if (loc) {
-				/* Don't do the casting unit yet */
-				if (loc->unit == u) {
-					delete loc;
-					continue;
-				}
-
-				if (loc->unit->GetAttitude(r,u) < A_ALLY) {
-					u->Error("CAST: Unit is not allied.");
-				} else {
-					if (comma) {
-						unitlist += AString(", ") + AString(loc->unit->num);
-					} else {
-						unitlist += AString(loc->unit->num);
-						comma = 1;
-					}
-
-                    // Unit cannot instantly guard the destination
-                    loc->unit->guard = GUARD_NONE;
-
-					loc->unit->Event(AString("Is teleported through a ") +
-							"Gate to " + tar->Print(&regions) + " by " +
-							*u->name + ".");
-					loc->unit->MoveUnit( tar->GetDummy() );
-					if (loc->unit != u) loc->unit->ClearCastOrders();
-				}
-				delete loc;
-			} else {
-				u->Error("CAST: No such unit.");
+		forlist(&(order->units))
+		{
+			Location *loc = r->GetLocation((UnitId*)elem, u->faction->num);
+			if (!loc)
+			{
+				u->Error("CAST GATE: No such unit.");
+				continue;
 			}
+
+			// Don't do the casting unit yet
+			if (loc->unit == u) {
+				delete loc;
+				continue;
+			}
+
+			if (nexgate && loc->unit->faction != u->faction)
+			{
+				u->Error("CAST: Only units from the same faction can exit the nexus together.");
+			}
+			else if (loc->unit->GetAttitude(r, u) < A_ALLY) {
+				u->Error("CAST: Unit is not allied.");
+			}
+			else
+			{
+				if (comma) {
+					unitlist += AString(", ") + AString(loc->unit->num);
+				} else {
+					unitlist += AString(loc->unit->num);
+					comma = true;
+				}
+
+				// Unit cannot instantly guard the destination
+				loc->unit->guard = GUARD_NONE;
+
+				loc->unit->Event(AString("Is teleported through a ") +
+				      "Gate to " + tar->Print(&regions) + " by " +
+				      *u->name + ".");
+				loc->unit->MoveUnit( tar->GetDummy() );
+				if (loc->unit != u)
+					loc->unit->ClearCastOrders();
+			}
+			delete loc;
 		}
 	}
 
-    // Mage cannot instantly guard the destination
-    u->guard = GUARD_NONE;
+	// Mage cannot instantly guard the destination
+	u->guard = GUARD_NONE;
 
-	u->Event(AString("Jumps through a Gate to ") +
-			tar->Print( &regions ) + ".");
+	u->Event(AString("Jumps through a Gate to ") + tar->Print(&regions) + ".");
 	u->Practise(S_GATE_LORE);
 	if (comma) {
 		u->Event(unitlist + " follow through the Gate.");
@@ -1717,8 +1867,8 @@ void Game::RunPortalLore(ARegion *r,Object *o,Unit *u)
 						tar->region->Print( &regions ) +
 						" by " + *u->name + ".");
 
-                // Unit cannot instantly guard the destination
-                loc->unit->guard = GUARD_NONE;
+				// Unit cannot instantly guard the destination
+				loc->unit->guard = GUARD_NONE;
 				loc->unit->MoveUnit( tar->obj );
 
 				if (loc->unit != u)
