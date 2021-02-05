@@ -417,6 +417,7 @@ public:
 
 	int gate;
 	AList units;
+	bool alignment_ = false;
 };
 
 /// Cast helper

@@ -56,7 +56,7 @@ int allowedTradesSize = sizeof(at) / sizeof(at[0]);
 
 static GameDefs g = {
 	"Miskatonic",				// RULESET_NAME
-	MAKE_ATL_VER( 1, 0, 32 ),   // RULESET_VERSION
+	MAKE_ATL_VER( 1, 0, 33 ),   // RULESET_VERSION
 
 	2, /* FOOT_SPEED */
 	4, /* HORSE_SPEED */
@@ -96,7 +96,7 @@ static GameDefs g = {
 
 	100, /* TIMES_REWARD */
 
-	1, // TOWNS_EXIST
+	0, // TOWNS_EXIST
 	0, // LEADERS_EXIST
 	1, // SKILL_LIMIT_NONLEADERS
 	1, // MAGE_NONLEADERS

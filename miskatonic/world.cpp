@@ -2219,7 +2219,7 @@ void Game::CreateWorld()
 		}
 	}
 
-    regions.SetACNeighbors( 0, 1, xx, yy );
+	regions.SetACNeighbors(0, 1, xx, yy);
 
     regions.InitSetupGates( 1 );
 	// Set up gates on all levels of the underworld

@@ -2194,8 +2194,11 @@ void ARegion::WriteReport(Areport *f, Faction *fac, int month, ARegionList *pReg
 		char *nexus_desc = new char[len];
 		sprintf(nexus_desc, AC_STRING, Globals->WORLD_NAME, Globals->WORLD_NAME);
 		AString tmp(nexus_desc);
-		if (Globals->NEXUS_NO_EXITS)
+		if (Globals->NEXUS_NO_EXITS) {
 			tmp += " You will need to 'CAST Gate_Lore RANDOM' to leave the Nexus.";
+			tmp += " Or, you can DECLARE ALIGNMENT <GOOD|EVIL> and CAST Gate_Lore ALIGNMENT";
+			tmp += " to land in an unoccupied hex matching your alignment.";
+		}
 		f->PutStr(tmp);
 		delete[] nexus_desc;
 
