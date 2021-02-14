@@ -2439,7 +2439,7 @@ ManType * ManDefs = mt;
 //
 // Table of monsters.
 //
-MonType md[NUMMONSTERS] = {
+static MonType md[NUMMONSTERS] = {
 	// attackLevel, defense array
 	// numAttacks, hits, regen,
 	// tactics, stealth, obs
@@ -2450,7 +2450,7 @@ MonType md[NUMMONSTERS] = {
 	 0,0,0,
 	 0,0,0,
 	 -1,0,
-	 0,-1,0,0,"None"}, /* none */
+	 0,-1,0,0,"None"},
 	{3,{3,0,0,0,2,0},
 	 2,2,0,
 	 3,2,2,
