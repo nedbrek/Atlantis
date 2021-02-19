@@ -1,3 +1,15 @@
+package require json
+
+if {$argc < 1} {
+	puts "Usage $argv0 <setup.json>"
+	exit
+}
+
+proc dGet {d k} {
+	if {![dict exists $d $k]} { return "" }
+
+	return [dict get $d $k]
+}
 
 set ifile [open "players.in"]
 set itext [read $ifile]
@@ -6,35 +18,49 @@ close $ifile
 set ofile [open "players.in.new" "w"]
 puts $ofile $itext
 
-puts $ofile "Faction: new"
-puts $ofile "Name: Neddites"
-puts $ofile "StartLoc: 1 1 1"
+set cfg_file [open "setup.json"]
+set cfg_text [read $cfg_file]
+close $cfg_file
+set cfg [::json::json2dict $cfg_text]
 
-puts $ofile "NewUnit: 1"
-puts $ofile "Item: gm1 25 GNOM"
-puts $ofile "Item: gm1 25 WOOD"
-puts $ofile "Skill: gm1 SHIP 30"
-puts $ofile "Skill: gm1 SAIL 30"
-puts $ofile "Order: gm1 BUILD LONGBOAT"
+set factions [dGet $cfg "Factions"]
+foreach f $factions {
+	puts $ofile "Faction: new"
+	if {[dict exists $f "Name"]} {
+		puts $ofile "Name: [dict get $f Name]"
+	}
+	if {[dict exists $f "StartLoc"]} {
+		puts $ofile "StartLoc: [dict get $f StartLoc]"
+	}
 
-puts $ofile "NewUnit: 2"
-puts $ofile "Item: gm2 25 GNOM"
-puts $ofile "Item: gm2 25 WOOD"
-puts $ofile "Skill: gm2 SHIP 30"
-puts $ofile "Skill: gm2 SAIL 30"
-puts $ofile "Order: gm2 BUILD LONGBOAT"
+	set units [dGet $f "Units"]
+	set unit_num 0
+	foreach u $units {
+		incr unit_num
 
-puts $ofile "NewUnit: 3"
-puts $ofile "Item: gm3 5 MDWA"
+		puts $ofile "NewUnit: $unit_num"
 
-puts $ofile "NewUnit: 4"
-puts $ofile "Item: gm4 5 MDWA"
+		set items [dGet $u Items]
+		foreach i $items {
+			set id [dGet $i Id]
+			set ct [dGet $i Count]
+			puts $ofile "Item: gm$unit_num $ct $id"
+		}
 
-puts $ofile "NewUnit: 5"
-puts $ofile "Item: gm3 5 HLNG"
+		set skills [dGet $u Skills]
+		foreach s $skills {
+			set abbr [dGet $s Name]
+			set days [dGet $s Days]
+			puts $ofile "Skill: gm$unit_num $abbr $days"
+		}
 
-puts $ofile "NewUnit: 6"
-puts $ofile "Item: gm4 5 MDWA"
+		set orders [dGet $u Orders]
+		foreach o $orders {
+			puts $ofile "Order: gm$unit_num $o"
+		}
+	}
+}
+
 
 close $ofile
 
