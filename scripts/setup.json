@@ -1,0 +1,56 @@
+{
+	"Factions" : [
+		{
+			"Name": "Neddites",
+			"StartLoc": "1 1 1",
+			"Units" : [
+				{
+					"Items": [
+						{"Id": "GNOM", "Count": 25},
+						{"Id": "WOOD", "Count": 25}
+					],
+					"Skills": [
+						{"Name": "SHIP", "Days": 30},
+						{"Name": "SAIL", "Days": 30}
+					],
+					"Orders": [
+						"BUILD LONGBOAT"
+					]
+				},
+				{
+					"Items": [
+						{"Id": "GNOM", "Count": 25},
+						{"Id": "WOOD", "Count": 25}
+					],
+					"Skills": [
+						{"Name": "SHIP", "Days": 30},
+						{"Name": "SAIL", "Days": 30}
+					],
+					"Orders": [
+						"BUILD LONGBOAT"
+					]
+				},
+				{
+					"Items": [
+						{"Id": "MDWA", "Count": 5}
+					]
+				},
+				{
+					"Items": [
+						{"Id": "MDWA", "Count": 5}
+					]
+				},
+				{
+					"Items": [
+						{"Id": "HLNG", "Count": 5}
+					]
+				},
+				{
+					"Items": [
+						{"Id": "MDWA", "Count": 5}
+					]
+				}
+			]
+		}
+	]
+}
