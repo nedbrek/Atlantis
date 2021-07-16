@@ -44,3 +44,7 @@ $(OBJS): obj/%.o: %.cpp
 obj/rand.o: i_rand.c
 	@$(CC) $(CFLAGS) -MF $(patsubst %.c,dep/%.d,$<) -c -o $@ $<
 
+.PHONY: tags
+tags:
+	ctags --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ *.h *.cpp miskatonic/*.cpp
+
