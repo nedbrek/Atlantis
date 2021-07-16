@@ -4811,7 +4811,7 @@ static SpecialType spd[NUMSPECIALS] = {
 	 {O_MFORTRESS, O_MTOWER, -1},
 	 {-1, -1, -1, -1, -1, -1, -1},
 	 {-1, -1, -1},
-	 SpecialType::FX_DAMAGE|SpecialType::FX_USE_LEV|SpecialType::FX_NOBUILDING|SpecialType::FX_DAMAGE,
+	 SpecialType::FX_DAMAGE|SpecialType::FX_USE_LEV|SpecialType::FX_NOBUILDING,
 	 {-1, -1, -1, -1},
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 "a non-shield spell",

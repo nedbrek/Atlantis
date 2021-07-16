@@ -51,6 +51,16 @@ Windows
        You'll probably want to compile the 'Checked' version in case you
        want to debug.
        
+Generating the rules
+
+   The rules consist of an HTML file which reference a CSS.
+   The command is:
+   ./miskatonic.exe genrules intro.html rules.css <output.html>
+
+   It will also produce a file called skills.dot
+   This can be converted into a graphic with:
+   dot skills.dot -Tpng -o skills.png
+
 Running a Game of Atlantis
 
    The Atlantis program is actually very simple in terms of input and
