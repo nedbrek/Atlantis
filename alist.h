@@ -99,10 +99,11 @@ private:
 };
 
 template<typename T>
-void deleteAll(const std::vector<T*> &v)
+void deleteAll(std::vector<T*> &v)
 {
 	for (auto i : v)
 		delete i;
+	v.clear();
 }
 
 #define forlist(l) \

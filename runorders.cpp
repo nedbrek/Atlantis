@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 // MODIFICATIONS
+#include "events.h"
 #include "game.h"
 #include "faction.h"
 #include "unit.h"
@@ -355,7 +356,7 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
 			Faction * f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->logEvent(new StrEvent(temp.str()));
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->Practise(S_STEALTH);
@@ -436,7 +437,7 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 			*(tar->name) + " in " + *(r->name) + ".";
 		forlist(seers) {
 			Faction * f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->logEvent(new StrEvent(temp.str()));
 		}
 		// One learns from one's mistakes.  Surviving them is another matter!
 		u->Practise(S_STEALTH);
@@ -476,7 +477,7 @@ void Game::Do1Steal(ARegion * r,Object * o,Unit * u)
 			ItemString(so->item,amt) + " from " + *(tar->name) + ".";
 		forlist(seers) {
 			Faction * f = ((FactionPtr *) elem)->ptr;
-			f->Event(temp);
+			f->logEvent(new StrEvent(temp.str()));
 		}
 	}
 
@@ -734,8 +735,9 @@ void Game::RunFindUnit(Unit *u)
 		if(!all) {
 			fac = GetFaction(&factions,f->find);
 			if (fac) {
-				u->faction->Event(AString("The address of ") + *(fac->name) +
-						" is " + *(fac->address) + ".");
+				AString msg("The address of ");
+				msg += fac->name() + " is " + *fac->address + ".";
+				u->faction->logEvent(new StrEvent(msg.str()));
 			} else {
 				u->Error(AString("FIND: ") + f->find + " is not a valid "
 						"faction number.");
@@ -744,8 +746,9 @@ void Game::RunFindUnit(Unit *u)
 			forlist(&factions) {
 				fac = (Faction *)elem;
 				if(fac) {
-					u->faction->Event(AString("The address of ") +
-							*(fac->name) + " is " + *(fac->address) + ".");
+					AString msg("The address of ");
+					msg += fac->name() + " is " + *fac->address + ".";
+					u->faction->logEvent(new StrEvent(msg.str()));
 				}
 			}
 		}
@@ -829,8 +832,7 @@ void Game::RunTaxRegion(ARegion *reg)
 			desired -= t * Globals->TAX_INCOME;
 			u->SetMoney(u->GetMoney() + amt);
 
-			u->Event(AString("Collects $") + amt + " in taxes in " +
-			      reg->ShortPrint(&regions) + ".");
+			u->logEvent(new TaxEvent(u->name->str(), amt, reg));
 			u->taxing = TAX_NONE;
 		}
 	}
@@ -924,8 +926,9 @@ void Game::RunPillageRegion(ARegion * reg)
 				forlist(facs) {
 					Faction * fp = ((FactionPtr *) elem)->ptr;
 					if (fp != u->faction) {
-						fp->Event(*(u->name) + " pillages " +
-								*(reg->name) + ".");
+						AString msg(*u->name);
+						msg += AString(" pillages ") + *reg->name + ".";
+						fp->logEvent(new StrEvent(msg.str()));
 					}
 				}
 			}
@@ -1353,9 +1356,15 @@ void Game::EndGame(Faction *pVictor)
 			pFac->quit = QUIT_GAME_OVER;
 
 		if(pVictor)
-			pFac->Event( *( pVictor->name ) + " has won the game!" );
+		{
+			AString msg(pVictor->name());
+			msg += " has won the game!";
+			pFac->logEvent(new StrEvent(msg.str()));
+		}
 		else
-			pFac->Event( "The game has ended with no winner." );
+		{
+			pFac->logEvent(new StrEvent("The game has ended with no winner."));
+		}
 	}
 
 	gameStatus = GAME_STATUS_FINISHED;
@@ -3174,7 +3183,7 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 			notallied = 0;
 		}
 
-		u->Event(AString("Gives unit to ") + *(t->faction->name) + ".");
+		u->Event(AString("Gives unit to ") + t->faction->name() + ".");
 		u->faction = t->faction;
 		u->Event("Is given to your faction.");
 
@@ -3350,11 +3359,13 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 		delete temp;
 	}
 
-	u->Event(AString("Gives ") + ItemString(o->item, amt) + " to " + *t->name + ".");
+	GiveEvent *ge = new GiveEvent(u->name->str(), o->item, amt, t->name->str(), false);
+	u->logEvent(ge);
 
 	if (u->faction != t->faction)
 	{
-		t->Event(AString("Receives ") + ItemString(o->item, amt) + " from " + *u->name + ".");
+		GiveEvent *re = new GiveEvent(u->name->str(), o->item, amt, t->name->str(), true);
+		t->logEvent(re);
 	}
 
 	// update inventories

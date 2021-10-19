@@ -751,7 +751,7 @@ void Army::endRound(Battle *b)
 	{
 		if (hits_from[i] || kills_from[i])
 		{
-			b->AddLine(*(leader->faction->name) + " takes " + hits_from[i] + " hits from " +
+			b->AddLine(leader->faction->name() + " takes " + hits_from[i] + " hits from " +
 			    attack_type_str[i] + " attacks, resulting in " + kills_from[i] + " losses."
 			);
 			if (kills_from[i])
@@ -762,13 +762,13 @@ void Army::endRound(Battle *b)
 	}
 
 	if (!had_losses)
-		b->AddLine(*(leader->faction->name) + " loses 0.");
+		b->AddLine(leader->faction->name() + " loses 0.");
 }
 
 void Army::WriteLosses(Battle *b)
 {
 	const int num_lost = count - NumAlive();
-	b->AddLine(*(leader->faction->name) + " loses " + num_lost + ".");
+	b->AddLine(leader->faction->name() + " loses " + num_lost + ".");
 
 	if (num_lost == 0)
 		return; // no losses

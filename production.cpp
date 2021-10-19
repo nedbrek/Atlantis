@@ -79,6 +79,11 @@ AString Production::WriteReport()
 	return ItemString(itemtype, amount);
 }
 
+void Production::creport(JsonReport *f) const
+{
+	f->putPairInt(ItemDefs[itemtype].abr, amount);
+}
+
 //----------------------------------------------------------------------------
 void ProductionList::Writeout(Aoutfile *f)
 {

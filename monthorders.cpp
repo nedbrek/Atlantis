@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "game.h"
+#include "events.h"
 #include "faction.h"
 #include "battle.h"
 #include "unit.h"
@@ -290,13 +291,15 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 			ship->MoveObject(newreg);
 			ship->SetPrevDir(i);
 
+			AString msg(*ship->name);
+			msg += AString(" sails from ") +
+				   reg->ShortPrint(&regions) + AString(" to ") +
+				   newreg->ShortPrint(&regions) + AString(".");
+
 			forlist(&facs)
 			{
 				Faction *f = ((FactionPtr*)elem)->ptr;
-
-				f->Event(*ship->name + AString(" sails from ") +
-				      reg->ShortPrint(&regions) + AString(" to ") +
-				      newreg->ShortPrint(&regions) + AString("."));
+				f->logEvent(new StrEvent(msg.str()));
 			}
 
 			if (Globals->TRANSIT_REPORT != GameDefs::REPORT_NOTHING)
@@ -328,8 +331,10 @@ ARegion* Game::Do1SailOrder(ARegion *reg, Object *ship, Unit *cap)
 			reg = newreg;
 			if (newreg->ForbiddenShip(ship))
 			{
-				cap->faction->Event(*ship->name + AString(" is stopped by guards in ") +
-				      newreg->ShortPrint(&regions) + AString("."));
+				AString msg(*ship->name);
+				msg += AString(" is stopped by guards in ") +
+				      newreg->ShortPrint(&regions) + AString(".");
+				cap->faction->logEvent(new StrEvent(msg.str()));
 				break;
 			}
 		}
@@ -1027,7 +1032,7 @@ bool Game::RunUnitProduce(ARegion *r, Unit *u, ProduceOrder *o, ProduceIntermedi
 
 	u->items.SetNum(o->item, u->items.GetNum(o->item) + output);
 
-	u->Event(AString("Produces ") + ItemString(o->item, output) + " in " + r->ShortPrint(&regions) + ".");
+	u->logEvent(new ProduceEvent(u->name->str(), o->item, output, r));
 	u->Practise(o->skill);
 
 	if (o->limit == -1)
@@ -1267,7 +1272,7 @@ void Game::RunAProduction(ARegion *r, Production *p)
 			else
 			{
 				// everything else
-				u->Event(AString("Produces ") + ItemString(po->item, ubucks) + " in " + r->ShortPrint(&regions) + ".");
+				u->logEvent(new ProduceEvent(u->name->str(), po->item, ubucks, r));
 				u->Practise(po->skill);
 			}
 
@@ -1861,8 +1866,10 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 
 		if (newreg->ForbiddenShip(unit->object))
 		{
-			unit->faction->Event(*unit->object->name + AString(" is stopped by guards in ") +
-			    newreg->ShortPrint(&regions) + AString("."));
+			AString msg(*unit->object->name);
+			msg += AString(" is stopped by guards in ") + newreg->ShortPrint(&regions) + AString(".");
+			unit->faction->logEvent(new StrEvent(msg.str()));
+
 			delete unit->monthorders;
 			unit->monthorders = NULL;
 			return loc;

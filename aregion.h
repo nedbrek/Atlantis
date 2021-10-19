@@ -31,6 +31,7 @@
 #include <functional>
 class Areport;
 class Faction;
+class JsonReport;
 class Object;
 class Unit;
 class UnitId;
@@ -197,7 +198,7 @@ public:
 	void Writeout(Aoutfile *f);
 	void Readin(Ainfile *f, AList *facs, ATL_VER v);
 
-	void WriteReport(Areport *f, Faction *fac, int month, ARegionList *pRegions);
+	void WriteReport(JsonReport &of, Faction *fac, int month, ARegionList *pRegions);
 	void WriteTemplate(Areport *f, Faction *fac, ARegionList *pRegs, int month);
 
 	// defined in template.cpp
@@ -206,6 +207,7 @@ public:
 
 	AString ShortPrint(ARegionList *pRegs);
 	AString Print(ARegionList *pRegs);
+	void CPrint(JsonReport *f, ARegionList *pRegs, bool inc_town = true);
 
 	/// change the name of the region
 	void SetName(const char *new_name);
@@ -344,10 +346,10 @@ private: // methods
 	void MakeLair(int lair_type);
 	void LairCheck();
 
-	void WriteProducts(Areport *f, Faction *fac, int present);
-	void WriteMarkets(Areport *f, Faction *fac, int present);
-	void WriteEconomy(Areport *f, Faction *fac, int present);
-	void WriteExits(Areport *f, ARegionList *pRegs, bool *exits_seen) const;
+	void WriteProducts(JsonReport &of, Faction *fac, int present);
+	void WriteMarkets(JsonReport &of, Faction *fac, int present);
+	void WriteEconomy(JsonReport &of, Faction *fac, int present);
+	void WriteExits(JsonReport &of, ARegionList *pRegs, bool *exits_seen) const;
 
 	AString GetDecayFlavor() const;
 

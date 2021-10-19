@@ -27,6 +27,7 @@
 #include "alist.h"
 class Ainfile;
 class Aoutfile;
+class JsonReport;
 class AString;
 
 /// One unit of production
@@ -41,6 +42,7 @@ public:
 
 	///@NOTE does not write anywhere, @return description
 	AString WriteReport();
+	void creport(JsonReport *f) const;
 
 	int itemtype;
 	int baseamount;

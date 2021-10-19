@@ -33,6 +33,7 @@ class ARegionList;
 class Areport;
 class AString;
 class Faction;
+class JsonReport;
 class Unit;
 class UnitId;
 
@@ -102,7 +103,7 @@ public:
 	void Writeout(Aoutfile *f);
 
 	/// write report to 'f'
-	void Report(Areport *f, Faction *fac, int obs, int truesight, int detfac, int passobs, int passtrue, int passdetfac, int present);
+	void Report(JsonReport &of, Faction *fac, int obs, int truesight, int detfac, int passobs, int passtrue, int passdetfac, int present);
 
 	/// change name to 's', takes ownership
 	void SetName(AString *s);

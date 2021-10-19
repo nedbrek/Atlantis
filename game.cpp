@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "game.h"
+#include "events.h"
 #include "faction.h"
 #include "unit.h"
 #include "gameio.h"
@@ -865,14 +866,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 	if (*pToken == "Name:")
 	{
 		pTemp = pLine->StripWhite();
-		if (pTemp)
-		{
-			if (newPlayer)
-			{
-				*pTemp += AString(" (") + pFac->num + ")";
-			}
-			pFac->SetNameNoChange(pTemp);
-		}
+		pFac->SetNameNoChange(pTemp);
 	}
 	else if (*pToken == "RewardTimes")
 	{
@@ -906,7 +900,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 	{
 		pTemp = pLine->gettoken();
 		const int nAmt = pTemp->value();
-		pFac->Event(AString("Reward of ") + nAmt + " silver.");
+		AString msg("Reward of ");
+		msg += AString(nAmt) + " silver.";
+		pFac->logEvent(new StrEvent(msg.str()));
 		pFac->unclaimed += nAmt;
 	}
 	else if (*pToken == "SendTimes:")
@@ -1031,7 +1027,7 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 					Unit *u = GetNewUnit(pFac);
 					u->gm_alias = val;
 					u->MoveUnit(pFac->pReg->GetDummy());
-					u->Event("Is given to your faction.");
+					u->logEvent(new StrEvent("Is given to your faction."));
 				}
 			}
 		}
@@ -1100,9 +1096,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 									u->items.SetNum(it, has + v);
 									if (!u->gm_alias)
 									{
-										u->Event(AString("Is given ") +
-										      ItemString(it, v) +
-										      " by the gods.");
+										AString msg("Is given ");
+										msg += ItemString(it, v) + " by the gods.";
+										u->logEvent(new StrEvent(msg.str()));
 									}
 									// make sure player has a description
 									u->faction->DiscoverItem(it, 0, 1);
@@ -1180,8 +1176,9 @@ int Game::ReadPlayersLine(AString *pToken, AString *pLine, Faction *pFac, int ne
 
 									if (!u->gm_alias)
 									{
-										u->Event(AString("Is taught ") + days + " days of " +
-										      SkillStrs(sk) + " by the gods.");
+										AString msg("Is taught ");
+										msg += AString(days) + " days of " + SkillStrs(sk) + " by the gods.";
+										u->logEvent(new StrEvent(msg.str()));
 									}
 
 									// This is NOT quite the same, but the gods
@@ -1727,27 +1724,32 @@ void Game::WriteReport()
 	if (Globals->APPRENTICES_EXIST)
 		CountAllApprentices();
 
-	Areport f; // avoid loop overhead
+	JsonReport of; // avoid loop overhead
 
 	forlist(&factions)
 	{
 		Faction *fac = (Faction*)elem;
-		const AString str = AString("report.") + fac->num;
 
 		if (!fac->IsNPC() ||
 		    (((month == 0 && year == 1) || Globals->GM_REPORT) &&
 		     fac->num == 1)
 		   )
 		{
-			const int i = f.OpenByName(str);
+			const AString str = AString("report.") + fac->num;
+			const AString cstr = AString("creport") + fac->num + ".json";
+			const int i = of.OpenByName(cstr);
 			if (i == -1)
 				continue; // failed to open!
+			of.openPlain(str);
 
-			fac->WriteReport(&f, this);
-			f.Close();
+			fac->WriteReport(of, this);
+			of.Close();
 		}
+		if (fac->num == 1)
+			fac->writeGlobalJson();
 		Adot();
 	}
+
 }
 
 void Game::DeleteDeadFactions()

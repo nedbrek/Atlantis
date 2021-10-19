@@ -304,9 +304,10 @@ Unit* Object::GetOwner()
 	return owner;
 }
 
-void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
+void Object::Report(JsonReport &of, Faction *fac, int obs, int truesight,
   int detfac, int passobs, int passtrue, int passdetfac, int present)
 {
+	Areport *f = of.plainFile();
 	ObjectType *ob = &ObjectDefs[type];
 
 	if (type != O_DUMMY && !present)
@@ -335,6 +336,7 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 	if (type != O_DUMMY)
 	{
+		of.startDict(NULL);
 		bool is_fleet = false;
 		AString temp = AString("+ ") + *name + " : ";
 		if (type != O_ARMY || objects.empty())
@@ -409,23 +411,34 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 
 		temp += ".";
 		f->PutStr(temp);
+		of.putPairStr("name", temp.str());
+		of.putPairStr("type", ob->name);
 		f->AddTab();
 	}
 
 	//foreach unit in this
+	bool first = true;
 	for (const auto &u : units)
 	{
 		if (u->faction == fac)
 		{
 			// self-report
-			u->WriteReport(f, -1, 1, 1, 1);
+			if (first) {
+				first = false;
+				of.startArray("units");
+			}
+			u->WriteReport(of, -1, 1, 1, 1, region);
 		}
 		else
 		{
 			if (present)
 			{
 				// foreign unit present
-				u->WriteReport(f, obs, truesight, detfac, type != O_DUMMY);
+				if (first) {
+					first = false;
+					of.startArray("units");
+				}
+				u->WriteReport(of, obs, truesight, detfac, type != O_DUMMY, region);
 			}
 			else
 			{
@@ -434,12 +447,22 @@ void Object::Report(Areport *f, Faction *fac, int obs, int truesight,
 				    (type != O_DUMMY && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_INDOOR_UNITS)) ||
 				    (u->guard == GUARD_GUARD && (Globals->TRANSIT_REPORT & GameDefs::REPORT_SHOW_GUARDS)))
 				{
-					u->WriteReport(f, passobs, passtrue, passdetfac, type != O_DUMMY);
+					if (first) {
+						first = false;
+						of.startArray("units");
+					}
+					u->WriteReport(of, passobs, passtrue, passdetfac, type != O_DUMMY, region);
 				}
 			}
 		}
 	}
+	if (!first) {
+		of.endArray();
+	}
+
 	f->EndLine();
+	if (type != O_DUMMY)
+		of.endDict();
 
 	if (type != O_DUMMY)
 		f->DropTab();
