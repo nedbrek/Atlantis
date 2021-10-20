@@ -48,7 +48,7 @@ Battle::~Battle()
 void Battle::FreeRound(Army *att, Army *def, int ass)
 {
 	// write header
-	AddLine(*att->leader->faction->name + " gets a free round of attacks.");
+	AddLine(att->leader->faction->name() + " gets a free round of attacks.");
 
 	// update both army's shields
 	att->shields.DeleteAll();
@@ -318,12 +318,12 @@ int Battle::Run(ARegion *region,
 
 		if (armies[0]->NumAlive())
 		{
-			AddLine(*(armies[0]->leader->faction->name) + " is routed!");
+			AddLine(armies[0]->leader->faction->name() + " is routed!");
 			FreeRound(armies[1], armies[0]);
 		}
 		else
 		{
-			AddLine(*(armies[0]->leader->faction->name) + " is destroyed!");
+			AddLine(armies[0]->leader->faction->name() + " is destroyed!");
 		}
 
 		AddLine("Total Casualties:");
@@ -367,12 +367,12 @@ int Battle::Run(ARegion *region,
 
 		if (armies[1]->NumAlive())
 		{
-			AddLine(*(armies[1]->leader->faction->name) + " is routed!");
+			AddLine(armies[1]->leader->faction->name() + " is routed!");
 			FreeRound(armies[0], armies[1]);
 		}
 		else
 		{
-			AddLine(*(armies[1]->leader->faction->name) + " is destroyed!");
+			AddLine(armies[1]->leader->faction->name() + " is destroyed!");
 		}
 
 		AddLine("Total Casualties:");
@@ -493,6 +493,26 @@ void Battle::Report(Areport *f, Faction *fac)
 		AString *s = (AString*)elem;
 		f->PutStr(*s);
 	}
+}
+
+void Battle::creport(JsonReport &f, Faction *fac)
+{
+	if (assassination == ASS_SUCC && fac != attacker)
+	{
+		f.startArray(NULL);
+		f.putStr(asstext->str());
+		f.putStr("");
+		f.endArray();
+		return;
+	}
+
+	f.startArray(NULL);
+	forlist(&text)
+	{
+		AString *s = (AString*)elem;
+		f.putStr(s->str());
+	}
+	f.endArray();
 }
 
 void Battle::AddLine(const AString &s)

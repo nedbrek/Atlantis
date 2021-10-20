@@ -23,6 +23,7 @@
 //
 // END A3HEADER
 #include "unit.h"
+#include "events.h"
 #include "aregion.h"
 #include "faction.h"
 #include "gamedata.h"
@@ -499,7 +500,7 @@ AString Unit::GetName(int obs)
 	if (reveal == REVEAL_FACTION || obs > GetSkill(S_STEALTH))
 	{
 		ret += ", ";
-		ret += *faction->name;
+		ret += faction->name();
 	}
 
 	return ret;
@@ -560,8 +561,9 @@ AString Unit::SpoilsReport()
 	return temp;
 }
 
-void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autosee)
+void Unit::WriteReport(JsonReport &of, int obs, int truesight, int detfac, int autosee, ARegion *loc)
 {
+	Areport *f = of.plainFile();
 	int stealth = GetSkill(S_STEALTH);
 	if (obs == -1)
 	{
@@ -629,39 +631,138 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 
 	// Write the report
 	AString temp;
+	of.startDict(NULL);
 	if (obs == 2)
+	{
 		temp += AString("* ");
+		of.putPairStr("report", "own");
+	}
 	else
+	{
 		temp += AString("- ");
+		of.putPairStr("report", "foreign");
+	}
 
 	temp += *name;
+	of.putPairStr("name", name->str());
 
+	if (obs > 0)
+		of.putPairStr("faction", faction->name().str());
+
+	of.startDict("flags");
 	if (guard == GUARD_GUARD)
+	{
 		temp += ", on guard";
+		of.putPairInt("GUARD", 1);
+	}
+	else
+	{
+		of.putPairInt("GUARD", 0);
+	}
 
 	if (obs > 0)
 	{
-		temp += AString(", ") + *faction->name;
-		if (guard == GUARD_AVOID) temp += ", avoiding";
-		if (GetFlag(FLAG_BEHIND)) temp += ", behind";
+		temp += AString(", ") + faction->name();
+
+		if (guard == GUARD_AVOID)
+		{
+			temp += ", avoiding";
+			of.putPairInt("AVOID", 1);
+		}
+
+		if (GetFlag(FLAG_BEHIND))
+		{
+			temp += ", behind";
+			of.putPairInt("BEHIND", 1);
+		}
 	}
 
 	if (obs == 2)
 	{
-		if (reveal == REVEAL_UNIT) temp += ", revealing unit";
-		if (reveal == REVEAL_FACTION) temp += ", revealing faction";
-		if (GetFlag(FLAG_HOLDING)) temp += ", holding";
-		if (GetFlag(FLAG_AUTOTAX)) temp += ", taxing";
-		if (GetFlag(FLAG_NOAID)) temp += ", receiving no aid";
-		if (GetFlag(FLAG_CONSUMING_UNIT)) temp += ", consuming unit's food";
-		if (GetFlag(FLAG_CONSUMING_FACTION))
+		if (reveal == REVEAL_UNIT)
+		{
+			temp += ", revealing unit";
+			of.putPairStr("REVEAL", "UNIT");
+		}
+		else if (reveal == REVEAL_FACTION)
+		{
+			temp += ", revealing faction";
+			of.putPairStr("REVEAL", "FACTION");
+		}
+
+		if (GetFlag(FLAG_HOLDING))
+		{
+			temp += ", holding";
+			of.putPairInt("HOLD", 1);
+		}
+
+		if (GetFlag(FLAG_AUTOTAX))
+		{
+			temp += ", taxing";
+			of.putPairInt("AUTOTAX", 1);
+		}
+
+		if (GetFlag(FLAG_NOAID))
+		{
+			temp += ", receiving no aid";
+			of.putPairInt("NOAID", 1);
+		}
+
+		if (GetFlag(FLAG_CONSUMING_UNIT))
+		{
+			temp += ", consuming unit's food";
+			of.putPairStr("CONSUME", "UNIT");
+		}
+		else if (GetFlag(FLAG_CONSUMING_FACTION))
+		{
 			temp += ", consuming faction's food";
-		if (GetFlag(FLAG_NOCROSS_WATER)) temp += ", won't cross water";
-		if (GetFlag(FLAG_SHARE)) temp += ", sharing";
+			of.putPairStr("CONSUME", "FACTION");
+		}
+
+		if (GetFlag(FLAG_NOCROSS_WATER))
+		{
+			temp += ", won't cross water";
+			of.putPairInt("NOCROSS", 1);
+		}
+
+		if (GetFlag(FLAG_SHARE))
+		{
+			temp += ", sharing";
+			of.putPairInt("SHARE", 1);
+		}
+
 		temp += SpoilsReport();
+		if (GetFlag(FLAG_NOSPOILS)) of.putPairStr("SPOILS", "NONE");
+		else if (GetFlag(FLAG_FLYSPOILS)) of.putPairStr("SPOILS", "FLY");
+		else if (GetFlag(FLAG_WALKSPOILS)) of.putPairStr("SPOILS", "WALK");
+		else if (GetFlag(FLAG_RIDESPOILS)) of.putPairStr("SPOILS", "RIDE");
 	}
+	of.endDict(); // FLAGS
 
 	temp += items.Report(obs, truesight, 0);
+	if (temp.len() > 0)
+	{
+		of.startArray("items");
+		forlist(&items)
+		{
+			const Item *const i = (Item*)elem;
+			const auto &item = ItemDefs[i->type];
+			if (obs != 2 && item.weight == 0)
+				continue;
+
+			of.startDict(NULL);
+			of.putPairInt("amount", i->num);
+			of.putPairStr("abbr", item.abr);
+
+			if (truesight && (item.type & IT_MONSTER) &&
+	    	 	 item.index == MONSTER_ILLUSION)
+	    	{
+	    		of.putPairInt("illusion", 1);
+	    	}
+	    	of.endDict();
+		}
+		of.endArray();
+	}
 
 	if (obs == 2)
 	{
@@ -675,21 +776,165 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 		temp += AString(WalkingCapacity());
 		temp += "/";
 		temp += AString(SwimmingCapacity());
+
 		temp += ". Upkeep: $";
-		temp += AString(MaintCost());
+		const auto upkeep = MaintCost();
+		temp += AString(upkeep);
+		of.putPairInt("upkeep", upkeep);
+
 		temp += ". Skills: ";
 		temp += skills.Report(GetMen());
+		// dump skills
+		if (skills.size())
+		{
+			of.startArray("skills");
+			forlist(&skills)
+			{
+				Skill *s = (Skill*)elem;
+				of.startDict(NULL);
+				of.putPairStr("abbr", SkillDefs[s->type].abbr);
+				of.putPairInt("level", GetLevelByDays(s->days/GetMen()));
+				of.putPairInt("days", s->days/GetMen());
+				of.endDict(); // end this skill
+			}
+			of.endArray(); // end skills
+		}
 	}
 
 	if (obs == 2 && (type == U_MAGE || type == U_GUARDMAGE))
 	{
 		temp += MageReport();
+		if (combat != -1)
+			of.putPairStr("combatSpell", SkillStrs(combat).str());
 	}
 
 	if (obs == 2)
 	{
 		temp += ReadyItem();
+		// creport
+		bool first_weapon = true;
+		for (unsigned i = 0; i < MAX_READY; ++i)
+		{
+			const int ready = readyWeapon[i];
+			if (ready == -1)
+				continue;
+			if (first_weapon)
+			{
+				of.startArray("readyWeapons");
+				first_weapon = false;
+			}
+			of.putStr(ItemDefs[ready].abr);
+		}
+		if (!first_weapon)
+			of.endArray();
+
+		bool first_armor = true;
+		for (unsigned i = 0; i < MAX_READY; ++i)
+		{
+			const int ready = readyArmor[i];
+			if (ready == -1)
+				continue;
+			if (first_armor)
+			{
+				of.startArray("readyArmor");
+				first_armor = false;
+			}
+			of.putStr(ItemDefs[ready].abr);
+		}
+		if (!first_armor)
+			of.endArray();
+
+		// skills
 		temp += StudyableSkills();
+
+		bool has_study = false;
+		for (int sk = 0; sk < NSKILLS; ++sk)
+		{
+			// Magic skills without depencies should not be skipped
+			if (SkillDefs[sk].depends[0].skill == -1 && !(SkillDefs[sk].flags & SkillType::MAGIC))
+				continue;
+
+			// CanStudy gets prereqs, does not check max level
+			if (!CanStudy(sk))
+				continue;
+			if (SkillDefs[sk].flags & SkillType::FOUNDATION)
+			{
+				// This is only used with mages to display studiable magic skills
+				if (type != U_MAGE)
+					continue;
+
+				// Compare current skill level to maximum level
+				if (GetRealSkill(sk) >= SkillMax(sk))
+					continue;
+			}
+
+			if (!has_study) {
+				has_study = true;
+				of.startArray("canStudy");
+			}
+			of.putStr(SkillDefs[sk].abbr);
+		}
+		if (has_study) {
+			of.endArray();
+		}
+
+		if (oldorders.size() || turnorders.size())
+		{
+			of.startArray("orders");
+			forlist(&oldorders)
+			{
+				Order *old_order = (Order*)elem;
+				of.putStr(old_order->toString(loc, faction->num).str());
+			}
+
+			if (turnorders.size())
+			{
+				// extract first turn order as a regular order
+				TurnOrder *t_order = (TurnOrder*)turnorders.front();
+				forlist(&t_order->turnOrders)
+				{
+					AString *order = (AString*)elem;
+					of.putStr(order->str());
+				}
+
+				// wrap the remaining orders in TURN/ENDTURN
+				for (t_order = (TurnOrder*)t_order->next; t_order; t_order = (TurnOrder*)t_order->next)
+				{
+					if (t_order->repeating)
+						of.putStr("@TURN");
+					else
+						of.putStr("TURN");
+
+					forlist(&t_order->turnOrders)
+					{
+						AString *order = (AString*)elem;
+						of.putStr(order->str());
+					}
+
+					of.putStr("ENDTURN");
+				}
+
+				// copy first order to end (if repeating)
+				t_order = (TurnOrder*)turnorders.front();
+				if (t_order->repeating)
+				{
+					if (t_order->repeating)
+						of.putStr("@TURN");
+					else
+						of.putStr("TURN");
+
+					forlist(&t_order->turnOrders)
+					{
+						AString *order = (AString*)elem;
+						of.putStr(order->str());
+					}
+
+					of.putStr("ENDTURN");
+				}
+			}
+
+			of.endArray();
+		}
 	}
 
 	const bool in_fleet = object->type == O_ARMY && !object->objects.empty();
@@ -697,6 +942,7 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 	{
 		temp += AString("; ");
 	}
+
 	if (in_fleet)
 	{
 		Object *sub = object->findUnitSubObject(this);
@@ -706,11 +952,13 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 			{
 				temp += "Captain of ";
 				temp += *sub->name;
+				of.putPairStr("captain", sub->name->str());
 			}
 			else
 			{
 				temp += "Sailing in ";
 				temp += *sub->name;
+				of.putPairStr("inObj", sub->name->str());
 			}
 		}
 	}
@@ -720,10 +968,17 @@ void Unit::WriteReport(Areport *f, int obs, int truesight, int detfac, int autos
 		if (in_fleet)
 			temp += ". ";
 		temp += *describe;
+		if (describe->len())
+			of.putPairStr("description", describe->str());
+		else
+			of.putPairStr("description", " ");
 	}
+	else if (in_fleet)
+		of.putPairStr("description", " ");
 
 	temp += ".";
 	f->PutStr(temp);
+	of.endDict();
 }
 
 AString Unit::TemplateReport()
@@ -2954,7 +3209,12 @@ void Unit::MoveUnit(Object *toobj)
 void Unit::Event(const AString &s)
 {
 	AString temp = *name + ": " + s;
-	faction->Event(temp);
+	faction->logEvent(new StrEvent(temp.str()));
+}
+
+void Unit::logEvent(IEvent *e)
+{
+	faction->logEvent(e);
 }
 
 void Unit::Error(const AString &s)

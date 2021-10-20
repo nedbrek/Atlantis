@@ -64,6 +64,8 @@ public:
 
 	void putNoNewline(const char*);
 
+	std::ofstream* handle() { return file; }
+
 protected:
 	std::ofstream *file;
 };
@@ -94,6 +96,45 @@ public:
 
 private:
 	int tabs;
+};
+
+/// Json Reports are outputs
+class JsonReport : public Aoutfile
+{
+public:
+	JsonReport();
+	~JsonReport() { close(); }
+
+	Areport* plainFile() { return plain_file; }
+
+	void Open(const AString &s);
+	int OpenByName(const AString &s);
+	void openPlain(const AString &s);
+	void close();
+	void Close() { close(); }
+	void AddTab();
+	void DropTab();
+
+	void putPairStr(const char *key, const char *val);
+	void putPairInt(const char *key, int val);
+	void startArray(const char *key);
+	void startDict(const char *key);
+	void endArray();
+	void endDict();
+
+	void putStr(const char *val); // only valid in array
+	void putInt(int val); // only valid in array
+
+protected: // methods
+	void printTabs();
+	void writeStr(const char *str);
+
+protected:
+	Areport *plain_file = nullptr;
+	unsigned tabs = 1;
+	unsigned arr_depth = 0;
+	unsigned dict_depth = 0;
+	bool first = true;
 };
 
 /// Rules are outputs (HTML)

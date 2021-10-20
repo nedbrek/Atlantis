@@ -32,6 +32,7 @@ class Army;
 class AString;
 class Faction;
 class ItemList;
+class JsonReport;
 class Soldier;
 class Unit;
 
@@ -63,6 +64,7 @@ public:
 
 	/// Send this battle report to 'f' for 'fac'
 	void Report(Areport *f, Faction *fac);
+	void creport(JsonReport &f, Faction *fac);
 
 	/// Add 's' to this battle report
 	void AddLine(const AString &s);

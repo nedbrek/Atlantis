@@ -39,6 +39,8 @@ class Areport;
 class AString;
 class Faction;
 class Game;
+class IEvent;
+class JsonReport;
 class Unit;
 
 /// Relations between factions
@@ -140,16 +142,18 @@ public:
 	void View();
 
 	void SetName(AString *);
+	AString name() const;
 	void SetNameNoChange(AString *str);
 	void SetAddress(const AString &strNewAddress);
 
 	void CheckExist(ARegionList *);
 	void Error(const AString &);
-	void Event(const AString &);
+	void logEvent(IEvent *e);
 
 	AString FactionTypeStr();
-	void WriteReport(Areport *f, Game *pGame);
+	void WriteReport(JsonReport &f, Game *pGame);
 	void WriteFacInfo(Aoutfile *);
+	void writeGlobalJson();
 
 	void SetAttitude(int num, int attitude); // if attitude == -1, clear it
 	int GetAttitude(int);
@@ -168,6 +172,9 @@ public:
 
 	void DiscoverItem(int item, int force, int full);
 
+protected: // data
+	AString *name_;
+
 public: // data
 	Game &game_; ///< back pointer to game
 	int num;
@@ -177,7 +184,6 @@ public: // data
 	int lastchange;
 	int lastorders;
 	int unclaimed;
-	AString *name;
 	AString *address;
 	AString *password;
 	int times;
@@ -201,7 +207,7 @@ public: // data
 	
 	std::list<AString*> extraPlayers_;
 	std::vector<AString*> errors_;
-	AList events;
+	std::vector<IEvent*> events_;
 	AList battles;
 	AList shows;
 	AList itemshows;

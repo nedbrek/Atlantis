@@ -36,7 +36,9 @@ class Areport;
 class AttackOrder;
 class CastOrder;
 class EvictOrder;
+class IEvent;
 class JoinOrder;
+class JsonReport;
 class Object;
 class Order;
 class TeleportOrder;
@@ -164,7 +166,7 @@ public:
 	void Readin(Ainfile *f, AList *facs, ATL_VER v);
 
 	/// write appropriate details to 'f'
-	void WriteReport(Areport *f, int obs, int truesight, int detfac, int autosee);
+	void WriteReport(JsonReport &of, int obs, int truesight, int detfac, int autosee, ARegion *loc);
 
 	///@return string with name, and faction if visible
 	AString GetName(int obs);
@@ -382,6 +384,7 @@ public:
 
 	/// prepend unit name and forward to Faction::Event
 	void Event(const AString &);
+	void logEvent(IEvent *e);
 
 	/// prepend unit name and forward to Faction::Error
 	void Error(const AString &);

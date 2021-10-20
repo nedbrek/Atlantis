@@ -249,6 +249,199 @@ void Areport::EndLine()
 }
 
 //----------------------------------------------------------------------------
+JsonReport::JsonReport()
+{
+	plain_file = new Areport;
+}
+
+void JsonReport::close()
+{
+	*file << "}\n";
+	Aoutfile::Close();
+	plain_file->Close();
+}
+
+void JsonReport::openPlain(const AString &s)
+{
+	plain_file->OpenByName(s);
+}
+
+void JsonReport::Open(const AString &s)
+{
+	Aoutfile::Open(s);
+	*file << "{\n";
+	tabs = 1;
+	arr_depth = 0;
+	dict_depth = 0;
+	first = true;
+}
+
+int JsonReport::OpenByName(const AString &s)
+{
+	tabs = 1;
+	arr_depth = 0;
+	dict_depth = 0;
+	first = true;
+
+	const int ret = Aoutfile::OpenByName(s);
+	*file << "{\n";
+	return ret;
+}
+
+void JsonReport::AddTab()
+{
+	++tabs;
+}
+
+void JsonReport::DropTab()
+{
+	if (tabs > 0)
+		--tabs;
+}
+
+void JsonReport::printTabs()
+{
+	for (unsigned i = 0; i < tabs; ++i)
+		*file << "   ";
+}
+
+void JsonReport::writeStr(const char *str)
+{
+	while (*str)
+	{
+		if (*str == '\"')
+		{
+			*file << '\\' << '\"';
+		}
+		else
+			*file << *str;
+		++str;
+	}
+}
+
+void JsonReport::putStr(const char *val)
+{
+	if (first) {
+		first = false;
+	}
+	else {
+		*file << ",\n";
+	}
+	printTabs();
+	*file << '\"';
+	writeStr(val);
+	*file << '\"';
+}
+
+void JsonReport::putInt(int val)
+{
+	if (first) {
+		first = false;
+	}
+	else {
+		*file << ",\n";
+	}
+	printTabs();
+	*file << val;
+}
+
+void JsonReport::putPairStr(const char *key, const char *val)
+{
+	if (first) {
+		first = false;
+	}
+	else {
+		*file << ",\n";
+	}
+	printTabs();
+	*file << '\"';
+	writeStr(key);
+	*file << "\": \"";
+	writeStr(val);
+	*file << '\"';
+}
+
+void JsonReport::putPairInt(const char *key, int val)
+{
+	if (first) {
+		first = false;
+	}
+	else {
+		*file << ",\n";
+	}
+	printTabs();
+	*file << '\"';
+	writeStr(key);
+	*file << "\": " << val;
+}
+
+void JsonReport::startArray(const char *key)
+{
+	if (!first) {
+		first = true;
+		*file << ",\n";
+	}
+	printTabs();
+	if (key) {
+		*file << '\"';
+		writeStr(key);
+		*file << "\": [\n";
+	}
+	else {
+		*file << "[\n";
+	}
+
+	++arr_depth;
+	AddTab();
+}
+
+void JsonReport::startDict(const char *key)
+{
+	if (!first) {
+		*file << ",\n";
+		first = true;
+	}
+	printTabs();
+	if (key) {
+		*file << '\"';
+		writeStr(key);
+		*file << "\": {\n";
+	}
+	else {
+		*file << "{\n";
+	}
+
+	++dict_depth;
+	AddTab();
+}
+
+void JsonReport::endArray()
+{
+	DropTab();
+	*file << "]";
+	if (arr_depth > 0) {
+		--arr_depth;
+	}
+	else {
+		std::cerr << "Array underflow" << std::endl;
+	}
+	first = false;
+}
+
+void JsonReport::endDict()
+{
+	DropTab();
+	*file << "}";
+	if (dict_depth > 0) {
+		--dict_depth;
+	}
+	else {
+		std::cerr << "Dict underflow" << std::endl;
+	}
+	first = false;
+}
+
+//----------------------------------------------------------------------------
 Arules::Arules()
 : tabs(0)
 , wraptab(0)

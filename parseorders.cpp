@@ -22,6 +22,7 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+#include "events.h"
 #include "game.h"
 #include "faction.h"
 #include "unit.h"
@@ -837,12 +838,14 @@ void Game::ProcessPasswordOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	if (token)
 	{
 		u->faction->password = token;
-		u->faction->Event(AString("Password is now: ") + *token);
+		AString msg("Password is now: ");
+		msg += *token;
+		u->faction->logEvent(new StrEvent(msg.str()));
 	}
 	else
 	{
 		u->faction->password = new AString("none");
-		u->faction->Event("Password cleared.");
+		u->faction->logEvent(new StrEvent("Password cleared."));
 	}
 }
 
@@ -860,7 +863,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 		if (!pCheck)
 		{
-			u->faction->Event("Times will be sent to your faction.");
+			u->faction->logEvent(new StrEvent("Times will be sent to your faction."));
 			u->faction->times = 1;
 		}
 		return;
@@ -871,7 +874,7 @@ void Game::ProcessOptionOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		delete token;
 		if (!pCheck)
 		{
-			u->faction->Event("Times will not be sent to your faction.");
+			u->faction->logEvent(new StrEvent("Times will not be sent to your faction."));
 			u->faction->times = 0;
 		}
 		return;

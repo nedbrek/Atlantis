@@ -10,7 +10,7 @@ OBJ := alist.o aregion.o army.o astring.o battle.o faction.o \
   fileio.o game.o gamedefs.o gameio.o genrules.o items.o main.o \
   market.o modify.o monthorders.o npc.o object.o orders.o parseorders.o \
   production.o runorders.o shields.o skills.o skillshows.o specials.o \
-  spells.o template.o unit.o
+  spells.o template.o unit.o events.o
 ALL_OBJ := $(OBJ) rand.o
 
 # objects per rule set
