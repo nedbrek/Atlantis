@@ -1610,7 +1610,7 @@ void Faction::writeGlobalJson()
 void Faction::WriteFacInfo(Aoutfile *file)
 {
 	file->PutStr( AString( "Faction: " ) + num );
-	file->PutStr( AString( "Name: " ) + name() );
+	file->PutStr( AString( "Name: " ) + *name_ );
 	file->PutStr( AString( "Email: " ) + *address );
 	file->PutStr( AString( "Password: " ) + *password );
 	file->PutStr( AString( "LastOrders: " ) + lastorders );

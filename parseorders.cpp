@@ -2303,7 +2303,11 @@ void Game::ProcessDeclareOrder(Faction *f, AString *o, OrdersCheck *pCheck)
 	}
 	else
 	{
-		fac = token->value();
+		if (!token->strict_value(&fac))
+		{
+			ParseError(pCheck, nullptr, f, AString("DECLARE: Invalid argument: ") + *token + ". Should be a faction number, DEFAULT, or ALIGNMENT.");
+			return;
+		}
 	}
 	delete token;
 

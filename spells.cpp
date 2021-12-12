@@ -690,8 +690,8 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
+	ParseError(pCheck, u, nullptr, AString("CAST GATE: Invalid argument: ") + *token + ".");
 	delete token;
-	u->Error("CAST: Invalid argument.");
 }
 
 void Game::RunACastOrder(ARegion *r, Object *o, Unit *u)
