@@ -37,7 +37,6 @@ AList::AList()
 
 AList::~AList()
 {
-	deleteAll();
 }
 
 void AList::deleteAll()
@@ -45,7 +44,7 @@ void AList::deleteAll()
 	while (list)
 	{
 		AListElem *temp = list->next;
-		delete list;
+		//delete list;
 		list = temp;
 	}
 	lastelem = 0;
