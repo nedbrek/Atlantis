@@ -95,9 +95,9 @@ int ParseAllItems(const AString &token)
 	return -1;
 }
 
-int ParseEnabledItem(const AString &token)
+int ParseEnabledItem(const AString &token, const int start)
 {
-	for (unsigned i = 0; i < ItemDefs.size(); ++i)
+	for (unsigned i = start; i < ItemDefs.size(); ++i)
 	{
 		if (ItemDefs[i].flags & ItemType::DISABLED)
 			continue;
