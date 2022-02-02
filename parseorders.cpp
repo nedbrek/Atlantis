@@ -2035,6 +2035,17 @@ void Game::ProcessBuyOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 	}
 }
 
+bool hasProduct(const ProductionList &pl, int item)
+{
+	forlist(&pl)
+	{
+		Production *p = (Production*)elem;
+		if (p->itemtype == item)
+			return true;
+	}
+	return false;
+}
+
 void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
@@ -2044,7 +2055,20 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	const int it = ParseEnabledItem(*token);
+	int it = ParseEnabledItem(*token);
+
+	if (!pCheck)
+	{
+		// check if region has the item
+		ARegion *reg = u->object->region;
+		const ProductionList &pl = reg->products;
+
+		while (it != -1 && !hasProduct(pl, it))
+		{
+			it = ParseEnabledItem(*token, it + 1);
+		}
+	}
+
 	delete token;
 
 	if (it == -1 || (ItemDefs[it].flags & ItemType::DISABLED))

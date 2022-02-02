@@ -401,7 +401,7 @@ extern BattleItemType *BattleItemDefs;
 
 int ParseGiveableItem(AString *);
 int ParseAllItems(const AString &token);
-int ParseEnabledItem(const AString &);
+int ParseEnabledItem(const AString &token, int start = 0);
 int ParseBattleItem(int);
 
 AString ItemString(int type,int num);
