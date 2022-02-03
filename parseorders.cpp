@@ -2057,7 +2057,7 @@ void Game::ProcessProduceOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	int it = ParseEnabledItem(*token);
 
-	if (!pCheck)
+	if (!pCheck && it == -1)
 	{
 		// check if region has the item
 		ARegion *reg = u->object->region;
