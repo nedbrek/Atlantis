@@ -1136,9 +1136,9 @@ void Game::RunSummonImps(ARegion *r, Unit *u)
 
 	const int count = m.level_scale * level + m.constant;
 	const int eff_ct = m.max_summon == -1 || (count + current <= m.max_summon) ? count : m.max_summon - current;
-	if (eff_ct == 0)
+	if (count != 0 && eff_ct == 0)
 	{
-		u->Error(AString("Can't control more than ") + ItemString(m.max_summon, item) + ".");
+		u->Error(AString("Can't control more than ") + ItemString(item, m.max_summon) + ".");
 		return;
 	}
 
@@ -1167,9 +1167,9 @@ void Game::RunSummonDemon(ARegion *r, Unit *u)
 
 	const int count = m.level_scale * level + m.constant;
 	const int eff_ct = m.max_summon == -1 || (count + current <= m.max_summon) ? count : m.max_summon - current;
-	if (eff_ct == 0)
+	if (count != 0 && eff_ct == 0)
 	{
-		u->Error(AString("Can't control more than ") + ItemString(m.max_summon, item) + ".");
+		u->Error(AString("Can't control more than ") + ItemString(item, m.max_summon) + ".");
 		return;
 	}
 
@@ -1199,9 +1199,9 @@ void Game::RunSummonBalrog(ARegion *r, Unit *u)
 	const int count = m.random ? (level * 20 + getrandom(100)) / 100 :
 	 m.level_scale * level + m.constant;
 	const int eff_ct = m.max_summon == -1 || (count + current <= m.max_summon) ? count : m.max_summon - current;
-	if (eff_ct == 0)
+	if (count != 0 && eff_ct == 0)
 	{
-		u->Error(AString("Can't control more than ") + ItemString(m.max_summon, item) + ".");
+		u->Error(AString("Can't control more than ") + ItemString(item, m.max_summon) + ".");
 		return;
 	}
 
