@@ -2889,14 +2889,15 @@ int ARegion::CanPillage(Unit *u)
 	return allow_pillage ? 1 : 0;
 }
 
-int ARegion::ForbiddenShip(Object *ship)
+Unit* ARegion::ForbiddenShip(Object *ship)
 {
 	for(auto &u : ship->getUnits())
 	{
-		if (Forbidden(u))
-			return 1;
+		Unit *forbid = Forbidden(u);
+		if (forbid)
+			return forbid;
 	}
-	return 0;
+	return nullptr;
 }
 
 void ARegion::DefaultOrders()
