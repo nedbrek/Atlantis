@@ -1798,6 +1798,7 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 	}
 
 	// check for crossing land
+	Unit *forbid = nullptr;
 	if (has_ship && !unit->object->canFly())
 	{
 		if (!newreg->IsCoastal())
@@ -1864,11 +1865,12 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 			}
 		}
 
-		if (newreg->ForbiddenShip(unit->object))
+		forbid = newreg->ForbiddenShip(unit->object);
+		if (unit->guard != GUARD_ADVANCE && forbid)
 		{
 			AString msg(*unit->object->name);
 			msg += AString(" is stopped by guards in ") + newreg->ShortPrint(&regions) + AString(".");
-			unit->faction->logEvent(new StrEvent(msg.str()));
+			unit->Event(msg);
 
 			delete unit->monthorders;
 			unit->monthorders = NULL;
@@ -1899,7 +1901,11 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 		}
 	}
 
-	Unit *forbid = newreg->Forbidden(unit);
+	if (!forbid)
+	{
+		forbid = newreg->Forbidden(unit);
+	}
+
 	if (forbid && !startmove && unit->guard != GUARD_ADVANCE)
 	{
 		unit->Event(AString("Is forbidden entry to ") + newreg->ShortPrint(&regions) + " by " + forbid->GetName(unit->GetObservation()) + ".");

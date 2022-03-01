@@ -268,7 +268,7 @@ public:
 	int CanPillage(Unit *u);
 
 	///@return 1 if any unit in 'ship' is forbidden from entering here
-	int ForbiddenShip(Object *ship);
+	Unit* ForbiddenShip(Object *ship);
 
 	///@return 1 if city guard present here
 	int HasCityGuard();
