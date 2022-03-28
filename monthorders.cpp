@@ -1396,25 +1396,60 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 	{
 		if (Globals->LIMITED_MAGES_PER_BUILDING)
 		{
-			if (obj->incomplete > 0 || obj->type == O_DUMMY)
+			Object *use_obj = obj;
+
+			if (obj->type == O_ARMY)
+			{
+				// use a ship in the fleet
+				for (const auto &sub_obj : obj->objects)
+				{
+					if (sub_obj->incomplete <= 0 && sub_obj->mages > 0)
+					{
+						use_obj = sub_obj;
+						break;
+					}
+				}
+			}
+
+			if (use_obj->incomplete > 0 || use_obj->type == O_DUMMY)
 			{
 				u->Error("Warning: Magic study rate outside of a building cut in half above level 2.");
 				days /= 2;
 			}
-			else if (obj->mages == 0)
+			else if (use_obj->mages == 0)
 			{
 				u->Error("Warning: Magic rate cut in half above level 2 due to number of mages studying in structure.");
 				days /= 2;
 			}
 			else
 			{
-				obj->mages--;
+				use_obj->mages--;
 			}
 		}
-		else if (!ObjectDefs[obj->type].protect || obj->incomplete > 0)
+		else
 		{
-			u->Error("Warning: Magic study rate outside of a building cut in half above level 2.");
-			days /= 2;
+			bool has_protect = false;
+			if (obj->type == O_ARMY)
+			{
+				for (const auto &sub_obj : obj->objects)
+				{
+					if (ObjectDefs[sub_obj->type].protect && sub_obj->incomplete <= 0)
+					{
+						has_protect = true;
+						break;
+					}
+				}
+			}
+			else if (ObjectDefs[obj->type].protect && obj->incomplete <= 0)
+			{
+				has_protect = true;
+			}
+
+			if (!has_protect)
+			{
+				u->Error("Warning: Magic study rate outside of a building cut in half above level 2.");
+				days /= 2;
+			}
 		}
 	}
 
