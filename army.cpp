@@ -927,6 +927,8 @@ void Army::Regenerate(Battle *b)
 
 void Army::Lose(Battle *b, ItemList *spoils)
 {
+	unsigned total_monsters = 0;
+	unsigned no_spoils_ct = 0;
 	for (int i = 0; i < count; ++i)
 	{
 		Soldier *&s = soldiers[i];
@@ -937,9 +939,29 @@ void Army::Lose(Battle *b, ItemList *spoils)
 		else
 		{
 			if (s->unit->type == U_WMON && (ItemDefs[s->race].type & IT_MONSTER))
+			{
+				++total_monsters;
+				if (Globals->MONSTER_NO_SPOILS > 0 &&
+				    s->unit->free >= Globals->MONSTER_SPOILS_RECOVERY)
+				{
+					++no_spoils_ct;
+				}
 				GetMonSpoils(spoils, s->race, s->unit->free);
+			}
 
 			s->Dead();
+		}
+	}
+
+	if (no_spoils_ct)
+	{
+		if (no_spoils_ct == total_monsters)
+		{
+			b->AddLine("Reduced spoils because all monsters have spawned recently.");
+		}
+		else
+		{
+			b->AddLine(AString("Reduced spoils because ") + AString(no_spoils_ct) + " of " + AString(total_monsters) + " monsters have spawned recently.");
 		}
 	}
 
