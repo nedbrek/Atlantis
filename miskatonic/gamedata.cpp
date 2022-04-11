@@ -5015,7 +5015,7 @@ static SpecialType spd[NUMSPECIALS] = {
 	 {-1, -1, -1},
 	 {I_HORSE, -1, -1, -1, -1, -1, -1},
 	 {EFFECT_FEAR, -1, -1},
-	 SpecialType::FX_DAMAGE,
+	 SpecialType::FX_DAMAGE|SpecialType::FX_COMBINE_MSG,
 	 {-1, -1, -1, -1},
 	 {{-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}},
 	 "a non-shield spell",

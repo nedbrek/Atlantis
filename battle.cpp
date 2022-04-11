@@ -61,13 +61,15 @@ void Battle::FreeRound(Army *att, Army *def, int ass)
 	att->round++;
 
 	// run attacks until done
+	std::map<Unit*, CombinedMsg> combined_count;
 	while (att->CanAttack() && def->NumAlive())
 	{
 		int num = getrandom(att->CanAttack());
 		int behind;
 		Soldier *a = att->GetAttacker(num, behind);
-		DoAttack(att->round, a, att, def, behind, ass);
+		DoAttack(att->round, a, att, def, behind, &combined_count, ass);
 	}
+	collectCombinedCount(combined_count);
 
 	// write losses
 	def->Regenerate(this);
@@ -79,9 +81,9 @@ void Battle::FreeRound(Army *att, Army *def, int ass)
 }
 
 void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-      int behind, bool ass)
+      int behind, std::map<Unit*, CombinedMsg> *combined_count, bool ass)
 {
-	DoSpecialAttack(round, a, attackers, def, behind);
+	DoSpecialAttack(round, a, attackers, def, behind, combined_count);
 
 	if (!def->NumAlive())
 		return;
@@ -116,8 +118,23 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 
 			if (tot != -1)
 			{
-				AddLine(a->name + " " + spd->spelldesc + ", " +
-				      spd->spelldesc2 + tot + spd->spelltarget + ".");
+				if (spd->effectflags & SpecialType::FX_COMBINE_MSG)
+				{
+					auto cci = combined_count->find(a->unit);
+					if (cci == combined_count->end())
+					{
+						combined_count->insert(std::make_pair(a->unit, CombinedMsg(pMt->mountSpecial, tot)));
+					}
+					else
+					{
+						cci->second.count += tot;
+					}
+				}
+				else
+				{
+					AddLine(a->name + " " + spd->spelldesc + ", " +
+					      spd->spelldesc2 + tot + spd->spelltarget + ".");
+				}
 			}
 		}
 	}
@@ -198,6 +215,7 @@ void Battle::NormalRound(int round, Army *a, Army *b)
 
 	// run attacks until done
 	// (both sides have living and one side has attackers)
+	std::map<Unit*, CombinedMsg> combined_count;
 	while (aalive && balive && (aatt || batt))
 	{
 		// pick someone to attack
@@ -210,14 +228,14 @@ void Battle::NormalRound(int round, Army *a, Army *b)
 
 			int behind;
 			Soldier *s = b->GetAttacker(num, behind);
-			DoAttack(b->round, s, b, a, behind);
+			DoAttack(b->round, s, b, a, behind, &combined_count);
 		}
 		else
 		{
 			// a attacks side b
 			int behind;
 			Soldier *s = a->GetAttacker(num, behind);
-			DoAttack(a->round, s, a, b, behind);
+			DoAttack(a->round, s, a, b, behind, &combined_count);
 		}
 
 		aalive = a->NumAlive();
@@ -227,6 +245,7 @@ void Battle::NormalRound(int round, Army *a, Army *b)
 	}
 
 	// finish round
+	collectCombinedCount(combined_count);
 	a->Regenerate(this);
 	b->Regenerate(this);
 

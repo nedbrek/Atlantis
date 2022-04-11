@@ -24,7 +24,9 @@
 // http://www.prankster.com/project
 //
 // END A3HEADER
+#include "astring.h"
 #include "alist.h"
+#include <map>
 class ARegion;
 class ARegionList;
 class Areport;
@@ -74,15 +76,28 @@ public:
 	void WriteSides(ARegion *r, Unit *att, Unit *tar, AList *atts, AList *defs, int ass, ARegionList *pRegs);
 
 private: // methods
+	struct CombinedMsg
+	{
+		int special_index;
+		int count;
+
+		CombinedMsg(int si, int ct)
+		: special_index(si)
+		, count(ct)
+		{
+		}
+	};
+
+	void collectCombinedCount(std::map<Unit*, CombinedMsg> &combined_count);
 	void FreeRound(Army *att, Army *def, int ass = 0);
 	void NormalRound(int round, Army *a, Army *b);
 	void DoAttack(int round, Soldier *a, Army *attackers, Army *def,
-	         int behind, bool ass = false);
+	         int behind, std::map<Unit*, CombinedMsg> *combined_count, bool ass = false);
 	void GetSpoils(AList *losers, ItemList *spoils, int ass);
 
 	// These functions should be implemented in specials.cpp
 	void UpdateShields(Army *);
-	void DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def, int behind);
+	void DoSpecialAttack(int round, Soldier *a, Army *attackers, Army *def, int behind, std::map<Unit*, CombinedMsg> *combined_count);
 
 public: // data
 	int assassination;
