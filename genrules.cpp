@@ -6068,6 +6068,31 @@ int Game::GenRules(const AString &rules, const AString &css,
 
 	f.Enclose(0, "BODY");
 	f.Enclose(0, "HTML");
+
+	std::ofstream skills("skills.dot");
+	skills << "strict digraph {" << std::endl;
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
+		const SkillType &s = SkillDefs[i];
+		if (s.depends[0].skill == -1)
+			continue;
+		if (s.flags & SkillType::DISABLED)
+			continue;
+
+		for (unsigned j = 0; j < sizeof(s.depends)/sizeof(s.depends[0]); ++j)
+		{
+			const SkillDepend d = s.depends[j];
+			if (d.skill == -1)
+				continue;
+			SkillType ds = SkillDefs[d.skill];
+			if (ds.flags & SkillType::DISABLED)
+				continue;
+
+			skills << ds.abbr << " -> " << s.abbr << " [label=" << d.level << ']' << std::endl;
+		}
+	}
+	skills << "}" << std::endl;
+
 	return 1;
 }
 

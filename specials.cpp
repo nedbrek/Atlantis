@@ -191,8 +191,21 @@ void Battle::UpdateShields(Army *a)
 	}
 }
 
+void Battle::collectCombinedCount(std::map<Unit*, CombinedMsg> &combined_count)
+{
+	for (const auto &cc : combined_count)
+	{
+		SpecialType *const spd = &SpecialDefs[cc.second.special_index];
+		AString temp = *cc.first->name + " " + spd->spelldesc;
+		temp += AString(", ") + spd->spelldesc2 + cc.second.count;
+		if (strlen(spd->spelltarget))
+			temp += AString(" ") + spd->spelltarget;
+		AddLine(temp + ".");
+	}
+}
+
 void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
-		Army *def, int behind)
+		Army *def, int behind, std::map<Unit*, CombinedMsg> *combined_count)
 {
 	if (a->special == -1)
 		return; // no special attack
@@ -243,6 +256,20 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 	if (tot == -1)
 	{
 		AddLine(a->name + " " + spd->spelldesc + ", but it is deflected.");
+		return;
+	}
+
+	if (spd->effectflags & SpecialType::FX_COMBINE_MSG)
+	{
+		auto cci = combined_count->find(a->unit);
+		if (cci == combined_count->end())
+		{
+			combined_count->insert(std::make_pair(a->unit, CombinedMsg(a->special, tot)));
+		}
+		else
+		{
+			cci->second.count += tot;
+		}
 		return;
 	}
 

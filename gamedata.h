@@ -842,7 +842,8 @@ public:
 		FX_USE_LEV      = 0x04,
 		FX_DEFBONUS     = 0x08,
 		FX_NOBUILDING   = 0x10,
-		FX_DONT_COMBINE = 0x20
+		FX_DONT_COMBINE = 0x20,
+		FX_COMBINE_MSG  = 0x40
 	};
 	int effectflags; ///< combination of above
 
