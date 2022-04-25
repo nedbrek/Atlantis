@@ -2076,22 +2076,9 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 	f.LinkRef("movement");
 	f.ClassTagText("DIV", "rule", "");
 	f.TagText("H2", "Movement");
-	if(may_sail)
-		temp = "There are two main methods of movement in Atlantis.  The "
-			"first ";
-	else
-		temp = "The main method of movement in Atlantis ";
-	temp += "is done using the ";
-	temp += f.Link("#move", "MOVE") + " order (or the " +
-		f.Link("#advance", "ADVANCE");
-	temp += " order), and moves units individually from one region to "
-		"another. ";
-	if(may_sail) {
-		temp += "The other method is done using the ";
-		temp += f.Link("#sail", "SAIL") + " order, which can sail a ";
-		temp += "ship, including all of its occupants from one region to "
-			"another. ";
-	}
+	temp = "Movement in Atlantis is mostly done using the ";
+	temp += f.Link("#move", "MOVE") + " order, or the " + f.Link("#advance", "ADVANCE");
+	temp += " order. This moves units from one region to another. ";
 	temp += "Certain powerful mages may also teleport themselves, or even "
 		"other units, but the knowledge of the workings of this magic is "
 		"carefully guarded.";
@@ -2217,6 +2204,7 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 	}
 	f.Enclose(0, "TABLE");
 	f.Enclose(0, "CENTER");
+
 	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		temp = "A unit which can fly, is capable of travelling over water.";
 		if(Globals->FLIGHT_OVER_WATER == GameDefs::WFLIGHT_MUST_LAND)
@@ -2245,6 +2233,7 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 	if(!Globals->CONQUEST_GAME)
 		temp += ", Jungle, and Tundra";
 	temp += ".";
+
 	if (Globals->WEATHER_EXISTS) {
 		temp += " Also, during certain seasons (depending on the latitude "
 			"of the region), all units (including flying ones) have a "
@@ -2253,10 +2242,10 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 			"in the tropics, seasonal hurricane winds and torrential "
 			"rains have a similar effect.";
 	}
+
 	temp += " Units may not move through ocean regions ";
 	if(may_sail) {
-		temp += "without using the ";
-		temp += f.Link("#sail", "SAIL") + " order";
+		temp += "without using a boat";
 	}
 	if(Globals->FLIGHT_OVER_WATER != GameDefs::WFLIGHT_NONE) {
 		temp += " unless they are capable of flight";
@@ -2305,22 +2294,23 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 	else
 		temp += " and has ";
 	temp += NumToWord(Globals->HORSE_SPEED);
-	int travel = Globals->HORSE_SPEED;
 	temp += " movement point";
 	temp += AString((Globals->HORSE_SPEED == 1) ? "" : "s") + ". ";
+
 	temp += "He issues the order MOVE NORTH NORTHEAST. First he moves north, "
-		"into a plain region.  This uses ";
+	    "into a plain region.  This uses ";
+
 	int cost = TerrainDefs[R_PLAIN].movepoints;
 	temp += NumToWord(cost) + " movement point" + (cost == 1?"":"s") + ".";
-	travel -= cost;
+
+	const int travel = Globals->HORSE_SPEED - cost;
 	if (travel > TerrainDefs[R_FOREST].movepoints)
 	{
 		temp += " Then he moves northeast, into a forest region. This uses ";
 		cost = TerrainDefs[R_FOREST].movepoints;
 		temp += NumToWord(cost) + " movement point" + (cost == 1?"":"s") + ",";
-		travel -= cost;
 		temp += " so the movement is completed with ";
-		temp += NumToWord(travel) + " to spare.";
+		temp += NumToWord(travel - cost) + " to spare.";
 	}
 	else
 	{
@@ -2339,31 +2329,30 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 	{
 		f.LinkRef("movement_sailing");
 		f.TagText("H3", "Sailing:");
-		temp = "Movement by sea is in some ways similar. It does not use the ";
-		temp += f.Link("#move", "MOVE") + " order however.  Instead, the " +
-			"owner of a ship must issue the " + f.Link("#sail", "SAIL") +
-			" order, and other units wishing to help sail the ship must " +
-			"also issue the " + f.Link("#sail", "SAIL") + " order. ";
+		temp = "Movement by sea is mostly similar.";
+		temp += AString(" The owner of a ship must issue the ") + f.Link("#move", "MOVE")
+			 + " (or " + f.Link("#advance", "ADVANCE") + ")"
+			 + " order, and other units wishing to help sail the ship must" +
+			" issue the " + f.Link("#sail", "SAIL") + " order. ";
 		temp += "The ship will then, if possible, make the indicated "
 			"movement, carrying all units on the ship with it.  Units on "
 			"board the ship, but not aiding in the sailing of the ship, "
 			"may execute other orders while the ship is sailing.  A unit "
 			"which does not wish to travel with the ship should leave the "
 			"ship in a coastal region, before the ";
-		temp += f.Link("#sail", "SAIL") + " order is processed.  (A coastal " +
+		temp += f.Link("#move", "MOVE") + " order is processed.  (A coastal " +
 			"region is defined as a non-ocean region with at least one "
 			"adjacent ocean region.)";
 		f.Paragraph(temp);
-		temp = AString("Note that a unit on board a ship while it is ") +
-			"sailing may not " + f.Link("#move", "MOVE") +
-			" later in the turn, even if he doesn't issue the " +
-			f.Link("#sail", "SAIL");
-		temp += " order; sailing is considered to take the whole month. "
-			"Also, units may not remain on guard while on board a sailing "
-			"ship; they will have to reissue the ";
+
+		temp = AString("Note that all units on board a ship while it is") +
+			" sailing will be charged movement points.";
+		temp += " Also, units may not remain on guard while in a ship that is"
+			" moving; they will have to reissue the ";
 		temp += f.Link("#guard", "GUARD") +  " 1 order to guard a " +
 			"region after sailing.";
 		f.Paragraph(temp);
+
 		temp = AString("Ships get ") + NumToWord(Globals->SHIP_SPEED);
 		temp += AString(" movement point") + (Globals->SHIP_SPEED==1?"":"s");
 		temp += " per turn.  A ship can move from an ocean region to "
@@ -2388,19 +2377,22 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 				"tropical latitudes).";
 		}
 		f.Paragraph(temp);
+
 		temp = "A ship can only move if the total weight of everything "
 			"aboard does not exceed the ship's capacity.  (The rules do "
 			"not prevent an overloaded ship from staying afloat, only "
 			"from moving.)  Also, there must be enough sailors aboard "
 			"(using the ";
 		temp += f.Link("#sail", "SAIL") + " order), to sail the ship, or ";
-		temp += "it will not go anywhere.  Note that the sailing skill "
+		temp += "it will not go anywhere. The SAIL skill of the owner is"
+		    " counted automatically.  Note that the sailing skill "
 			"increases the usefulness of a unit proportionally; thus, a "
 			"1 man unit with level 5 sailing skill can sail a longboat "
 			"alone.  (See the section on skills for further details on "
 			"skills.)  The capacities (and costs in labor units) of the "
 			"various basic ship types are as follows:";
 		f.Paragraph(temp);
+
 		f.LinkRef("tableshipcapacities");
 		f.Enclose(1, "CENTER");
 		f.Enclose(1, "TABLE BORDER=1");
@@ -2457,22 +2449,10 @@ void genMovement(Arules &f, bool may_sail, bool swimming_exists, int sword_idx)
 		"their second hex (if they have enough movement points left). This "
 		"continues until no units can move anymore.";
 	f.Paragraph(temp);
-	if(may_sail) {
-		temp = "Sailing is handled differently; Atlantis cycles through all "
-			"of the ships in Atlantis, moving them one at a time. When "
-			"Atlantis sails a ship, it sails it through its entire course, "
-			"either to the end, or until the ship enters a hex guarded "
-			"against some unit on the ship, and then moves onto the next "
-			"ship.";
-		f.Paragraph(temp);
-	}
-	temp = "Note that";
-	if(may_sail) {
-		temp += " in either case,";
-	}
-	temp += " the order in which the regions are processed is undefined "
-		"by the rules. The computer generally does them in the same "
-		"order every time, but it is up to the wiles of the player to "
+
+	temp = "Note that the order in which the regions are processed is"
+		" undefined by the rules. The computer generally does them in the same"
+		" order every time, but it is up to the wiles of the player to "
 		"determine (or not) these patterns. The order in which units or "
 		"ships are moved within a region is the order that they appear "
 		"on a turn report.";
@@ -4144,6 +4124,282 @@ void genCombat(Arules &f, bool has_stea, bool has_obse, int sword_idx, const Ite
 		}
 	}
 }
+
+void genMagic(Arules &f)
+{
+	AString temp;
+	f.LinkRef("magic");
+	f.ClassTagText("DIV", "rule", "");
+	f.TagText("H2", "Magic");
+	temp = "A character enters the world of magic in Atlantis by beginning "
+	    "study on one of the Foundation magic skills.  Only one man units";
+	if (!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST)
+		temp += ", with the man being a leader,";
+	temp += " are permitted to study these skills. ";
+	if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED)
+	{
+		temp += "The number of these units (known as \"magicians\" or "
+			"\"mages\") that a faction may own is ";
+		if (Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
+			temp += "limited.";
+		else
+			temp += "determined by the faction's type.";
+		temp += " Any attempt to gain more, either through study, or by "
+		    "transfer from another faction, will fail.  In addition, mages ";
+	}
+	else
+	{
+		temp += "Mages ";
+	}
+	temp += "may not ";
+	temp += f.Link("#give", "GIVE") + " men at all; once a unit becomes a "
+		"mage (by studying one of the Foundations), the unit number is "
+		"fixed. (The mage may be given to another faction using the ";
+	temp += f.Link("#give", "GIVE") + " UNIT order.)";
+	f.Paragraph(temp);
+
+	f.LinkRef("magic_skills");
+	f.TagText("H3", "Magic Skills:");
+	temp = "Magic skills are the same as normal skills, with a few "
+	    "differences.  The basic magic skills, called Foundations, are ";
+
+	int last = -1;
+	int comma = 0;
+	int num_found = 0;
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
+		if (SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if (!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+		++num_found;
+		if(last == -1) {
+			last = i;
+			continue;
+		}
+		temp += SkillDefs[last].name;
+		temp += ", ";
+		++comma;
+		last = i;
+	}
+	if (comma) temp += "and ";
+	temp += SkillDefs[last].name;
+	temp += ". To become a mage, a unit undertakes study in one of these "
+		"Foundations.  As a unit studies the Foundations, he will be able "
+		"to study deeper into the magical arts; the additional skills that "
+		"he may study will be indicated on your turn report.";
+	if (Globals->RACES_EXIST) {
+		temp += " All Magic Skills count as 1 skill in terms of race Max Skills count.";
+	}
+	f.Paragraph(temp);
+
+	temp = "There are two major differences between Magic skills and most "
+		"normal skills. The first is that the ability to study Magic skills "
+		"sometimes depends on lower level Magic skills.  The Magic skills "
+		"that a mage may study are listed on his turn report, so he knows "
+		"which areas he may pursue.  Studying higher in the Foundation "
+		"skills, and certain other Magic skills, will make other skills "
+		"available to the mage. Also, study into a magic skill above "
+		"level 2 requires that the mage be located in some sort of "
+		"building which can ";
+	if (!Globals->LIMITED_MAGES_PER_BUILDING) {
+		temp += "offer protection.  Trade structures do not count. ";
+	}
+	else {
+		temp += "offer specific protection to mages.  Certain types of "
+			"buildings can offer shelter and support and a proper "
+			"environment, some more so than others. ";
+	}
+	temp += "If the mage is not in such a structure, his study rate is cut "
+			"in half, as he does not have the proper environment and "
+			"equipment for research.";
+	f.Paragraph(temp);
+
+	if (Globals->LIMITED_MAGES_PER_BUILDING)
+	{
+		temp = "It is possible that there are advanced buildings not listed "
+			"here which also can support mages.  The description of a "
+			"building will tell you for certain.  The common buildings and "
+			"the mages a building of that type can support follows:";
+		f.LinkRef("tablemagebuildings");
+		f.Enclose(1, "CENTER");
+		f.Enclose(1, "TABLE BORDER=1");
+		f.Enclose(1, "TR");
+		f.TagText("TD", "");
+		f.TagText("TH", "Mages");
+		f.Enclose(0, "TR");
+		for (unsigned i = 0; i < NOBJECTS; ++i)
+		{
+			if (ObjectDefs[i].flags & ObjectType::DISABLED) continue;
+			if (!ObjectDefs[i].maxMages) continue;
+			int j = ObjectDefs[i].skill;
+			if (j == -1) continue;
+			if (SkillDefs[j].flags & SkillType::MAGIC) continue;
+			j = ObjectDefs[i].item;
+			if (j == -1) continue;
+			// Need the >0 since item could be WOOD_OR_STONE (-2)
+			if (j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
+			if (j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
+			// Okay, this is a valid object to build!
+			f.Enclose(1, "TR");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].name);
+			f.Enclose(0, "TD");
+			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
+			f.PutStr(ObjectDefs[i].maxMages);
+			f.Enclose(0, "TD");
+		}
+		f.Enclose(0, "TABLE");
+		f.Enclose(0, "CENTER");
+	}
+
+	f.LinkRef("magic_foundations");
+	f.TagText("H3", "Foundations:");
+	temp = "The ";
+	temp += NumToWord(num_found);
+	temp += " Foundation skills are called ";
+	last = -1;
+	comma = 0;
+	for (unsigned i = 0; i < NSKILLS; ++i)
+	{
+		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
+		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
+		if(last == -1) {
+			last = i;
+			continue;
+		}
+		temp += SkillDefs[last].name;
+		temp += ", ";
+		comma++;
+		last = i;
+	}
+	if (comma) temp += "and ";
+	temp += SkillDefs[last].name;
+	temp += ".";
+
+	// TODO -- This needs better handling!
+	// Add each foundation here if it exists
+	if (!(SkillDefs[S_FORCE].flags & SkillType::DISABLED)) {
+		temp += " Force indicates the quantity of magical energy that a "
+			"mage is able to channel (a Force rating of 0 does not mean "
+			"that the mage can channel no magical energy at all, but only "
+			"a minimal amount).";
+	}
+	if (!(SkillDefs[S_PATTERN].flags & SkillType::DISABLED)) {
+		temp += " Pattern indicates ability to handle complex patterns, and "
+			"is important for things like healing and nature spells. ";
+	}
+	if (!(SkillDefs[S_SPIRIT].flags & SkillType::DISABLED)) {
+		temp += " Spirit deals with meta-effects that lie outside the scope "
+			"of the physical world.";
+	}
+	f.Paragraph(temp);
+
+	f.LinkRef("magic_furtherstudy");
+	f.TagText("H3", "Further Magic Study:");
+	temp = "Once a mage has begun study of one or more Foundations, more "
+		"skills that he may study will begin to show up on his report. "
+		"These skills are the skills that give a mage his power.  As with "
+		"normal skills, when a mage achieves a new level of a magic skill, "
+		"he will be given a skill report, describing the new powers (if "
+		"any) that the new skill confers.  The ";
+	temp += f.Link("#show", "SHOW") + " order may be used to show this "
+		"information on future reports.";
+	f.Paragraph(temp);
+
+	f.LinkRef("magic_usingmagic");
+	f.TagText("H3", "Using Magic:");
+	temp = "A mage may use his magical power in three different ways, "
+		"depending on the type of spell he wants to use.  Some spells, "
+		"once learned, take effect automatically and are considered "
+		"always to be in use; these spells do not require any order to "
+		"take effect.";
+	f.Paragraph(temp);
+
+	temp = "Secondly, some spells are for use in combat. A mage may specify "
+		"that he wishes to use a spell in combat by issuing the ";
+	temp += f.Link("#combat", "COMBAT") + " order.  A combat spell "
+		"specified in this way will only be used if the mage finds "
+		"himself taking part in a battle.";
+	f.Paragraph(temp);
+
+	temp = "The third type of spell use is for spells that take an entire "
+		"month to cast.  These spells are cast by the mage issuing the ";
+	temp += f.Link("#cast", "CAST") + " order. Because " +
+		f.Link("#cast", "CAST") + " takes an entire month, a mage may use "
+		"only one of this type of spell each turn. Note, however, that a ";
+	temp += f.Link("#cast", "CAST") + " order is not a full month order; "
+		"a mage may still ";
+	temp += f.Link("#move", "MOVE") + ", ";
+	temp += f.Link("#study", "STUDY") + ", or use any other month long order. ";
+	temp += "The justification for this (as well as being for game balance) "
+		"is that a spell drains a mage of his magic power for the month, "
+		"but does not actually take the entire month to cast.";
+	f.Paragraph(temp);
+
+	temp = "The description that a mage receives when he first learns a "
+		"spell specifies the manner in which the spell is used (automatic, "
+		"in combat, or by casting).";
+	f.Paragraph(temp);
+
+	f.LinkRef("magic_incombat");
+	f.TagText("H3", "Magic in Combat:");
+	temp = "NOTE: This section is rather vague, and quite advanced.  You "
+		"may want to wait until you have figured out other parts of "
+		"Atlantis before trying to understand exactly all of the rules in "
+		"this section.";
+	f.Paragraph(temp);
+
+	temp = "Although the magic skills and spells are unspecified in these "
+		"rules, left for the players to discover, the rules for combat "
+		"spells' interaction are spelled out here.  There are five major "
+		"types of attacks, and defenses: Combat, Ranged, Energy, Weather, "
+		"and Spirit.  Every attack and defense has a type, and only the "
+		"appropriate defense is effective against an attack.";
+	f.Paragraph(temp);
+
+	temp = "Defensive spells are cast at the beginning of each round of "
+		"combat, and will have a type of attack they deflect, and skill "
+		"level (Defensive spells are generally called Shields).  Every "
+		"time an attack is launched against an army, it must first attack "
+		"the highest level Shield of the same type as the attack, before "
+		"it may attack a soldier directly. Note that an attack only has "
+		"to attack the highest Shield, any other Shields of the same "
+		"type are ignored for that attack.";
+	f.Paragraph(temp);
+
+	temp = "An attack spell (and any other type of attack) also has an "
+		"attack type, and attack level, and a number of blows it deals. "
+		"When the attack spell is cast, it is matched up against the most "
+		"powerful defensive spell of the appropriate type that the other "
+		"army has cast.  If the other army has not cast any applicable "
+		"defensive spells, the attack goes through unmolested.  Unlike "
+		"normal combat however, men are at a disadvantage to defending "
+		"against spells.   Men which are in the open (not protected by "
+		"a building) have an effective skill of -2 unless they have a "
+		"shield or some other defensive magic.  Some monsters "
+		"have bonuses to resisting some attacks but are more susceptible "
+		"to others. The skill level of the attack spell and the effective "
+		"skill for defense are matched against each other.  The formula "
+		"for determining the victor between a defensive and offensive "
+		"spell is the same as for a contest of soldiers; if the levels "
+		"are equal, there is a 1:1 chance of success, and so on.  If the "
+		"offensive spell is victorious, the offensive spell deals its blows "
+		"to the defending army, and the Shield in question is destroyed "
+		"(thus, it can be useful to have more than one of the same type "
+		"of Shield in effect, as the other Shield will take the place of "
+		"the destroyed one).  Otherwise, the attack spell disperses, and "
+		"the defending spell remains in place.";
+	f.Paragraph(temp);
+
+	temp = "Some spells do not actually kill enemies, but rather have some "
+		"negative effect on them. These spells are treated the same as "
+		"normal spells; if there is a Shield of the same type as them, "
+		"they must attack the Shield before attacking the army. "
+		"Physical attacks that go through a defensive spell also must "
+		"match their skill level against that of the defensive spell in "
+		"question.  However, they do not destroy the defensive spell when "
+		"they are successful.";
+	f.Paragraph(temp);
+}
 }
 
 int Game::GenRules(const AString &rules, const AString &css,
@@ -5297,258 +5553,7 @@ int Game::GenRules(const AString &rules, const AString &css,
 	genCombat(f, has_stea, has_obse, sword_idx, lbow_item);
 
 	// magic
-	f.LinkRef("magic");
-	f.ClassTagText("DIV", "rule", "");
-	f.TagText("H2", "Magic");
-	temp = "A character enters the world of magic in Atlantis by beginning "
-		"study on one of the Foundation magic skills.  Only one man units";
-	if(!Globals->MAGE_NONLEADERS && Globals->LEADERS_EXIST)
-		temp += ", with the man being a leader,";
-	temp += " are permitted to study these skills. ";
-	if(Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED) {
-		temp += "The number of these units (known as \"magicians\" or "
-			"\"mages\") that a faction may own is ";
-		if(Globals->FACTION_LIMIT_TYPE == GameDefs::FACLIM_MAGE_COUNT)
-			temp += "limited.";
-		else
-			temp += "determined by the faction's type.";
-		temp += " Any attempt to gain more, either through study, or by "
-			"transfer from another faction, will fail.  In addition, mages ";
-	} else {
-		temp += "Mages ";
-	}
-	temp += "may not ";
-	temp += f.Link("#give", "GIVE") + " men at all; once a unit becomes a "
-		"mage (by studying one of the Foundations), the unit number is "
-		"fixed. (The mage may be given to another faction using the ";
-	temp += f.Link("#give", "GIVE") + " UNIT order.)";
-	f.Paragraph(temp);
-	f.LinkRef("magic_skills");
-	f.TagText("H3", "Magic Skills:");
-	temp = "Magic skills are the same as normal skills, with a few "
-		"differences.  The basic magic skills, called Foundations, are ";
-	last = -1;
-	comma = 0;
-	int j = 0;
-	for (unsigned i = 0; i < NSKILLS; ++i)
-	{
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
-		j++;
-		if(last == -1) {
-			last = i;
-			continue;
-		}
-		temp += SkillDefs[last].name;
-		temp += ", ";
-		comma++;
-		last = i;
-	}
-	if(comma) temp += "and ";
-	temp += SkillDefs[last].name;
-	temp += ". To become a mage, a unit undertakes study in one of these "
-		"Foundations.  As a unit studies the Foundations, he will be able "
-		"to study deeper into the magical arts; the additional skills that "
-		"he may study will be indicated on your turn report.";
-	if(Globals->RACES_EXIST) {
-		temp += " All Magic Skills count as 1 skill in terms of race Max Skills count.";
-	}
-	f.Paragraph(temp);
-	temp = "There are two major differences between Magic skills and most "
-		"normal skills. The first is that the ability to study Magic skills "
-		"sometimes depends on lower level Magic skills.  The Magic skills "
-		"that a mage may study are listed on his turn report, so he knows "
-		"which areas he may pursue.  Studying higher in the Foundation "
-		"skills, and certain other Magic skills, will make other skills "
-		"available to the mage. Also, study into a magic skill above "
-		"level 2 requires that the mage be located in some sort of "
-		"building which can ";
-	if(!Globals->LIMITED_MAGES_PER_BUILDING) {
-		temp += "offer protection.  Trade structures do not count. ";
-	} else {
-		temp += "offer specific protection to mages.  Certain types of "
-			"buildings can offer shelter and support and a proper "
-			"environment, some more so than others. ";
-	}
-	temp += "If the mage is not in such a structure, his study rate is cut "
-			"in half, as he does not have the proper environment and "
-			"equipment for research.";
-	f.Paragraph(temp);
-
-	if(Globals->LIMITED_MAGES_PER_BUILDING) {
-		temp = "It is possible that there are advanced buildings not listed "
-			"here which also can support mages.  The description of a "
-			"building will tell you for certain.  The common buildings and "
-			"the mages a building of that type can support follows:";
-		f.LinkRef("tablemagebuildings");
-		f.Enclose(1, "CENTER");
-		f.Enclose(1, "TABLE BORDER=1");
-		f.Enclose(1, "TR");
-		f.TagText("TD", "");
-		f.TagText("TH", "Mages");
-		f.Enclose(0, "TR");
-		for (unsigned i = 0; i < NOBJECTS; ++i)
-		{
-			if(ObjectDefs[i].flags & ObjectType::DISABLED) continue;
-			if(!ObjectDefs[i].maxMages) continue;
-			int j = ObjectDefs[i].skill;
-			if(j == -1) continue;
-			if(SkillDefs[j].flags & SkillType::MAGIC) continue;
-			j = ObjectDefs[i].item;
-			if(j == -1) continue;
-			/* Need the >0 since item could be WOOD_OR_STONE (-2) */
-			if(j > 0 && (ItemDefs[j].flags & ItemType::DISABLED)) continue;
-			if(j > 0 && !(ItemDefs[j].type & IT_NORMAL)) continue;
-			/* Okay, this is a valid object to build! */
-			f.Enclose(1, "TR");
-			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-			f.PutStr(ObjectDefs[i].name);
-			f.Enclose(0, "TD");
-			f.Enclose(1, "TD ALIGN=LEFT NOWRAP");
-			f.PutStr(ObjectDefs[i].maxMages);
-			f.Enclose(0, "TD");
-		}
-		f.Enclose(0, "TABLE");
-		f.Enclose(0, "CENTER");
-	}
-
-	f.LinkRef("magic_foundations");
-	f.TagText("H3", "Foundations:");
-	temp = "The ";
-	temp += NumToWord(j);
-	temp += " Foundation skills are called ";
-	last = -1;
-	comma = 0;
-	for (unsigned i = 0; i < NSKILLS; ++i)
-	{
-		if(SkillDefs[i].flags & SkillType::DISABLED) continue;
-		if(!(SkillDefs[i].flags & SkillType::FOUNDATION)) continue;
-		if(last == -1) {
-			last = i;
-			continue;
-		}
-		temp += SkillDefs[last].name;
-		temp += ", ";
-		comma++;
-		last = i;
-	}
-	if(comma) temp += "and ";
-	temp += SkillDefs[last].name;
-	temp += ".";
-	/* XXX -- This needs better handling! */
-	/* Add each foundation here if it exists */
-	if(!(SkillDefs[S_FORCE].flags & SkillType::DISABLED)) {
-		temp += " Force indicates the quantity of magical energy that a "
-			"mage is able to channel (a Force rating of 0 does not mean "
-			"that the mage can channel no magical energy at all, but only "
-			"a minimal amount).";
-	}
-	if(!(SkillDefs[S_PATTERN].flags & SkillType::DISABLED)) {
-		temp += " Pattern indicates ability to handle complex patterns, and "
-			"is important for things like healing and nature spells. ";
-	}
-	if(!(SkillDefs[S_SPIRIT].flags & SkillType::DISABLED)) {
-		temp += " Spirit deals with meta-effects that lie outside the scope "
-			"of the physical world.";
-	}
-	f.Paragraph(temp);
-	f.LinkRef("magic_furtherstudy");
-	f.TagText("H3", "Further Magic Study:");
-	temp = "Once a mage has begun study of one or more Foundations, more "
-		"skills that he may study will begin to show up on his report. "
-		"These skills are the skills that give a mage his power.  As with "
-		"normal skills, when a mage achieves a new level of a magic skill, "
-		"he will be given a skill report, describing the new powers (if "
-		"any) that the new skill confers.  The ";
-	temp += f.Link("#show", "SHOW") + " order may be used to show this "
-		"information on future reports.";
-	f.Paragraph(temp);
-	f.LinkRef("magic_usingmagic");
-	f.TagText("H3", "Using Magic:");
-	temp = "A mage may use his magical power in three different ways, "
-		"depending on the type of spell he wants to use.  Some spells, "
-		"once learned, take effect automatically and are considered "
-		"always to be in use; these spells do not require any order to "
-		"take effect.";
-	f.Paragraph(temp);
-	temp = "Secondly, some spells are for use in combat. A mage may specify "
-		"that he wishes to use a spell in combat by issuing the ";
-	temp += f.Link("#combat", "COMBAT") + " order.  A combat spell "
-		"specified in this way will only be used if the mage finds "
-		"himself taking part in a battle.";
-	f.Paragraph(temp);
-	temp = "The third type of spell use is for spells that take an entire "
-		"month to cast.  These spells are cast by the mage issuing the ";
-	temp += f.Link("#cast", "CAST") + " order. Because " +
-		f.Link("#cast", "CAST") + " takes an entire month, a mage may use "
-		"only one of this type of spell each turn. Note, however, that a ";
-	temp += f.Link("#cast", "CAST") + " order is not a full month order; "
-		"a mage may still ";
-	temp += f.Link("#move", "MOVE") + ", ";
-	temp += f.Link("#study", "STUDY") + ", or use any other month long order. ";
-	temp += "The justification for this (as well as being for game balance) "
-		"is that a spell drains a mage of his magic power for the month, "
-		"but does not actually take the entire month to cast.";
-	f.Paragraph(temp);
-	temp = "The description that a mage receives when he first learns a "
-		"spell specifies the manner in which the spell is used (automatic, "
-		"in combat, or by casting).";
-	f.Paragraph(temp);
-	f.LinkRef("magic_incombat");
-	f.TagText("H3", "Magic in Combat:");
-	temp = "NOTE: This section is rather vague, and quite advanced.  You "
-		"may want to wait until you have figured out other parts of "
-		"Atlantis before trying to understand exactly all of the rules in "
-		"this section.";
-	f.Paragraph(temp);
-	temp = "Although the magic skills and spells are unspecified in these "
-		"rules, left for the players to discover, the rules for combat "
-		"spells' interaction are spelled out here.  There are five major "
-		"types of attacks, and defenses: Combat, Ranged, Energy, Weather, "
-		"and Spirit.  Every attack and defense has a type, and only the "
-		"appropriate defense is effective against an attack.";
-	f.Paragraph(temp);
-	temp = "Defensive spells are cast at the beginning of each round of "
-		"combat, and will have a type of attack they deflect, and skill "
-		"level (Defensive spells are generally called Shields).  Every "
-		"time an attack is launched against an army, it must first attack "
-		"the highest level Shield of the same type as the attack, before "
-		"it may attack a soldier directly. Note that an attack only has "
-		"to attack the highest Shield, any other Shields of the same "
-		"type are ignored for that attack.";
-	f.Paragraph(temp);
-	temp = "An attack spell (and any other type of attack) also has an "
-		"attack type, and attack level, and a number of blows it deals. "
-		"When the attack spell is cast, it is matched up against the most "
-		"powerful defensive spell of the appropriate type that the other "
-		"army has cast.  If the other army has not cast any applicable "
-		"defensive spells, the attack goes through unmolested.  Unlike "
-		"normal combat however, men are at a disadvantage to defending "
-		"against spells.   Men which are in the open (not protected by "
-		"a building) have an effective skill of -2 unless they have a "
-		"shield or some other defensive magic.  Some monsters "
-		"have bonuses to resisting some attacks but are more susceptible "
-		"to others. The skill level of the attack spell and the effective "
-		"skill for defense are matched against each other.  The formula "
-		"for determining the victor between a defensive and offensive "
-		"spell is the same as for a contest of soldiers; if the levels "
-		"are equal, there is a 1:1 chance of success, and so on.  If the "
-		"offensive spell is victorious, the offensive spell deals its blows "
-		"to the defending army, and the Shield in question is destroyed "
-		"(thus, it can be useful to have more than one of the same type "
-		"of Shield in effect, as the other Shield will take the place of "
-		"the destroyed one).  Otherwise, the attack spell disperses, and "
-		"the defending spell remains in place.";
-	f.Paragraph(temp);
-	temp = "Some spells do not actually kill enemies, but rather have some "
-		"negative effect on them. These spells are treated the same as "
-		"normal spells; if there is a Shield of the same type as them, "
-		"they must attack the Shield before attacking the army. "
-		"Physical attacks that go through a defensive spell also must "
-		"match their skill level against that of the defensive spell in "
-		"question.  However, they do not destroy the defensive spell when "
-		"they are successful.";
-	f.Paragraph(temp);
+	genMagic(f);
 
 	// non-players
 	f.LinkRef("nonplayers");
