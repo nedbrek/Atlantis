@@ -1879,28 +1879,46 @@ void genOrders(Arules &f, const bool move_over_water)
 void genTaxers(Arules &f, AString *s)
 {
 	AString &temp = *s;
-	AString temp2, temp3;
-	int prev = 0, hold = 0;
+
+	if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE)
+	{
+		temp += "Any unit may ";
+		temp += f.Link("#tax", "TAX");
+		temp += ". ";
+		return;
+	}
+
 	temp += "A unit may ";
 	temp += f.Link("#tax", "TAX");
 	temp += " if it ";
+
+	AString temp2, temp3;
+	int prev = 0, hold = 0;
+
+	// skill based
 	if (Globals->WHO_CAN_TAX &
 	    (GameDefs::TAX_COMBAT_SKILL | GameDefs::TAX_BOW_SKILL |
 	     GameDefs::TAX_RIDING_SKILL | GameDefs::TAX_STEALTH_SKILL))
 	{
 		int prev2 = 0, hold2 = 0;
-		if (hold) {
+		if (hold)
+		{
 			if (prev) temp += ", ";
 			temp += temp2;
-			prev= 1;
+			prev = 1;
 		}
 		temp2 = "has ";
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) {
+
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL)
+		{
 			temp3 = "Combat";
 			hold2 = 1;
 		}
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) {
-			if (hold2) {
+
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL)
+		{
+			if (hold2)
+			{
 				temp2 += temp3;
 				prev2 = 1;
 			}
@@ -1910,8 +1928,11 @@ void genTaxers(Arules &f, AString *s)
 			temp3 = "Crossbow";
 			hold2 = 1;
 		}
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) {
-			if (hold2) {
+
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL)
+		{
+			if (hold2)
+			{
 				if (prev2) temp2 += ", ";
 				temp2 += temp3;
 				prev2 = 1;
@@ -1919,8 +1940,11 @@ void genTaxers(Arules &f, AString *s)
 			temp3 = "Riding";
 			hold2 = 1;
 		}
-		if (Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) {
-			if (hold2) {
+
+		if (Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL)
+		{
+			if (hold2)
+			{
 				if (prev2) temp2 += ", ";
 				temp2 += temp3;
 				prev2= 1;
@@ -1928,34 +1952,39 @@ void genTaxers(Arules &f, AString *s)
 			temp3 = "Stealth";
 			hold2 = 1;
 		}
+
 		if (prev2) temp2 += " or ";
 		temp2 += temp3;
 		temp2 += " skill of at least level 1";
 		hold = 1;
 	}
 
+	// weapon with skill
 	if (Globals->WHO_CAN_TAX &
 		 (GameDefs::TAX_ANY_WEAPON | GameDefs::TAX_USABLE_WEAPON |
 		  GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
 		  GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON))
 	{
-		if (hold) {
+		if (hold)
+		{
 			if (prev) temp += ", ";
 			temp += temp2;
-			prev= 1;
+			prev = 1;
 		}
 		temp2 = "has ";
+
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_ANY_WEAPON)
 			temp2 += "a weapon (regardless of skill requirements)";
 		else if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_WEAPON)
 			temp2 += "a weapon and the appropriate skill to use it";
 		else if (Globals->WHO_CAN_TAX &
-				(GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
-				 GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON)) {
+		      (GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL |
+		       GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON))
+		{
 			AString temp3;
 			int prev2 = 0, hold2 = 0;
-			if (Globals->WHO_CAN_TAX &
-					GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL) {
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MELEE_WEAPON_AND_MATCHING_SKILL)
+			{
 				temp2 += "Combat skill of at least level 1 and a "
 					"weapon which does not require any skill";
 				temp3 = "Riding skill of at least level 1 and "
@@ -1963,9 +1992,11 @@ void genTaxers(Arules &f, AString *s)
 				prev2 = 1;
 				hold2 = 1;
 			}
-			if (Globals->WHO_CAN_TAX &
-					GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON) {
-				if (hold2) {
+
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL_AND_MATCHING_WEAPON)
+			{
+				if (hold2)
+				{
 					temp2 += ", ";
 					temp2 += temp3;
 				}
@@ -1982,10 +2013,11 @@ void genTaxers(Arules &f, AString *s)
 	if (Globals->WHO_CAN_TAX &
 		 (GameDefs::TAX_HORSE | GameDefs::TAX_HORSE_AND_RIDING_SKILL))
 	{
-		if (hold) {
+		if (hold)
+		{
 			if (prev) temp += ", ";
 			temp += temp2;
-			prev= 1;
+			prev = 1;
 		}
 		temp2 = "has a mount";
 		if (!(Globals->WHO_CAN_TAX & GameDefs::TAX_HORSE))
@@ -1997,43 +2029,57 @@ void genTaxers(Arules &f, AString *s)
 		 (GameDefs::TAX_ANY_MAGE | GameDefs::TAX_MAGE_DAMAGE |
 		  GameDefs::TAX_MAGE_FEAR | GameDefs::TAX_MAGE_OTHER))
 	{
-		if (hold) {
+		if (hold)
+		{
 			if (prev) temp += ", ";
 			temp += temp2;
-			prev= 1;
+			prev = 1;
 		}
-		temp2 = "is a mage ";
-		if ((Globals->WHO_CAN_TAX &
-					(GameDefs::TAX_MAGE_DAMAGE |
-					 GameDefs::TAX_MAGE_FEAR |
-					 GameDefs::TAX_MAGE_OTHER)) ==
-				(GameDefs::TAX_MAGE_DAMAGE | GameDefs::TAX_MAGE_FEAR |
-				 GameDefs::TAX_MAGE_OTHER)) {
+		temp2 = "is a mage";
+
+		const int mage_scary_spells = GameDefs::TAX_MAGE_DAMAGE |
+		          GameDefs::TAX_MAGE_FEAR |
+		          GameDefs::TAX_MAGE_OTHER;
+
+		const int mage_tax_settings = Globals->WHO_CAN_TAX & mage_scary_spells;
+
+		if (mage_tax_settings == mage_scary_spells)
+		{
 			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
-				temp2 += "who has a combat spell set";
+				temp2 += " who has a combat spell set";
 			else
-				temp2 += "who knows a combat spell";
-		} else {
+				temp2 += " who knows a combat spell";
+		}
+		else
+		{
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
+				temp2 += " whose combat spell ";
+			else if (mage_tax_settings != 0)
+				temp2 += " who knows a spell which ";
+
 			int hold2 = 0, prev2 = 0;
 			AString temp3;
-			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_COMBAT_SPELL)
-				temp2 += "whose combat spell ";
-			else
-				temp2 += "who knows a spell which ";
-			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE) {
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_DAMAGE)
+			{
 				temp3 = "damages enemies";
 				hold2 = 1;
 			}
-			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR) {
-				if (hold2) {
+
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_FEAR)
+			{
+				if (hold2)
+				{
 					temp2 += temp3;
 					prev2 = 1;
 				}
 				temp3 = "weakens opponents";
 				hold2 = 1;
 			}
-			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER) {
-				if (hold2) {
+
+			if (Globals->WHO_CAN_TAX & GameDefs::TAX_MAGE_OTHER)
+			{
+				if (hold2)
+				{
 					if (prev2) temp2 += ", ";
 					temp2 += temp3;
 					prev2 = 1;
@@ -2041,6 +2087,7 @@ void genTaxers(Arules &f, AString *s)
 				temp3 = "protects in combat";
 				hold2 = 1;
 			}
+
 			if (prev2) temp2 += " or ";
 			temp2 += temp3;
 		}
@@ -2051,20 +2098,23 @@ void genTaxers(Arules &f, AString *s)
 		 (GameDefs::TAX_BATTLE_ITEM |
 		  GameDefs::TAX_USABLE_BATTLE_ITEM))
 	{
-		if (hold) {
+		if (hold)
+		{
 			if (prev) temp += ", ";
 			temp += temp2;
 			prev= 1;
 		}
+
 		if (Globals->WHO_CAN_TAX & GameDefs::TAX_USABLE_BATTLE_ITEM)
 			temp2 = "has a ";
 		else
 			temp2 = "can use a ";
+
 		temp2 += "magical item which gives a special attack in combat";
 		hold = 1;
 	}
 
-	if (prev) temp += " or ";
+	if (prev) temp += ", or ";
 	temp += temp2;
 	temp += ". ";
 }
