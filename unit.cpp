@@ -2758,30 +2758,29 @@ int Unit::Taxers()
 	int creatures = 0;
 	int taxers = 0;
 
-	// if men can tax
-	if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) ||
-		((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) &&
-		 GetSkill(S_COMBAT)) ||
-		((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) &&
-		 (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW))) ||
-		((Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) &&
-		 GetSkill(S_RIDING)) ||
-		((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) &&
-		 GetSkill(S_STEALTH)))
+	const bool has_comb = GetSkill(S_COMBAT) > 0;
+
+	// if a broad category of men can tax
+	if ((Globals->WHO_CAN_TAX & GameDefs::TAX_ANYONE) // anyone
+	 || ((Globals->WHO_CAN_TAX & GameDefs::TAX_COMBAT_SKILL) && has_comb) // need comb
+	 || ((Globals->WHO_CAN_TAX & GameDefs::TAX_BOW_SKILL) && (GetSkill(S_CROSSBOW) || GetSkill(S_LONGBOW))) // need bow skill
+	 || ((Globals->WHO_CAN_TAX & GameDefs::TAX_RIDING_SKILL) && GetSkill(S_RIDING)) // need RIDI
+	 || ((Globals->WHO_CAN_TAX & GameDefs::TAX_STEALTH_SKILL) && GetSkill(S_STEALTH)) // need STEA
+	   )
 	{
 		taxers = totalMen;
 	}
 	else
 	{
-		// check out items
+		// need to look at items
 		int numMelee = 0;
-		int numUsableMelee = 0;
+		int numUsableMelee = 0; // weapon + COMB
 		int numBows = 0;
 		int numUsableBows = 0;
 		int numMounted = 0;
 		int numUsableMounted = 0;
 		int numMounts = 0;
-		int numUsableMounts = 0;
+		int numUsableMounts = 0; // mounts that we have skill to ride
 		int numBattle = 0;
 		int numUsableBattle = 0;
 
@@ -2817,7 +2816,7 @@ int Unit::Taxers()
 				if (!(pWep->flags & WeaponType::NEEDSKILL))
 				{
 					// A melee weapon
-					if (GetSkill(S_COMBAT))
+					if (has_comb)
 						numUsableMelee += pItem->num;
 
 					numMelee += pItem->num;
