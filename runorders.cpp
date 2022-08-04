@@ -545,15 +545,14 @@ void Game::SinkUncrewedShips()
 	forlist(&regions)
 	{
 		ARegion *r = (ARegion*)elem;
+		const bool in_ocean = TerrainDefs[r->type].similar_type == R_OCEAN;
 
+		std::vector<Object*> save_obj;
 		forlist(&r->objects)
 		{
 			Object *o = (Object*)elem;
-			bool check_empty = TerrainDefs[r->type].similar_type == R_OCEAN && o->IsBoat();
 			// also remove empty armies
-			if (o->type == O_ARMY)
-				check_empty = true;
-
+			const bool check_empty = o->type == O_ARMY || (in_ocean && o->IsBoat());
 			if (!check_empty)
 				continue;
 
@@ -562,7 +561,6 @@ void Game::SinkUncrewedShips()
 			{
 				men += u->GetMen();
 			}
-
 			if (men > 0)
 				continue; // safe
 			//else no men, move all units out to ocean
@@ -580,14 +578,28 @@ void Game::SinkUncrewedShips()
 				while (!o->objects.empty())
 				{
 					Object *sub_obj = o->objects.back();
-					delete sub_obj;
+
+					if (in_ocean)
+					{
+						delete sub_obj;
+					}
+					else
+					{
+						save_obj.push_back(sub_obj);
+					}
+
 					o->objects.pop_back();
 				}
 			}
 
-			// And sink the boat
+			// And sink the boat / forget the army
 			r->objects.remove(o);
 			delete o;
+		}
+
+		for (const auto &o : save_obj)
+		{
+			r->objects.push_back(o);
 		}
 	}
 }
@@ -1138,8 +1150,16 @@ void Game::Do1EnterOrder(ARegion * r,Object * in,Unit * u)
 	else
 	{
 		to = r->GetObject(u->enter_);
+		if (!to)
+		{
+			u->Error(AString("ENTER: Can't enter ") + u->enter_  + ", no such object.");
+			u->enter_ = 0;
+			return;
+		}
+
 		u->enter_ = 0;
-		if (!to || !to->CanEnter(r, u))
+
+		if (!to->CanEnter(r, u))
 		{
 			u->Error("ENTER: Can't enter that.");
 			return;

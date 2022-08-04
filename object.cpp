@@ -106,6 +106,7 @@ void Object::Writeout(Aoutfile *f)
 	else
 		f->PutInt(-1);
 	f->PutInt(runes);
+
 	f->PutInt(units.size());
 	for (auto &u : units)
 		u->Writeout(f);
@@ -166,12 +167,38 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 	if (v >= MAKE_ATL_VER(4, 2, 86))
 	{
 		const int num_objects = f->GetInt();
-		for (int i = 0; i < num_objects; ++i)
+		if (num_objects > 0)
 		{
-			Object *op = new Object(region);
-			op->Readin(f, facs, v);
-			op->parent = this;
-			objects.push_back(op);
+			std::map<int, Unit*> unit_map;
+			for (Unit *u : units)
+			{
+				unit_map[u->num] = u;
+			}
+
+			// read sub objects
+			for (int i = 0; i < num_objects; ++i)
+			{
+				Object *op = new Object(region);
+				op->Readin(f, facs, v);
+				op->parent = this;
+				objects.push_back(op);
+
+				// remap units
+				std::vector<Unit*> new_units;
+				for (Unit *u : op->units)
+				{
+					auto umi = unit_map.find(u->num);
+					if (umi == unit_map.end())
+					{
+						std::cerr << "Error in object data" << std::endl;
+						exit(-1);
+					}
+					Unit *base_unit = umi->second;
+					new_units.push_back(base_unit);
+					base_unit->object = this;
+				}
+				op->units = new_units;
+			}
 		}
 	}
 }
