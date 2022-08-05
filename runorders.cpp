@@ -95,8 +95,6 @@ void Game::RunOrders()
 	DeleteEmptyUnits();
 	SinkUncrewedShips();
 	DrownUnits();
-	Awrite("Running Sail Orders...");
-	RunSailOrders();
 	Awrite("Running Move Orders...");
 	RunMoveOrders();
 	SinkUncrewedShips();
