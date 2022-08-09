@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 111 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 112 )
 
 class Aorders;
 class ExchangeOrder;
@@ -375,8 +375,6 @@ private: // methods
 	bool RunUnitProduce(ARegion *,Unit *, ProduceOrder *o, struct ProduceIntermediates *pi);
 	void Run1BuildOrder(ARegion *,Object *,Unit *);
 	void RunBuildHelpers(ARegion *);
-	void RunSailOrders();
-	ARegion* Do1SailOrder(ARegion *, Object *, Unit *);
 	void ClearCastEffects();
 	void RunCastOrders();
 	void RunACastOrder(ARegion *,Object *,Unit *);
