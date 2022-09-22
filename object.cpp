@@ -185,19 +185,24 @@ void Object::Readin(Ainfile *f, AList *facs, ATL_VER v)
 
 				// remap units
 				std::vector<Unit*> new_units;
+				bool all_good = true;
 				for (Unit *u : op->units)
 				{
 					auto umi = unit_map.find(u->num);
 					if (umi == unit_map.end())
 					{
-						std::cerr << "Error in object data" << std::endl;
-						exit(-1);
+						std::cerr << "Error in object data " << op->name->str() << ' ' << u->name->str() << std::endl;
+						all_good = false;
 					}
-					Unit *base_unit = umi->second;
-					new_units.push_back(base_unit);
-					base_unit->object = this;
+					else
+					{
+						Unit *base_unit = umi->second;
+						new_units.push_back(base_unit);
+						base_unit->object = this;
+					}
 				}
-				op->units = new_units;
+				if (all_good)
+					op->units = new_units;
 			}
 		}
 	}

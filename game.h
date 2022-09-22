@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 112 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 113 )
 
 class Aorders;
 class ExchangeOrder;
