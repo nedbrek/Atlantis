@@ -159,7 +159,7 @@ Skill* Skill::Split(int total, int leave)
 }
 
 //----------------------------------------------------------------------------
-int SkillList::GetDays(int skill)
+int SkillList::GetDays(int skill) const
 {
 	forlist(this)
 	{

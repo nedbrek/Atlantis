@@ -219,10 +219,10 @@ public:
 	int GetMons();
 
 	///@return number of men in unit
-	int GetMen();
+	int GetMen() const;
 
 	///@return number of items of type 't'
-	int GetMen(int t);
+	int GetMen(int t) const;
 
 	///@return number of soldiers in unit
 	int GetSoldiers();
@@ -252,16 +252,16 @@ public:
 	Skill* GetSkillObject(int sk);
 
 	///@return effective stealth for this
-	int GetStealth();
+	int GetStealth() const;
 
 	///@return effective tactics for this
-	int GetTactics();
+	int GetTactics() const;
 
 	///@return effective observation for this
-	int GetObservation();
+	int GetObservation() const;
 
 	///@return effective entertainment for this
-	int GetEntertainment();
+	int GetEntertainment() const;
 
 	///@return effective riding attack bonus for this
 	int GetAttackRiding();
@@ -270,19 +270,19 @@ public:
 	int GetDefenseRiding();
 
 	///@return bonus to 'sk'
-	int GetSkillBonus(int sk);
+	int GetSkillBonus(int sk) const;
 
 	///@return bonus when producing 'item'
 	int GetProductionBonus(int item);
 
 	/// wrapper around various get skill level functions
-	int GetSkill(int sk);
+	int GetSkill(int sk) const;
 
 	/// set skill 'sk' to 'level'
 	void SetSkill(int sk, int level);
 
 	///@return skill level of 'sk'
-	int GetRealSkill(int sk);
+	int GetRealSkill(int sk) const;
 
 	/// remove 'sk' from known skills (also reverts type as appopriate)
 	void ForgetSkill(int sk);

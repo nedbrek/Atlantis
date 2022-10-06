@@ -439,7 +439,7 @@ public:
 	int Weight();
 
 	///@return number of items held matching 'type'
-	int GetNum(int type);
+	int GetNum(int type) const;
 	///@return number of items matching 'type' which can be sold
 	int CanSell(int type);
 

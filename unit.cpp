@@ -1290,12 +1290,12 @@ int Unit::GetMons()
 	return n;
 }
 
-int Unit::GetMen(int t)
+int Unit::GetMen(int t) const
 {
 	return items.GetNum(t);
 }
 
-int Unit::GetMen()
+int Unit::GetMen() const
 {
 	int n = 0;
 	forlist(&items)
@@ -1410,7 +1410,7 @@ void Unit::consume(int itemId, int num)
 	}
 }
 
-int Unit::GetTactics()
+int Unit::GetTactics() const
 {
 	int retval = GetRealSkill(S_TACTICS);
 
@@ -1428,7 +1428,7 @@ int Unit::GetTactics()
 	return retval;
 }
 
-int Unit::GetObservation()
+int Unit::GetObservation() const
 {
 	// pull observation skill, with bonuses
 	int retval = GetRealSkill(S_OBSERVATION) + GetSkillBonus(S_OBSERVATION);
@@ -1530,7 +1530,7 @@ int Unit::GetDefenseRiding()
 	return riding;
 }
 
-int Unit::GetStealth()
+int Unit::GetStealth() const
 {
 	// units on guard aren't hiding
 	if (guard == GUARD_GUARD)
@@ -1564,7 +1564,7 @@ int Unit::GetStealth()
 	return manstealth;
 }
 
-int Unit::GetEntertainment()
+int Unit::GetEntertainment() const
 {
 	const int level  =     GetRealSkill(S_ENTERTAINMENT);
 	const int level2 = 5 * GetRealSkill(S_PHANTASMAL_ENTERTAINMENT);
@@ -1573,7 +1573,7 @@ int Unit::GetEntertainment()
 	return level > level2 ? level : level2;
 }
 
-int Unit::GetSkill(int sk)
+int Unit::GetSkill(int sk) const
 {
 	if (sk == S_TACTICS)       return GetTactics();
 	if (sk == S_STEALTH)       return GetStealth();
@@ -1588,7 +1588,7 @@ void Unit::SetSkill(int sk, int level)
 	skills.SetDays(sk, GetDaysByLevel(level) * GetMen());
 }
 
-int Unit::GetRealSkill(int sk)
+int Unit::GetRealSkill(int sk) const
 {
 	const int numMen = GetMen();
 	if (!numMen)
@@ -3222,7 +3222,7 @@ void Unit::Error(const AString &s)
 	faction->Error(temp);
 }
 
-int Unit::GetSkillBonus(int sk)
+int Unit::GetSkillBonus(int sk) const
 {
 	int bonus = 0;
 	const int men = GetMen();
