@@ -152,7 +152,7 @@ public:
 	SkillList* Split(int total_men, int num_leaving);
 
 	///@return number of days of study for 'skill'
-	int GetDays(int skill);
+	int GetDays(int skill) const;
 
 	/// set days of study for 'skill' to 'new_days' (0 to remove)
 	void SetDays(int skill, int new_days);

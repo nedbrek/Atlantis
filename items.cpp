@@ -607,7 +607,7 @@ void ItemList::Readin(Ainfile *f)
 	}
 }
 
-int ItemList::GetNum(int t)
+int ItemList::GetNum(int t) const
 {
 	forlist(this)
 	{
