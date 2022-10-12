@@ -361,18 +361,26 @@ void Game::Do1Assassinate(ARegion * r,Object * o,Unit * u)
 		return;
 	}
 
-	int ass = 1;
-	if(u->items.GetNum(I_RINGOFI)) {
-		ass = 2; // Check if assassin has a ring.
+	// check if assassin is invisible
+	const bool is_invis = u->isInvisible();
+
+	// 2: relying on invisibility
+	// 1: plain stealth
+	const int ass = is_invis ? 2 : 1;
+
+	if (is_invis)
+	{
 		// New rule: if a target has an amulet of true seeing they
-		// cannot be assassinated by someone with a ring of invisibility
-		if(tar->AmtsPreventCrime(u)) {
-			tar->Event( "Assassination prevented by amulet of true seeing." );
-			u->Event( AString( "Attempts to assassinate " ) + *(tar->name) +
-					", but is prevented by amulet of true seeing." );
+		// cannot be assassinated by someone invisible
+		if (tar->AmtsPreventCrime(u))
+		{
+			tar->Event("Assassination prevented by amulet of true seeing.");
+			u->Event(AString("Attempts to assassinate ") + *(tar->name) +
+					", but is prevented by amulet of true seeing.");
 			return;
 		}
 	}
+
 	u->Practise(S_STEALTH);
 	RunBattle(r,u,tar,ass);
 }
