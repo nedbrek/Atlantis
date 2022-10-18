@@ -349,6 +349,9 @@ public:
 	///@return flags & mask
 	int GetFlag(int mask) const;
 
+	///@return true if unit is invisible
+	bool isInvisible() const;
+
 	/// update flags according to 'mask' (clear or set using 'val')
 	void SetFlag(int mask, int val);
 

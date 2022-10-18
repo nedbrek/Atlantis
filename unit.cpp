@@ -2675,11 +2675,17 @@ int Unit::AmtsPreventCrime(Unit *u)
 	if (!u)
 		return 0;
 
+	// if criminal is not invisible
+	if (!u->isInvisible())
+		return 0;
+
+	// pull number of amulets in this
 	const int amulets = items.GetNum(I_AMULETOFTS);
-	if (u->items.GetNum(I_RINGOFI) < 1 || amulets < 1)
+	if (amulets < 1)
 		return 0;
 
 	const int men = GetMen();
+	// if there is an amulet for every man
 	if (men <= amulets)
 		return 1;
 
@@ -2987,6 +2993,23 @@ int Unit::Taxers()
 int Unit::GetFlag(int mask) const
 {
 	return (flags & mask);
+}
+
+bool Unit::isInvisible() const
+{
+	// had invisibility cast on this
+	if (GetFlag(FLAG_INVIS))
+		return true;
+
+	// have enough rings of invisibility
+	if (items.GetNum(I_RINGOFI) >= GetMen())
+		return true;
+
+	// knows invisibility
+	if (Globals->FULL_INVIS_ON_SELF && GetSkill(S_INVISIBILITY))
+		return true;
+
+	return false;
 }
 
 void Unit::SetFlag(int x, int val)
