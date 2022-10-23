@@ -65,6 +65,8 @@ static GameDefs g = {
 	8, /* MAX_SPEED */
 
 	10, /* STUDENTS_PER_TEACHER */
+
+	5, // WAGE_FACTOR
 	5, /* MAINTENANCE_COST */
 	0, /* LEADER_COST */
 	1, /* MAINT_COST_PER_HIT */
