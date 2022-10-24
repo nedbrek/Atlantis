@@ -2712,18 +2712,5 @@ void Game::AdjustCityMon(ARegion *r, Unit *u)
 
 int Game::GetAvgMaintPerMan()
 {
-	int man_count = 0;
-	int hits_sum = 0;
-
-	for (unsigned i = 0; i < ItemDefs.size(); ++i)
-	{
-		if (!(ItemDefs[i].type & IT_MAN)) { continue; }
-		if (ItemDefs[i].flags & ItemType::DISABLED) { continue; }
-		if (i == I_LEADERS || i == I_FACTIONLEADER) { continue; }
-
-		++man_count;
-		hits_sum += ManDefs[ItemDefs[i].index].hits;
-	}
-
-	return hits_sum / man_count * Globals->MAINTENANCE_COST;
+	return Globals->WAGE_FACTOR;
 }

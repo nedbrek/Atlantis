@@ -71,6 +71,7 @@ public:
 	int STUDENTS_PER_TEACHER; ///< number of students per man in the teaching unit
 
 	//---maintenance
+	int WAGE_FACTOR; ///< scaling factor for average wages
 	int MAINTENANCE_COST; ///< cost in silver per man per month
 	int LEADER_COST; ///< base maintenance cost of leaders
 
