@@ -31,6 +31,7 @@
 #include "gameio.h"
 #include "astring.h"
 #include "fileio.h"
+#include "object.h"
 #include <map>
 
 namespace
@@ -716,6 +717,118 @@ void doDumpData(Game &game, int argc, const char *argv[])
 	}
 	f.PutStr("};");
 }
+
+struct ItemDesc
+{
+	unsigned idx;
+	bool illusion;
+	bool is_disabled;
+};
+
+void reportCollision(const std::string &type1, const std::string &type2, const std::string &name,
+    const ItemDesc &col, unsigned i2, bool is_disabled)
+{
+	std::cerr << "Collision with " << name << ", " << type1 << " of ";
+	if (col.is_disabled)
+	{
+		std::cerr << "(disabled)";
+	}
+	std::cerr << col.idx << " and " << type2 << " of ";
+
+	if (is_disabled)
+	{
+		std::cerr << "(disabled)";
+	}
+
+	std::cerr << i2 << std::endl;
+}
+
+void checkCollisions()
+{
+	std::map<std::string, ItemDesc> name;
+	std::map<std::string, ItemDesc> plural;
+	std::map<std::string, ItemDesc> abbr;
+
+	// cross check items
+	for (unsigned idx = 0; idx < ItemDefs.size(); ++idx)
+	{
+		const auto &item = ItemDefs[idx];
+		const bool is_illusion = item.type == IT_MONSTER && item.index == MONSTER_ILLUSION;
+		const bool is_disabled = item.flags & ItemType::DISABLED;
+		std::string item_abbr;
+		for (unsigned i = 0; item.abr[i]; ++i)
+			item_abbr.push_back(tolower(item.abr[i]));
+
+		// item name
+		auto i = name.find(item.name);
+		if (i != name.end() && is_illusion == i->second.illusion)
+			reportCollision("name", "name", i->first, i->second, idx, is_disabled);
+
+		i = plural.find(item.name);
+		if (i != plural.end() && is_illusion == i->second.illusion)
+			reportCollision("plural", "name", i->first, i->second, idx, is_disabled);
+
+		i = abbr.find(item.name);
+		if (i != abbr.end() && is_illusion == i->second.illusion)
+			reportCollision("abbr", "name", i->first, i->second, idx, is_disabled);
+
+		// item plural
+		i = name.find(item.names);
+		if (i != name.end() && is_illusion == i->second.illusion)
+			reportCollision("name", "plural", i->first, i->second, idx, is_disabled);
+
+		i = plural.find(item.names);
+		if (i != plural.end() && is_illusion == i->second.illusion)
+			reportCollision("plural", "plural", i->first, i->second, idx, is_disabled);
+
+		i = abbr.find(item.names);
+		if (i != abbr.end() && is_illusion == i->second.illusion)
+			reportCollision("abbr", "plural", i->first, i->second, idx, is_disabled);
+
+		// item abbr
+		i = name.find(item_abbr);
+		if (i != name.end() && is_illusion == i->second.illusion)
+			reportCollision("name", "abbr", i->first, i->second, idx, is_disabled);
+
+		i = plural.find(item_abbr);
+		if (i != plural.end() && is_illusion == i->second.illusion)
+			reportCollision("plural", "abbr", i->first, i->second, idx, is_disabled);
+
+		i = abbr.find(item_abbr);
+		if (i != abbr.end() && is_illusion == i->second.illusion)
+			reportCollision("abbr", "abbr", i->first, i->second, idx, is_disabled);
+
+		// stash current item
+		name.insert({item.name, {idx, is_illusion, is_disabled}});
+		plural.insert({item.names, {idx, is_illusion, is_disabled}});
+		abbr.insert({item_abbr, {idx, is_illusion, is_disabled}});
+	}
+
+	// check objects
+	std::map<const char*, int> objects;
+	for (int idx = O_DUMMY+1; idx < NOBJECTS; ++idx)
+	{
+		const auto &obj = ObjectDefs[idx];
+
+		auto i = name.find(obj.name);
+		if (i != name.end())
+			printf("Item collision with object %s, name of %d and object %d\n", i->first.c_str(), i->second.idx, idx);
+
+		i = plural.find(obj.name);
+		if (i != plural.end())
+			printf("Item collision with object %s, plural of %d and object %d\n", i->first.c_str(), i->second.idx, idx);
+
+		i = abbr.find(obj.name);
+		if (i != abbr.end())
+			printf("Item collision with object %s, abbr of %d and object %d\n", i->first.c_str(), i->second.idx, idx);
+
+		auto j = objects.find(obj.name);
+		if (j != objects.end())
+			printf("Object collision on %s, indexes %d and %d\n", j->first, j->second, idx);
+
+		objects.insert({obj.name, idx});
+	}
+}
 } // anonymous namespace
 
 int main(int argc, const char *argv[])
@@ -738,6 +851,7 @@ int main(int argc, const char *argv[])
 
 	game.ModifyTablesPerRuleset();
 	game.resolveBackRefs();
+	checkCollisions();
 
 	typedef void Handler(Game &, int, const char*[]);
 
