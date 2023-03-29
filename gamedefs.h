@@ -442,6 +442,9 @@ public:
 	/// If we are preventing sail through, should we also prevent the 'easy portage' that the above allows by default?
 	int ALLOW_TRIVIAL_PORTAGE;
 
+	/// Replaces free round by combat bonus
+	int ALTERNATE_TACTICS;
+
     /// Disable command FIND to allow players to be anonymous, communication is handled elsewhere, etc
     int DISABLE_FIND_EMAIL_COMMAND;
 };

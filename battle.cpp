@@ -108,7 +108,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				num  = def->DoAnAttack(pMt->mountSpecial, realtimes,
 				      spd->damage[i].type, pMt->specialLev,
 				      spd->damage[i].flags, spd->damage[i].dclass,
-				      spd->damage[i].effect, 0, &num_killed, a->riding != -1);
+				      spd->damage[i].effect, 0, &num_killed, a->riding != -1, attackers);
 				if (num != -1)
 				{
 					if (tot == -1) tot = num;
@@ -183,7 +183,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		}
 
 		def->DoAnAttack( 0, 1, attackType, a->askill, flags, attackClass,
-		      0, mountBonus, &num_killed, a->riding != -1);
+		      0, mountBonus, &num_killed, a->riding != -1, attackers);
 
 		if (!def->NumAlive())
 			break;
@@ -317,9 +317,24 @@ int Battle::Run(ARegion *region,
 	}
 	else
 	{
-		// tactics superiority gives free round
-		if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0], armies[1]);
-		if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1], armies[0]);
+		if (Globals->ALTERNATE_TACTICS)
+		{
+			// tactics superiority gives combat bonus
+			if (armies[0]->tac > armies[1]->tac)
+			{
+				armies[0]->tactics_bonus = armies[0]->tac - armies[1]->tac;
+			}
+			else if (armies[1]->tac > armies[0]->tac)
+			{
+				armies[1]->tactics_bonus = armies[1]->tac - armies[0]->tac;
+			}
+		}
+		else
+		{
+			// tactics superiority gives free round
+			if (armies[0]->tac > armies[1]->tac) FreeRound(armies[0], armies[1]);
+			if (armies[1]->tac > armies[0]->tac) FreeRound(armies[1], armies[0]);
+		}
 	}
 
 	int round = 1;
