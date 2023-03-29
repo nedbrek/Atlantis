@@ -608,20 +608,11 @@ void Soldier::Dead()
 //----------------------------------------------------------------------------
 Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 {
-	for (unsigned i = 0; i < 6; ++i)
-	{
-		kills_from[i] = 0;
-		hits_from[i] = 0;
-	}
-
 	int tacspell = 0;
 	Unit *tactitian = ldr;
 
 	leader = ldr;
-	round = 0;
 	tac = ldr->GetSkill(S_TACTICS);
-	count = 0;
-	hitstotal = 0;
 
 	if (ass)
 	{
@@ -635,7 +626,7 @@ Army::Army(Unit *ldr, AList *locs, int regtype, int ass)
 			Unit *u = ((Location*)elem)->unit;
 			count += u->GetSoldiers();
 			u->losses = 0;
-			int temp = u->GetSkill(S_TACTICS);
+			const int temp = u->GetSkill(S_TACTICS);
 			if (temp > tac)
 			{
 				tac = temp;
@@ -1339,7 +1330,7 @@ int Army::RemoveEffects(int num, int effect)
 
 int Army::DoAnAttack(int special, int numAttacks, int attackType,
       int attackLevel, int flags, int weaponClass, int effect,
-      int mountBonus, int *num_killed, bool riding)
+      int mountBonus, int *num_killed, bool riding, Army *attackers)
 {
 	// 1. check against Global effects (not sure how yet)
 	// 2. attack shield
@@ -1467,6 +1458,13 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 			if (!(flags & WeaponType::ALWAYSREADY) && getrandom(2))
 			{
 				continue; // no
+			}
+
+			// add tactics bonus
+			int final_attack_level = attackLevel;
+			if (combat)
+			{
+				final_attack_level += std::min(attackers->tactics_bonus, final_attack_level / 2);
 			}
 
 			// check for hit

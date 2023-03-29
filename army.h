@@ -119,10 +119,11 @@ class Army
 {
 public:
 	/// construct
+	Army() = delete;
 	Army(Unit *ldr, AList *locs, int reg_type, int ass = 0);
 	~Army();
 
-	/// ?shuffles front and behind?
+	/// called at end of round (?shuffles front and behind?)
 	void Reset();
 	void endRound(Battle *b);
 
@@ -180,7 +181,7 @@ public:
 	/// evaluate one attack on us
 	int DoAnAttack( int special, int numAttacks, int attackType,
 	      int attackLevel, int flags, int weaponClass, int effect,
-	      int mountBonus, int *num_killed, bool riding);
+	      int mountBonus, int *num_killed, bool riding, Army *attackers);
 
 	/// damage soldier 'i'
 	///@return true if he dies
@@ -190,22 +191,24 @@ public:
 	int CheckSpecialTarget(int, int);
 
 public: // data
-	SoldierPtr *soldiers;
-	Unit *leader;
+	SoldierPtr *soldiers = nullptr;
+	Unit *leader = nullptr;
 	ShieldList shields;
-	int round;
-	int tac;
-	int canfront;
-	int canbehind;
-	int notfront;
-	int notbehind;
-	int count;
+	int round = 0;
+	int tac = 0;
+	int canfront = 0;
+	int canbehind = 0;
+	int notfront = 0;
+	int notbehind = 0;
+	int count = 0;
 
-	int hitsalive; ///< Current number of "living hits"
-	int hitstotal; ///< Number of hits at start of battle
+	int tactics_bonus = 0; ///< Used for ALTERNATE_TACTICS
 
-	int kills_from[6];
-	int hits_from[6];
+	int hitsalive = 0; ///< Current number of "living hits"
+	int hitstotal = 0; ///< Number of hits at start of battle
+
+	int kills_from[6] = {0,};
+	int hits_from[6] = {0,};
 
 private:
 	void DoHealLevel(Battle *b, int type, int useItems);
