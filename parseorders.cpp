@@ -122,6 +122,7 @@ int Game::ParseDir(AString *token)
 
 	if (*token == "in" ) return MOVE_IN;
 	if (*token == "out") return MOVE_OUT;
+	if (*token == "pause" || *token == "p") return MOVE_PAUSE;
 
 	const int num = token->value();
 	if (num) return MOVE_ENTER + num;

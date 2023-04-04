@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 118 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 119 )
 
 class Aorders;
 class ExchangeOrder;
@@ -362,7 +362,7 @@ private: // methods
 	// Month long orders
 	void RunMoveOrders();
 	Location* DoAMoveOrder(Unit *, ARegion *, Object *);
-	void DoMoveEnter(Unit *, ARegion *, Object **);
+	void DoMoveEnter(Unit *, ARegion *);
 	void RunMonthOrders();
 	void RunStudyOrders(ARegion *);
 	void Do1StudyOrder(Unit *,Object *);

@@ -28,9 +28,12 @@
 #include "battle.h"
 #include "unit.h"
 #include "gamedata.h"
+#include "gameio.h" // for getrandom()
 #include "object.h"
 #include "orders.h"
+#include <algorithm>
 #include <map>
+#include <set>
 
 //----------------------------------------------------------------------------
 int summonWindLevel(int ship_type)
@@ -1156,11 +1159,38 @@ void Game::Do1StudyOrder(Unit *u, Object *obj)
 	}
 }
 
+class RandGen
+{
+public:
+	typedef int result_type;
+
+	explicit RandGen(int mv)
+	: max_val(mv)
+	{
+	}
+
+	int min() const { return 0; }
+	int max() const { return max_val-1; }
+
+	int operator()()
+	{
+		return getrandom(max_val);
+	}
+
+private:
+	const int max_val;
+};
+
 void Game::RunMoveOrders()
 {
-	for (int phase = 0; phase < Globals->MAX_SPEED; ++phase)
+	int phase = 0;
+	bool more_moves = true;
+	//foreach movement phase
+	do
 	{
-		// before processing region to region moves, process leading OUT/ENTER
+		// build a list of units to move
+		std::set<Unit*> units_to_move;
+
 		{
 			//foreach region
 			forlist((&regions))
@@ -1175,48 +1205,62 @@ void Game::RunMoveOrders()
 					//foreach unit
 					for(auto &unit : obj->getUnits())
 					{
-						Object *tempobj = obj;
-						DoMoveEnter(unit, region, &tempobj);
+						if (unit->monthorders &&
+						    (unit->monthorders->type == O_MOVE ||
+						     unit->monthorders->type == O_ADVANCE) &&
+						    !unit->nomove &&
+						    unit->object != nullptr)
+					   {
+							units_to_move.insert(unit);
+					   }
 					}
 				}
 			}
 		}
+
+		// randomize the movement order
+		std::vector<Unit*> move_vec(units_to_move.size());
+		std::copy(units_to_move.begin(), units_to_move.end(), move_vec.begin());
+		RandGen rg(move_vec.size());
+		std::shuffle(move_vec.begin(), move_vec.end(), rg);
+
+		// before processing region to region moves, process leading OUT/ENTER
+		for (auto u : move_vec)
+		{
+			Object *obj = u->object;
+			if (!u->monthorders || !obj || u->nomove)
+				continue;
+
+			DoMoveEnter(u, obj->region);
+		}
+
+		// shuffle again
+		std::shuffle(move_vec.begin(), move_vec.end(), rg);
 
 		// now process actual moves
 		AList *locs = new AList;
 
 		//foreach region
-		forlist((&regions))
+		for (auto u : move_vec)
 		{
-			ARegion *region = (ARegion*)elem;
+			Object *obj = u->object;
+			if (!u->monthorders || !obj || u->nomove)
+				continue;
 
-			//foreach object
-			forlist((&region->objects))
-			{
-				Object *obj = (Object*)elem;
-
-				//foreach unit
-				const auto units = obj->getUnits();
-				for(auto &unit : units)
-				{
-					if (phase == unit->movepoints && unit->monthorders &&
-					    (unit->monthorders->type == O_MOVE ||
-					     unit->monthorders->type == O_ADVANCE) &&
-					    !unit->nomove)
-					{
-						locs->Add(DoAMoveOrder(unit, region, obj));
-					}
-				}
-			}
+			Location *loc_info = DoAMoveOrder(u, obj->region, obj);
+			if (loc_info)
+				locs->Add(loc_info);
 		}
 
 		DoAdvanceAttacks(locs);
 		locs->DeleteAll();
-	}
+
+		++phase;
+	} while (phase < Globals->MAX_SPEED && more_moves);
 }
 
 // process all the leading OUT and ENTER moves for 'unit'
-void Game::DoMoveEnter(Unit *unit, ARegion *region, Object **obj)
+void Game::DoMoveEnter(Unit *unit, ARegion *region)
 {
 	if (!unit->monthorders ||
 	    (unit->monthorders->type != O_MOVE &&
@@ -1253,7 +1297,6 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region, Object **obj)
 
 			Object *to = region->GetDummy();
 			unit->MoveUnit(to);
-			*obj = to;
 
 			continue;
 		}
@@ -1315,7 +1358,6 @@ void Game::DoMoveEnter(Unit *unit, ARegion *region, Object **obj)
 
 		unit->MoveUnit(to);
 		unit->Event(AString("Enters ") + *(to->name) + ".");
-		*obj = to;
 	}
 }
 
@@ -1335,45 +1377,20 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 {
 	MoveOrder *o = (MoveOrder*)unit->monthorders;
 
-	const bool in_boat = ObjectIsShip(unit->object->type);
-	const bool in_army = unit->object->type == O_ARMY;
-	const bool in_fleet = in_army && !unit->object->objects.empty();
-	const bool has_ship = in_fleet || in_boat;
-	const bool in_move_obj = in_army || in_boat;
-
-	// moving clears guard bit
-	if (unit->guard == GUARD_GUARD)
-	{
-		if (in_move_obj)
-		{
-			// apply to all units
-			for (auto &u : unit->object->getUnits())
-			{
-				u->guard = GUARD_NONE;
-			}
-		}
-		else
-		{
-			unit->guard = GUARD_NONE;
-		}
-	}
-
-	if (o->advancing)
-		unit->guard = GUARD_ADVANCE;
-
-	Location *loc = new Location;
-	loc->unit = unit;
-	loc->region = region;
-	loc->obj = obj;
-
-	// TODO can this happen?
+	// (DoMoveEnter() doesn't clean the orders)
 	// if move with no direction
 	if (!o->dirs.Num())
 	{
 		delete unit->monthorders;
 		unit->monthorders = NULL;
-		return loc;
+		return nullptr;
 	}
+
+	const bool in_boat = ObjectIsShip(unit->object->type);
+	const bool in_army = unit->object->type == O_ARMY;
+	const bool in_fleet = in_army && !unit->object->objects.empty();
+	const bool has_ship = in_fleet || in_boat;
+	const bool in_move_obj = in_army || in_boat;
 
 	if (in_move_obj && unit->object->GetOwner() != unit)
 	{
@@ -1400,14 +1417,45 @@ Location* Game::DoAMoveOrder(Unit *const unit, ARegion *const region, Object *co
 
 		delete unit->monthorders;
 		unit->monthorders = NULL;
-		return loc;
+		return nullptr;
 	}
+
+	// moving clears guard bit
+	if (in_move_obj)
+	{
+		// apply to all units
+		for (auto &u : unit->object->getUnits())
+		{
+			if (u->guard == GUARD_GUARD)
+			{
+				u->guard = GUARD_NONE;
+			}
+		}
+	}
+	else
+	{
+		if (unit->guard == GUARD_GUARD)
+			unit->guard = GUARD_NONE;
+	}
+
+	if (o->advancing)
+		unit->guard = GUARD_ADVANCE;
+
+	Location *loc = new Location;
+	loc->unit = unit;
+	loc->region = region;
+	loc->obj = obj;
 
 	// pop first move order
 	MoveDir *x = (MoveDir*)o->dirs.front();
 	const int i = x->dir;
 	o->dirs.Remove(x);
 	delete x;
+
+	if (i == MOVE_PAUSE)
+	{
+		return nullptr;
+	}
 
 	if (i == MOVE_IN && obj->inner == -1)
 	{
