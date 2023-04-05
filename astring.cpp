@@ -314,21 +314,37 @@ int AString::getat()
 
 AString* AString::getlegal() const
 {
+	// buffer valid characters (guaranteed to be <= current len)
 	char *temp = new char[len_ + 1];
+
+	bool is_valid = false;
 	char *temp2 = temp;
-	bool j = false;
-	for (int i = 0; i < len_; ++i)
+	if (islegal(str_[0]))
 	{
+		*temp2 = str_[0];
+		if (str_[0] != ' ')
+			is_valid = true;
+
+		++temp2;
+	}
+
+	for (int i = 1; i < len_; ++i)
+	{
+		// collapse multiple spaces
+		if (str_[i-1] == ' ' && str_[i] == ' ')
+			continue;
+
 		if (islegal(str_[i]))
 		{
 			*temp2 = str_[i];
-			if (str_[i] != ' ') j = true;
+			if (str_[i] != ' ')
+				is_valid = true;
 
 			++temp2;
 		}
 	}
 
-	if (!j)
+	if (!is_valid)
 	{
 		delete temp;
 		return 0;
