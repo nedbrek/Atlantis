@@ -172,12 +172,25 @@ AString* ShowSkill::Report(Faction *f)
 			break;
 		case S_TACTICS:
 			if(level > 1) break;
-			*str += "Tactics allows the unit, and all allies, to gain a "
-				"free round of attacks during battle. The army with the "
-				"highest level tactician in a battle will receive this free "
-				"round; if the highest levels are equal, no free round is "
-				"awarded. Only one free round total will be awarded for any "
-				"reason.";
+			if (Globals->ALTERNATE_TACTICS)
+			{
+				*str += "Tactics allows the unit, and all allies, to gain a bonus"
+					" to their attack and defense during battle. The army with the"
+					" highest level tactician in a battle will receive this"
+					" bonus; if the highest levels are equal, no advantage is "
+					"awarded. The bonus to combat skill is equal to the"
+					" difference in tactics skill, but limited to half the"
+					" base skill of each unit.";
+			}
+			else
+			{
+				*str += "Tactics allows the unit, and all allies, to gain a "
+					"free round of attacks during battle. The army with the "
+					"highest level tactician in a battle will receive this free "
+					"round; if the highest levels are equal, no free round is "
+					"awarded. Only one free round total will be awarded for any "
+					"reason.";
+			}
 			break;
 		case S_COMBAT:
 			if(level > 1) break;
