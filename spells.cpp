@@ -155,7 +155,7 @@ void Game::ProcessMindReading(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	UnitId *id = ParseUnit(o);
 	if (!id) {
-		u->Error("CAST: No unit specified.");
+		ParseError(pCheck, u, 0, "CAST: No unit specified.");
 		return;
 	}
 
@@ -172,7 +172,7 @@ void Game::ProcessBirdLore(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Missing arguments.");
+		ParseError(pCheck, u, 0, "CAST: Missing arguments.");
 		return;
 	}
 
@@ -192,14 +192,14 @@ void Game::ProcessBirdLore(Unit *u, AString *o, OrdersCheck *pCheck)
 		token = o->gettoken();
 
 		if (!token) {
-			u->Error("CAST: Missing arguments.");
+			ParseError(pCheck, u, 0, "CAST: Missing arguments.");
 			return;
 		}
 
 		const int dir = ParseDir(token);
 		delete token;
 		if (dir == -1 || dir > NDIRS) {
-			u->Error("CAST: Invalid direction.");
+			ParseError(pCheck, u, 0, "CAST: Invalid direction.");
 			return;
 		}
 
@@ -213,7 +213,7 @@ void Game::ProcessBirdLore(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	u->Error("CAST: Invalid arguments.");
+	ParseError(pCheck, u, 0, "CAST: Invalid arguments.");
 	delete token;
 }
 
@@ -221,7 +221,7 @@ void Game::ProcessInvisibility(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token || !(*token == "units")) {
-		u->Error("CAST: Must specify units to render invisible.");
+		ParseError(pCheck, u, 0, "CAST: Must specify units to render invisible.");
 		return;
 	}
 	delete token;
@@ -254,7 +254,7 @@ void Game::ProcessPhanDemons(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Illusion to summon must be given.");
+		ParseError(pCheck, u, 0, "CAST: Illusion to summon must be given.");
 		return;
 	}
 
@@ -278,7 +278,7 @@ void Game::ProcessPhanDemons(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	if (!order->level) {
-		u->Error("CAST: Can't summon that illusion.");
+		ParseError(pCheck, u, 0, "CAST: Can't summon that illusion.");
 		delete order;
 		return;
 	}
@@ -301,7 +301,7 @@ void Game::ProcessPhanUndead(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		ParseError(pCheck, u, 0, "CAST: Must specify which illusion to summon.");
 		return;
 	}
 
@@ -325,7 +325,7 @@ void Game::ProcessPhanUndead(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 
 	if (!order->level) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		ParseError(pCheck, u, 0, "CAST: Must specify which illusion to summon.");
 		delete order;
 		return;
 	}
@@ -348,7 +348,7 @@ void Game::ProcessPhanBeasts(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Must specify which illusion to summon.");
+		ParseError(pCheck, u, 0, "CAST: Must specify which illusion to summon.");
 		return;
 	}
 
@@ -370,7 +370,7 @@ void Game::ProcessPhanBeasts(Unit *u, AString *o, OrdersCheck *pCheck)
 	delete token;
 	if (!order->level) {
 		delete order;
-		u->Error("CAST: Must specify which illusion to summon.");
+		ParseError(pCheck, u, 0, "CAST: Must specify which illusion to summon.");
 		return;
 	}
 
@@ -399,14 +399,14 @@ void Game::ProcessEnchantSpell(Unit *u, AString *o, int spell, OrdersCheck *pChe
 	AString *token = o->gettoken();
 	if (!token)
 	{
-		u->Error("CAST Enchant: Must specify which item to create.");
+		ParseError(pCheck, u, 0, "CAST Enchant: Must specify which item to create.");
 		return;
 	}
 
 	const int item = ParseEnabledItem(*token);
 	if (item == -1)
 	{
-		u->Error(AString("CAST Enchant: Unknown item '") + *token + "'.");
+		ParseError(pCheck, u, 0, AString("CAST Enchant: Unknown item '") + *token + "'.");
 		return;
 	}
 
@@ -438,7 +438,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 			delete token;
 			token = o->gettoken();
 			if(!token) {
-				u->Error("CAST: Region X coordinate not specified.");
+				ParseError(pCheck, u, 0, "CAST: Region X coordinate not specified.");
 				return;
 			}
 			x = token->value();
@@ -446,7 +446,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 
 			token = o->gettoken();
 			if(!token) {
-				u->Error("CAST: Region Y coordinate not specified.");
+				ParseError(pCheck, u, 0, "CAST: Region Y coordinate not specified.");
 				return;
 			}
 			y = token->value();
@@ -460,7 +460,7 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 					if(z < 0 || (z >= Globals->UNDERWORLD_LEVELS +
 								Globals->UNDERDEEP_LEVELS +
 								Globals->ABYSS_LEVEL + 2)) {
-						u->Error("CAST: Invalid Z coordinate specified.");
+						ParseError(pCheck, u, 0, "CAST: Invalid Z coordinate specified.");
 						return;
 					}
 				}
@@ -500,7 +500,7 @@ void Game::ProcessCastPortalLore(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Requires a target mage.");
+		ParseError(pCheck, u, 0, "CAST: Requires a target mage.");
 		return;
 	}
 	const int gate = token->value(); // actually unit with portal stone
@@ -508,12 +508,12 @@ void Game::ProcessCastPortalLore(Unit *u, AString *o, OrdersCheck *pCheck)
 
 	token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: No units to teleport.");
+		ParseError(pCheck, u, 0, "CAST: No units to teleport.");
 		return;
 	}
 
 	if (!(*token == "units")) {
-		u->Error("CAST: No units to teleport.");
+		ParseError(pCheck, u, 0, "CAST: No units to teleport.");
 		delete token;
 		return;
 	}
@@ -543,7 +543,7 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 {
 	AString *token = o->gettoken();
 	if (!token) {
-		u->Error("CAST: Missing argument.");
+		ParseError(pCheck, u, 0, "CAST: Missing argument.");
 		return;
 	}
 
@@ -554,7 +554,7 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 		token = o->gettoken();
 
 		if (!token) {
-			u->Error("CAST: Requires a target gate.");
+			ParseError(pCheck, u, 0, "CAST: Requires a target gate.");
 			return;
 		}
 		const int target_gate = token->value();
@@ -622,7 +622,7 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 
 		if (!token) return;
 		if (!(*token == "units")) {
-			u->Error(AString("CAST GATE RANDOM: Invalid argument: ") + *token);
+			ParseError(pCheck, u, 0, AString("CAST GATE RANDOM: Invalid argument: ") + *token);
 			delete token;
 			return;
 		}
@@ -663,7 +663,7 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 			return;
 
 		if (!(*token == "units")) {
-			u->Error(AString("CAST GATE ALIGN: Invalid argument: ") + *token);
+			ParseError(pCheck, u, 0, AString("CAST GATE ALIGN: Invalid argument: ") + *token);
 			delete token;
 			return;
 		}
@@ -1072,8 +1072,7 @@ void Game::RunEngraveRunes(ARegion *r, Object *o, Unit *u)
 	}
 
 	if (o->incomplete > 0) {
-		u->Error( "Runes of Warding may only be engraved on a completed "
-				"building.");
+		u->Error("Runes of Warding may only be engraved on a completed building.");
 		return;
 	}
 
@@ -1092,8 +1091,7 @@ void Game::RunEngraveRunes(ARegion *r, Object *o, Unit *u)
 		case 1:
 			if (o->type == O_TOWER) break;
 		default:
-			u->Error("Not high enough level to engrave Runes of Warding on "
-					"that building.");
+			u->Error("Not high enough level to engrave Runes of Warding on that building.");
 			return;
 	}
 
@@ -1764,7 +1762,7 @@ void Game::RunGateJump(ARegion *r, Object *o, Unit *u)
 	// pull skill level
 	int level = u->GetSkill(S_GATE_LORE);
 	if (!level) {
-		u->Error( "CAST: Unit doesn't have that skill." );
+		u->Error("CAST: Unit doesn't have that skill.");
 		return;
 	}
 
