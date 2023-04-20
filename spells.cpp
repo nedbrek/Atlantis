@@ -72,86 +72,82 @@ void Game::ProcessCastOrder(Unit *u, AString *o, OrdersCheck *pCheck)
 		return;
 	}
 
-	if( !pCheck )
+	switch(sk)
 	{
-		// TODO? -- should be error checking spells
-		switch(sk)
-		{
-		case S_MIND_READING:
-			ProcessMindReading(u, o, pCheck);
-			break;
+	case S_GATE_LORE:
+		ProcessCastGateLore(u, o, pCheck);
+		break;
 
-		case S_CONSTRUCT_PORTAL:
-		case S_CONSTRUCT_GATE:
-		case S_ENGRAVE_RUNES_OF_WARDING:
-		case S_SUMMON_IMPS:
-		case S_SUMMON_DEMON:
-		case S_SUMMON_BALROG:
-		case S_SUMMON_SKELETONS:
-		case S_RAISE_UNDEAD:
-		case S_SUMMON_LICH:
-		case S_DRAGON_LORE:
-		case S_WOLF_LORE:
-		case S_EARTH_LORE:
-		case S_CREATE_RING_OF_INVISIBILITY:
-		case S_CREATE_CLOAK_OF_INVULNERABILITY:
-		case S_CREATE_STAFF_OF_FIRE:
-		case S_CREATE_STAFF_OF_LIGHTNING:
-		case S_CREATE_AMULET_OF_TRUE_SEEING:
-		case S_CREATE_AMULET_OF_PROTECTION:
-		case S_CREATE_RUNESWORD:
-		case S_CREATE_SHIELDSTONE:
-		case S_CREATE_MAGIC_CARPET:
-		case S_CREATE_FOOD:
-			ProcessGenericSpell(u, sk, pCheck );
-			break;
+	case S_FARSIGHT:
+	case S_TELEPORTATION:
+	case S_WEATHER_LORE:
+		ProcessRegionSpell(u, o, sk, pCheck);
+		break;
 
-		case S_ENCHANT_SWORDS:
-		case S_ENCHANT_ARMOR:
-			ProcessEnchantSpell(u, o, sk, pCheck);
-			break;
+	case S_PORTAL_LORE:
+		ProcessCastPortalLore(u, o, pCheck);
+		break;
 
-		case S_CLEAR_SKIES:
-			if(SkillDefs[S_CLEAR_SKIES].rangeIndex != -1)
-				ProcessRegionSpell(u, o, sk, pCheck);
-			else
-				ProcessGenericSpell(u, sk, pCheck);
-			break;
+	case S_MIND_READING:
+		ProcessMindReading(u, o, pCheck);
+		break;
 
-		case S_FARSIGHT:
-		case S_TELEPORTATION:
-		case S_WEATHER_LORE:
+	case S_CLEAR_SKIES:
+		if(SkillDefs[S_CLEAR_SKIES].rangeIndex != -1)
 			ProcessRegionSpell(u, o, sk, pCheck);
-			break;
+		else
+			ProcessGenericSpell(u, sk, pCheck);
+		break;
 
-		case S_BIRD_LORE:
-			ProcessBirdLore(u, o, pCheck);
-			break;
+	case S_CONSTRUCT_PORTAL:
+	case S_CONSTRUCT_GATE:
+	case S_ENGRAVE_RUNES_OF_WARDING:
+	case S_SUMMON_IMPS:
+	case S_SUMMON_DEMON:
+	case S_SUMMON_BALROG:
+	case S_SUMMON_SKELETONS:
+	case S_RAISE_UNDEAD:
+	case S_SUMMON_LICH:
+	case S_DRAGON_LORE:
+	case S_WOLF_LORE:
+	case S_EARTH_LORE:
+	case S_CREATE_RING_OF_INVISIBILITY:
+	case S_CREATE_CLOAK_OF_INVULNERABILITY:
+	case S_CREATE_STAFF_OF_FIRE:
+	case S_CREATE_STAFF_OF_LIGHTNING:
+	case S_CREATE_AMULET_OF_TRUE_SEEING:
+	case S_CREATE_AMULET_OF_PROTECTION:
+	case S_CREATE_RUNESWORD:
+	case S_CREATE_SHIELDSTONE:
+	case S_CREATE_MAGIC_CARPET:
+	case S_CREATE_FOOD:
+		ProcessGenericSpell(u, sk, pCheck);
+		break;
 
-		case S_INVISIBILITY:
-			ProcessInvisibility(u, o, pCheck);
-			break;
+	case S_BIRD_LORE:
+		ProcessBirdLore(u, o, pCheck);
+		break;
 
-		case S_GATE_LORE:
-			ProcessCastGateLore(u, o, pCheck);
-			break;
+	case S_CREATE_PHANTASMAL_BEASTS:
+		ProcessPhanBeasts(u, o, pCheck);
+		break;
 
-		case S_PORTAL_LORE:
-			ProcessCastPortalLore(u, o, pCheck);
-			break;
+	case S_CREATE_PHANTASMAL_UNDEAD:
+		ProcessPhanUndead(u, o, pCheck);
+		break;
 
-		case S_CREATE_PHANTASMAL_BEASTS:
-			ProcessPhanBeasts(u, o, pCheck);
-			break;
+	case S_CREATE_PHANTASMAL_DEMONS:
+		ProcessPhanDemons(u, o, pCheck);
+		break;
 
-		case S_CREATE_PHANTASMAL_UNDEAD:
-			ProcessPhanUndead(u, o, pCheck);
-			break;
+	case S_INVISIBILITY:
+		ProcessInvisibility(u, o, pCheck);
+		break;
 
-		case S_CREATE_PHANTASMAL_DEMONS:
-			ProcessPhanDemons(u, o, pCheck);
-			break;
-		}
+	case S_ENCHANT_SWORDS:
+	case S_ENCHANT_ARMOR:
+		ProcessEnchantSpell(u, o, sk, pCheck);
+		break;
 	}
 }
 
@@ -432,9 +428,10 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 
 	int val = SkillDefs[spell].rangeIndex;
 	RangeType *range = NULL;
-	if(val != -1) range = &RangeDefs[val];
+	if (val != -1)
+		range = &RangeDefs[val];
 
-	if(token)
+	if (token)
 	{
 		if(*token == "region")
 		{
@@ -662,8 +659,9 @@ void Game::ProcessCastGateLore(Unit *u, AString *o, OrdersCheck *pCheck)
 
 		delete token;
 		token = o->gettoken();
+		if (!token)
+			return;
 
-		if (!token) return;
 		if (!(*token == "units")) {
 			u->Error(AString("CAST GATE ALIGN: Invalid argument: ") + *token);
 			delete token;
