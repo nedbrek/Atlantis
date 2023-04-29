@@ -467,8 +467,13 @@ void Game::ProcessRegionSpell(Unit *u, AString *o, int spell, OrdersCheck *pChec
 			}
 		}
 		else {
+			ParseError(pCheck, u, 0, "CAST: Region spell without region keyword will use current region");
 			delete token;
 		}
+	}
+
+	if (pCheck) {
+		return;
 	}
 
 	if(x == -1) x = u->object->region->xloc;
