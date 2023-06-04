@@ -3179,6 +3179,12 @@ int Game::DoGiveOrder(ARegion *r, Unit *u, GiveOrder *o)
 	// if GIVE UNIT
 	if (amt == -1)
 	{
+		if (u->IsLeader())
+		{
+			u->Error("GIVE: Can't give leaders.");
+			return 0;
+		}
+
 		if (u->type == U_MAGE)
 		{
 			if (Globals->FACTION_LIMIT_TYPE != GameDefs::FACLIM_UNLIMITED)
