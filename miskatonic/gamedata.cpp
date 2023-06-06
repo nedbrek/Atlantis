@@ -1313,7 +1313,7 @@ std::vector<ItemType> ItemDefs = {
 	 0,0,0,0,
 	 {},
 	 {{"AXE",1}}},
-	{"wolf","wolves","MWOL",
+	{"mountain wolf","mountain wolves","MWOL",
 	 ItemType::NOMARKET,
 	 S_MONSTERTRAINING,1,2,1, {},
 	 -1,0,0, {},
