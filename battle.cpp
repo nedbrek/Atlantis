@@ -108,7 +108,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 				num  = def->DoAnAttack(pMt->mountSpecial, realtimes,
 				      spd->damage[i].type, pMt->specialLev,
 				      spd->damage[i].flags, spd->damage[i].dclass,
-				      spd->damage[i].effect, 0, &num_killed, a->riding != -1, attackers);
+				      spd->damage[i].effect, 0, 0, &num_killed, a->riding != -1, attackers);
 				if (num != -1)
 				{
 					if (tot == -1) tot = num;
@@ -183,7 +183,7 @@ void Battle::DoAttack(int round, Soldier *a, Army *attackers, Army *def,
 		}
 
 		def->DoAnAttack( 0, 1, attackType, a->askill, flags, attackClass,
-		      0, mountBonus, &num_killed, a->riding != -1, attackers);
+		      0, mountBonus, a->base_skill, &num_killed, a->riding != -1, attackers);
 
 		if (!def->NumAlive())
 			break;

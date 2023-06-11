@@ -234,7 +234,7 @@ void Battle::DoSpecialAttack(int round, Soldier *a, Army *attackers,
 		const int num = def->DoAnAttack(a->special, realtimes,
 				spd->damage[i].type, a->slevel,
 				spd->damage[i].flags, spd->damage[i].dclass,
-				spd->damage[i].effect, 0, &num_killed, a->riding != -1, attackers);
+				spd->damage[i].effect, 0, 0, &num_killed, a->riding != -1, attackers);
 
 		if ((spd->effectflags & SpecialType::FX_DONT_COMBINE) && num != -1)
 		{
