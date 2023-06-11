@@ -322,6 +322,8 @@ Soldier::Soldier(Unit *u, Object *o, int regtype, int r, int ass)
 		}
 	}
 
+	base_skill = unit->GetSkill(S_COMBAT) + ridingBonus;
+
 	unit->Practise(S_COMBAT);
 	if (ridingBonus)
 		unit->Practise(S_RIDING);
@@ -1330,7 +1332,7 @@ int Army::RemoveEffects(int num, int effect)
 
 int Army::DoAnAttack(int special, int numAttacks, int attackType,
       int attackLevel, int flags, int weaponClass, int effect,
-      int mountBonus, int *num_killed, bool riding, Army *attackers)
+      int mountBonus, int base_skill, int *num_killed, bool riding, Army *attackers)
 {
 	// 1. check against Global effects (not sure how yet)
 	// 2. attack shield
@@ -1461,10 +1463,9 @@ int Army::DoAnAttack(int special, int numAttacks, int attackType,
 			}
 
 			// add tactics bonus
-			int final_attack_level = attackLevel;
 			if (combat)
 			{
-				final_attack_level += std::min(attackers->tactics_bonus, final_attack_level / 2);
+				attackLevel += std::min(attackers->tactics_bonus, base_skill / 2);
 			}
 
 			// check for hit

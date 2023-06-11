@@ -82,6 +82,7 @@ public: // data
 	int race;
 	int riding;
 	int building;
+	int base_skill = 0;
 
 	// Healing information
 	int healing;
@@ -181,7 +182,7 @@ public:
 	/// evaluate one attack on us
 	int DoAnAttack( int special, int numAttacks, int attackType,
 	      int attackLevel, int flags, int weaponClass, int effect,
-	      int mountBonus, int *num_killed, bool riding, Army *attackers);
+	      int mountBonus, int base_skill, int *num_killed, bool riding, Army *attackers);
 
 	/// damage soldier 'i'
 	///@return true if he dies
