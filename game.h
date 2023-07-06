@@ -26,7 +26,7 @@
 // END A3HEADER
 #include "aregion.h"
 
-#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 126 )
+#define CURRENT_ATL_VER MAKE_ATL_VER( 4, 2, 127 )
 
 class Aorders;
 class ExchangeOrder;
@@ -392,7 +392,7 @@ private: // methods
 	     int = 0,int = 0);
 	int CanAttack(ARegion *,AList *,Unit *);
 	void GetAFacs(ARegion *,Unit *,Unit *,AList &,AList &,AList &);
-	void GetDFacs(ARegion *,Unit *,AList &);
+	void GetDFacs(ARegion *,Unit *,Unit *,AList &);
 
 private: // data
 	AList factions;
