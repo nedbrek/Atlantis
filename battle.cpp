@@ -554,7 +554,7 @@ void Battle::AddLine(const AString &s)
 	text.Add(new AString(s));
 }
 
-void Game::GetDFacs(ARegion *r, Unit *t, AList &facs)
+void Game::GetDFacs(ARegion *r, Unit *att, Unit *t, AList &facs)
 {
 	// foreach object in the region
 	forlist((&r->objects))
@@ -567,9 +567,16 @@ void Game::GetDFacs(ARegion *r, Unit *t, AList &facs)
 			if (!u->IsAlive())
 				continue;
 
+			// if same faction as target or
+			// (not avoiding and not hostile to target and
+			// (ally to target, or hostile to attacker))
 			if (u->faction == t->faction ||
 			    (u->guard != GUARD_AVOID &&
-			     u->GetAttitude(r, t) == A_ALLY))
+			     u->GetAttitude(r, t) != A_HOSTILE &&
+			     (u->GetAttitude(r, t) == A_ALLY ||
+			      u->GetAttitude(r, att) == A_HOSTILE)
+			    )
+			   )
 			{
 				if (!GetFaction2(&facs, u->faction->num))
 				{
@@ -607,7 +614,8 @@ void Game::GetAFacs(ARegion *r, Unit *att, Unit *tar, AList &dfacs,
 			else
 			{
 				if (u->guard == GUARD_ADVANCE &&
-				    u->GetAttitude(r, tar) != A_ALLY)
+				    u->GetAttitude(r, tar) != A_ALLY &&
+				    u->GetAttitude(r, att) != A_HOSTILE)
 				{
 					add = true;
 				}
@@ -920,7 +928,7 @@ int Game::RunBattle(ARegion *r, Unit *attacker, Unit *target, int ass, int adv)
 			return BATTLE_IMPOSSIBLE;
 		}
 
-		GetDFacs(r, target, dfacs);
+		GetDFacs(r, attacker, target, dfacs);
 
 		if (GetFaction2(&dfacs, attacker->faction->num))
 		{
