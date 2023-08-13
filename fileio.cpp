@@ -313,6 +313,10 @@ void JsonReport::writeStr(const char *str)
 		{
 			*file << '\\' << '\"';
 		}
+		else if (*str == '\\')
+		{
+			*file << '\\' << '\\';
+		}
 		else
 			*file << *str;
 		++str;
